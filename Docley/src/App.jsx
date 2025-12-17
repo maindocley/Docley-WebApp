@@ -12,13 +12,6 @@ import Login from './pages/Auth/Login';
 import Signup from './pages/Auth/Signup';
 import { ToastProvider } from './context/ToastContext';
 
-// Placeholder components to prevent router errors until implemented
-const PlaceholderPage = ({ title }) => (
-  <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-900">
-    <h1 className="text-3xl font-bold">{title} Page - Coming Soon</h1>
-  </div>
-);
-
 function App() {
   return (
     <ToastProvider>
