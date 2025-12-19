@@ -308,7 +308,12 @@ function LifestyleHeroMock({ isDark }) {
         )}>
             {/* Animated gradient overlays */}
             <div className="absolute inset-0 opacity-40 [background-image:radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.3),transparent_50%),radial-gradient(circle_at_80%_70%,rgba(59,130,246,0.3),transparent_50%)] animate-pulse" />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-slate-900/20 to-transparent" />
+            <div className={cn(
+                "absolute inset-0 bg-gradient-to-t",
+                isDark 
+                    ? "from-slate-900/60 via-slate-900/20 to-transparent" 
+                    : "from-white/40 via-white/10 to-transparent"
+            )} />
             
             {/* Floating particles */}
             <div className="absolute inset-0">
@@ -339,7 +344,12 @@ function LifestyleHeroMock({ isDark }) {
                                         alt="Students collaborating on an assignment"
                                         className="absolute inset-0 h-full w-full object-cover opacity-90"
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 via-slate-900/15 to-transparent" />
+                                    <div className={cn(
+                                        "absolute inset-0 bg-gradient-to-t",
+                                        isDark 
+                                            ? "from-slate-900/50 via-slate-900/15 to-transparent" 
+                                            : "from-white/30 via-white/10 to-transparent"
+                                    )} />
                                 </div>
                             </div>
 
@@ -468,8 +478,10 @@ export default function Landing() {
                     
                     {/* Grid pattern overlay */}
                     <div className={cn(
-                        "absolute inset-0 opacity-[0.15] [background-image:linear-gradient(to_right,rgba(0,0,0,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.1)_1px,transparent_1px)] [background-size:60px_60px]",
-                        isDark && "opacity-[0.15]"
+                        "absolute inset-0 opacity-[0.15] [background-size:60px_60px]",
+                        isDark 
+                            ? "[background-image:linear-gradient(to_right,rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.1)_1px,transparent_1px)]"
+                            : "[background-image:linear-gradient(to_right,rgba(59,130,246,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(59,130,246,0.1)_1px,transparent_1px)]"
                     )} />
                 </div>
 
@@ -635,26 +647,53 @@ export default function Landing() {
                     <div className="grid gap-6 md:gap-8 lg:grid-cols-12">
                         {/* Big card */}
                         <div className="lg:col-span-7 lg:row-span-2 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
-                            <div className="relative h-full overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/5 to-white/0 backdrop-blur-xl p-6 shadow-2xl md:p-8 hover:border-white/20 transition-all duration-500">
-                                <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-orange-500/20 blur-3xl animate-pulse" />
-                                <div className="pointer-events-none absolute -left-24 -bottom-24 h-80 w-80 rounded-full bg-blue-500/20 blur-3xl animate-pulse animation-delay-2000" />
+                            <div className={cn(
+                                "relative h-full overflow-hidden rounded-3xl border backdrop-blur-xl p-6 shadow-2xl md:p-8 transition-all duration-500",
+                                isDark 
+                                    ? "border-white/10 bg-gradient-to-br from-white/5 to-white/0 hover:border-white/20" 
+                                    : "border-blue-200 bg-white hover:border-blue-300 shadow-blue-500/10"
+                            )}>
+                                <div className={cn(
+                                    "pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full blur-3xl animate-pulse",
+                                    isDark ? "bg-orange-500/20" : "bg-orange-400/10"
+                                )} />
+                                <div className={cn(
+                                    "pointer-events-none absolute -left-24 -bottom-24 h-80 w-80 rounded-full blur-3xl animate-pulse animation-delay-2000",
+                                    isDark ? "bg-blue-500/20" : "bg-blue-400/10"
+                                )} />
 
                                 <div className="flex items-start justify-between gap-6 relative z-10">
                                     <div>
-                                        <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm px-3 py-1.5 text-[11px] font-semibold text-white/90">
+                                        <div className={cn(
+                                            "inline-flex items-center gap-2 rounded-full border backdrop-blur-sm px-3 py-1.5 text-[11px] font-semibold",
+                                            isDark 
+                                                ? "border-white/20 bg-white/10 text-white/90" 
+                                                : "border-blue-200 bg-blue-50 text-blue-700"
+                                        )}>
                                             <span className="inline-flex h-2 w-2 rounded-full bg-orange-500 animate-pulse" />
                                             Diagnostics → Upgrade → Export
                                         </div>
-                                        <h3 className="mt-5 text-2xl font-bold tracking-tight text-white md:text-3xl">
+                                        <h3 className={cn(
+                                            "mt-5 text-2xl font-bold tracking-tight md:text-3xl",
+                                            isDark ? "text-white" : "text-slate-900"
+                                        )}>
                                             See what's wrong, then fix it in one run
                                         </h3>
-                                        <p className="mt-3 max-w-[60ch] text-sm text-slate-300 leading-relaxed md:text-base">
+                                        <p className={cn(
+                                            "mt-3 max-w-[60ch] text-sm leading-relaxed md:text-base",
+                                            isDark ? "text-slate-300" : "text-slate-600"
+                                        )}>
                                             Get a quick diagnostic report (tone, structure, clarity), apply improvements, and keep editing in your own words.
                                         </p>
 
                                         <div className="mt-6 flex flex-wrap gap-2 text-xs">
                                             {["Tone", "Structure", "Clarity", "Citations"].map((chip) => (
-                                                <span key={chip} className="rounded-full border border-white/20 bg-white/10 backdrop-blur-sm px-3 py-1.5 text-white/90 hover:bg-white/15 transition-colors">
+                                                <span key={chip} className={cn(
+                                                    "rounded-full border backdrop-blur-sm px-3 py-1.5 transition-colors",
+                                                    isDark 
+                                                        ? "border-white/20 bg-white/10 text-white/90 hover:bg-white/15" 
+                                                        : "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                                                )}>
                                                     {chip}
                                                 </span>
                                             ))}
@@ -670,10 +709,18 @@ export default function Landing() {
 
                                 <div className="mt-8 grid gap-4 md:grid-cols-2 relative z-10">
                                     {/* mini diagnostic UI */}
-                                    <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-5 hover:bg-white/10 transition-all duration-300">
+                                    <div className={cn(
+                                        "rounded-2xl border backdrop-blur-xl p-5 transition-all duration-300",
+                                        isDark 
+                                            ? "border-white/10 bg-white/5 hover:bg-white/10" 
+                                            : "border-blue-200 bg-blue-50/50 hover:bg-blue-100/50"
+                                    )}>
                                         <div className="flex items-center justify-between">
-                                            <div className="text-sm font-semibold text-white">Diagnostic Report</div>
-                                            <div className="text-xs font-bold text-orange-400">B+</div>
+                                            <div className={cn(
+                                                "text-sm font-semibold",
+                                                isDark ? "text-white" : "text-slate-900"
+                                            )}>Diagnostic Report</div>
+                                            <div className="text-xs font-bold text-orange-500">B+</div>
                                         </div>
 
                                         <div className="mt-4 space-y-3">
@@ -683,11 +730,20 @@ export default function Landing() {
                                                 { label: "Clarity", value: 90 },
                                             ].map((row) => (
                                                 <div key={row.label}>
-                                                    <div className="flex items-center justify-between text-xs text-slate-300">
+                                                    <div className={cn(
+                                                        "flex items-center justify-between text-xs",
+                                                        isDark ? "text-slate-300" : "text-slate-600"
+                                                    )}>
                                                         <span>{row.label}</span>
-                                                        <span className="font-semibold text-white">{row.value}/100</span>
+                                                        <span className={cn(
+                                                            "font-semibold",
+                                                            isDark ? "text-white" : "text-slate-900"
+                                                        )}>{row.value}/100</span>
                                                     </div>
-                                                    <div className="mt-1 h-2 w-full rounded-full bg-white/10">
+                                                    <div className={cn(
+                                                        "mt-1 h-2 w-full rounded-full",
+                                                        isDark ? "bg-white/10" : "bg-blue-200"
+                                                    )}>
                                                         <div
                                                             className="h-2 rounded-full bg-gradient-to-r from-orange-500 to-blue-500"
                                                             style={{ width: `${row.value}%` }}
@@ -697,29 +753,61 @@ export default function Landing() {
                                             ))}
                                         </div>
 
-                                        <div className="mt-4 rounded-xl bg-white/5 backdrop-blur-sm p-3 text-xs text-slate-300 border border-white/10">
-                                            <span className="font-semibold text-white">Next:</span> Replace informal phrases and strengthen topic sentences.
+                                        <div className={cn(
+                                            "mt-4 rounded-xl backdrop-blur-sm p-3 text-xs border",
+                                            isDark 
+                                                ? "bg-white/5 text-slate-300 border-white/10" 
+                                                : "bg-white text-slate-600 border-blue-200"
+                                        )}>
+                                            <span className={cn(
+                                                "font-semibold",
+                                                isDark ? "text-white" : "text-slate-900"
+                                            )}>Next:</span> Replace informal phrases and strengthen topic sentences.
                                         </div>
                                     </div>
 
                                     {/* mini before/after */}
-                                    <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-5 hover:bg-white/10 transition-all duration-300">
+                                    <div className={cn(
+                                        "rounded-2xl border backdrop-blur-xl p-5 transition-all duration-300",
+                                        isDark 
+                                            ? "border-white/10 bg-white/5 hover:bg-white/10" 
+                                            : "border-blue-200 bg-blue-50/50 hover:bg-blue-100/50"
+                                    )}>
                                         <div className="flex items-center justify-between">
-                                            <div className="text-sm font-semibold text-white">Before → After</div>
-                                            <div className="text-xs text-slate-400">Preview</div>
+                                            <div className={cn(
+                                                "text-sm font-semibold",
+                                                isDark ? "text-white" : "text-slate-900"
+                                            )}>Before → After</div>
+                                            <div className={cn(
+                                                "text-xs",
+                                                isDark ? "text-slate-400" : "text-slate-500"
+                                            )}>Preview</div>
                                         </div>
 
                                         <div className="mt-4 space-y-3">
-                                            <div className="rounded-xl border border-red-500/30 bg-red-500/10 backdrop-blur-sm p-3 text-xs text-red-200">
+                                            <div className={cn(
+                                                "rounded-xl border backdrop-blur-sm p-3 text-xs",
+                                                isDark 
+                                                    ? "border-red-500/30 bg-red-500/10 text-red-200" 
+                                                    : "border-red-200 bg-red-50 text-red-700"
+                                            )}>
                                                 "This shows the economy is bad and people can't buy stuff..."
                                             </div>
-                                            <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 backdrop-blur-sm p-3 text-xs text-blue-200">
+                                            <div className={cn(
+                                                "rounded-xl border backdrop-blur-sm p-3 text-xs",
+                                                isDark 
+                                                    ? "border-blue-500/30 bg-blue-500/10 text-blue-200" 
+                                                    : "border-blue-200 bg-blue-50 text-blue-700"
+                                            )}>
                                                 "These findings indicate inflationary pressure has reduced consumer purchasing power..."
                                             </div>
                                         </div>
 
-                                        <div className="mt-4 flex items-center gap-2 text-xs text-slate-300">
-                                            <Check className="h-4 w-4 text-green-400" />
+                                        <div className={cn(
+                                            "mt-4 flex items-center gap-2 text-xs",
+                                            isDark ? "text-slate-300" : "text-slate-600"
+                                        )}>
+                                            <Check className="h-4 w-4 text-green-500" />
                                             Keeps your intent; improves academic register.
                                         </div>
                                     </div>
@@ -730,13 +818,28 @@ export default function Landing() {
                         {/* Top-right supporting cards */}
                         {bentoTopRight.map((item, idx) => (
                             <div key={item.title} className={`lg:col-span-5 animate-in fade-in slide-in-from-bottom-8 duration-1000`} style={{ animationDelay: `${300 + idx * 100}ms` }}>
-                                <div className="relative h-full overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 shadow-2xl md:p-7 hover:border-white/20 hover:bg-white/10 transition-all duration-500">
-                                    <div className={cn("pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full blur-3xl opacity-30 animate-pulse", `bg-gradient-to-br ${item.accent === "from-blue-600 to-violet-600" ? "from-orange-500 to-blue-500" : "from-blue-500 to-orange-500"}`)} />
+                                <div className={cn(
+                                    "relative h-full overflow-hidden rounded-3xl border backdrop-blur-xl p-6 shadow-2xl md:p-7 transition-all duration-500",
+                                    isDark 
+                                        ? "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10" 
+                                        : "border-blue-200 bg-white hover:border-blue-300 hover:shadow-blue-500/20 shadow-blue-500/10"
+                                )}>
+                                    <div className={cn(
+                                        "pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full blur-3xl opacity-30 animate-pulse",
+                                        `bg-gradient-to-br ${item.accent === "from-blue-600 to-violet-600" ? "from-orange-500 to-blue-500" : "from-blue-500 to-orange-500"}`,
+                                        !isDark && "opacity-20"
+                                    )} />
 
                                     <div className="flex items-start justify-between gap-4 relative z-10">
                                         <div>
-                                            <h3 className="text-lg font-semibold text-white">{item.title}</h3>
-                                            <p className="mt-2 text-sm text-slate-300 leading-relaxed">{item.description}</p>
+                                            <h3 className={cn(
+                                                "text-lg font-semibold",
+                                                isDark ? "text-white" : "text-slate-900"
+                                            )}>{item.title}</h3>
+                                            <p className={cn(
+                                                "mt-2 text-sm leading-relaxed",
+                                                isDark ? "text-slate-300" : "text-slate-600"
+                                            )}>{item.description}</p>
                                         </div>
                                         <div className={cn("flex h-11 w-11 items-center justify-center rounded-2xl text-white shadow-lg", item.accent === "from-blue-600 to-violet-600" ? "bg-gradient-to-br from-orange-500 to-blue-500" : "bg-gradient-to-br from-blue-500 to-orange-500")}>
                                             <item.icon className="h-5 w-5" />
@@ -745,32 +848,71 @@ export default function Landing() {
 
                                     <div className="mt-6 flex flex-wrap gap-2 text-xs">
                                         {item.chips.map((chip) => (
-                                            <span key={chip} className="rounded-full border border-white/20 bg-white/10 backdrop-blur-sm px-3 py-1.5 text-white/90 hover:bg-white/15 transition-colors">
+                                            <span key={chip} className={cn(
+                                                "rounded-full border backdrop-blur-sm px-3 py-1.5 transition-colors",
+                                                isDark 
+                                                    ? "border-white/20 bg-white/10 text-white/90 hover:bg-white/15" 
+                                                    : "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                                            )}>
                                                 {chip}
                                             </span>
                                         ))}
                                     </div>
 
-                                    <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
+                                    <div className={cn(
+                                        "mt-6 rounded-2xl border backdrop-blur-sm p-4",
+                                        isDark 
+                                            ? "border-white/10 bg-white/5" 
+                                            : "border-blue-200 bg-blue-50/50"
+                                    )}>
                                         {item.title === "Rewrite with academic tone" ? (
-                                            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-3 text-xs">
-                                                <div className="font-semibold text-white">Example upgrade</div>
+                                            <div className={cn(
+                                                "rounded-xl border backdrop-blur-sm p-3 text-xs",
+                                                isDark 
+                                                    ? "border-white/10 bg-white/5" 
+                                                    : "border-blue-200 bg-white"
+                                            )}>
+                                                <div className={cn(
+                                                    "font-semibold",
+                                                    isDark ? "text-white" : "text-slate-900"
+                                                )}>Example upgrade</div>
                                                 <div className="mt-2 space-y-2">
-                                                    <div className="rounded-lg border border-red-500/30 bg-red-500/10 backdrop-blur-sm p-2 text-red-200">
+                                                    <div className={cn(
+                                                        "rounded-lg border backdrop-blur-sm p-2",
+                                                        isDark 
+                                                            ? "border-red-500/30 bg-red-500/10 text-red-200" 
+                                                            : "border-red-200 bg-red-50 text-red-700"
+                                                    )}>
                                                         "I think this is a big problem for society."
                                                     </div>
-                                                    <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 backdrop-blur-sm p-2 text-blue-200">
+                                                    <div className={cn(
+                                                        "rounded-lg border backdrop-blur-sm p-2",
+                                                        isDark 
+                                                            ? "border-blue-500/30 bg-blue-500/10 text-blue-200" 
+                                                            : "border-blue-200 bg-blue-50 text-blue-700"
+                                                    )}>
                                                         "These findings indicate significant societal implications."
                                                     </div>
                                                 </div>
                                             </div>
                                         ) : (
-                                            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-3 text-xs">
-                                                <div className="font-semibold text-white">What you control</div>
-                                                <ul className="mt-2 space-y-2 text-slate-300">
-                                                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-400" /> Your topic and sources</li>
-                                                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-400" /> Your thesis and argument</li>
-                                                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-400" /> Final edits before export</li>
+                                            <div className={cn(
+                                                "rounded-xl border backdrop-blur-sm p-3 text-xs",
+                                                isDark 
+                                                    ? "border-white/10 bg-white/5" 
+                                                    : "border-blue-200 bg-white"
+                                            )}>
+                                                <div className={cn(
+                                                    "font-semibold",
+                                                    isDark ? "text-white" : "text-slate-900"
+                                                )}>What you control</div>
+                                                <ul className={cn(
+                                                    "mt-2 space-y-2",
+                                                    isDark ? "text-slate-300" : "text-slate-600"
+                                                )}>
+                                                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Your topic and sources</li>
+                                                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Your thesis and argument</li>
+                                                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Final edits before export</li>
                                                 </ul>
                                             </div>
                                         )}
@@ -782,23 +924,47 @@ export default function Landing() {
                         {/* Bottom row */}
                         {bentoBottom.map((b, idx) => (
                             <div key={b.title} className={`lg:col-span-4 animate-in fade-in slide-in-from-bottom-8 duration-1000`} style={{ animationDelay: `${500 + idx * 100}ms` }}>
-                                <div className="h-full overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl hover:border-white/20 hover:bg-white/10 transition-all duration-500">
+                                <div className={cn(
+                                    "h-full overflow-hidden rounded-3xl border backdrop-blur-xl shadow-2xl transition-all duration-500",
+                                    isDark 
+                                        ? "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10" 
+                                        : "border-blue-200 bg-white hover:border-blue-300 hover:shadow-blue-500/20 shadow-blue-500/10"
+                                )}>
                                     <div className="p-6">
                                         <div className="flex items-start justify-between gap-4">
                                             <div>
-                                                <h3 className="text-base font-semibold text-white">{b.title}</h3>
-                                                <p className="mt-2 text-sm text-slate-300 leading-relaxed">{b.description}</p>
+                                                <h3 className={cn(
+                                                    "text-base font-semibold",
+                                                    isDark ? "text-white" : "text-slate-900"
+                                                )}>{b.title}</h3>
+                                                <p className={cn(
+                                                    "mt-2 text-sm leading-relaxed",
+                                                    isDark ? "text-slate-300" : "text-slate-600"
+                                                )}>{b.description}</p>
                                             </div>
                                             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-blue-500 text-white shadow-lg">
                                                 <b.icon className="h-5 w-5" />
                                             </div>
                                         </div>
                                         {b.title === "Structure & flow" && (
-                                            <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
-                                                <div className="text-[11px] font-semibold text-white">Suggested outline</div>
+                                            <div className={cn(
+                                                "mt-5 rounded-2xl border backdrop-blur-sm p-4",
+                                                isDark 
+                                                    ? "border-white/10 bg-white/5" 
+                                                    : "border-blue-200 bg-blue-50/50"
+                                            )}>
+                                                <div className={cn(
+                                                    "text-[11px] font-semibold",
+                                                    isDark ? "text-white" : "text-slate-900"
+                                                )}>Suggested outline</div>
                                                 <div className="mt-3 space-y-2">
                                                     {["Thesis statement", "Argument 1 → evidence", "Argument 2 → evidence"].map((row) => (
-                                                        <div key={row} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm px-3 py-2 text-xs text-slate-300 hover:bg-white/10 transition-colors">
+                                                        <div key={row} className={cn(
+                                                            "flex items-center justify-between rounded-xl border backdrop-blur-sm px-3 py-2 text-xs transition-colors",
+                                                            isDark 
+                                                                ? "border-white/10 bg-white/5 text-slate-300 hover:bg-white/10" 
+                                                                : "border-blue-200 bg-white text-slate-700 hover:bg-blue-50"
+                                                        )}>
                                                             <span>{row}</span>
                                                             <span className="h-2 w-2 rounded-full bg-orange-500" />
                                                         </div>
@@ -807,27 +973,63 @@ export default function Landing() {
                                             </div>
                                         )}
                                         {b.title === "Citation awareness" && (
-                                            <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
+                                            <div className={cn(
+                                                "mt-5 rounded-2xl border backdrop-blur-sm p-4",
+                                                isDark 
+                                                    ? "border-white/10 bg-white/5" 
+                                                    : "border-blue-200 bg-blue-50/50"
+                                            )}>
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-[11px] font-semibold text-white">Citation checks</span>
-                                                    <span className="rounded-full border border-orange-500/30 bg-orange-500/10 backdrop-blur-sm px-2 py-0.5 text-[10px] font-semibold text-orange-300">2 missing</span>
+                                                    <span className={cn(
+                                                        "text-[11px] font-semibold",
+                                                        isDark ? "text-white" : "text-slate-900"
+                                                    )}>Citation checks</span>
+                                                    <span className={cn(
+                                                        "rounded-full border backdrop-blur-sm px-2 py-0.5 text-[10px] font-semibold",
+                                                        isDark 
+                                                            ? "border-orange-500/30 bg-orange-500/10 text-orange-300" 
+                                                            : "border-orange-200 bg-orange-50 text-orange-700"
+                                                    )}>2 missing</span>
                                                 </div>
                                                 <div className="mt-3 space-y-2">
-                                                    <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm px-3 py-2 text-xs text-slate-300">
-                                                        "Factual claim" <span className="font-semibold text-orange-400">needs citation</span>
+                                                    <div className={cn(
+                                                        "rounded-xl border backdrop-blur-sm px-3 py-2 text-xs",
+                                                        isDark 
+                                                            ? "border-white/10 bg-white/5 text-slate-300" 
+                                                            : "border-blue-200 bg-white text-slate-600"
+                                                    )}>
+                                                        "Factual claim" <span className="font-semibold text-orange-600">needs citation</span>
                                                     </div>
-                                                    <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm px-3 py-2 text-xs text-slate-300">
-                                                        Reference list <span className="font-semibold text-blue-400">style: APA</span>
+                                                    <div className={cn(
+                                                        "rounded-xl border backdrop-blur-sm px-3 py-2 text-xs",
+                                                        isDark 
+                                                            ? "border-white/10 bg-white/5 text-slate-300" 
+                                                            : "border-blue-200 bg-white text-slate-600"
+                                                    )}>
+                                                        Reference list <span className="font-semibold text-blue-600">style: APA</span>
                                                     </div>
                                                 </div>
                                             </div>
                                         )}
                                         {b.title === "Export-ready output" && (
-                                            <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
-                                                <div className="text-[11px] font-semibold text-white">Export</div>
+                                            <div className={cn(
+                                                "mt-5 rounded-2xl border backdrop-blur-sm p-4",
+                                                isDark 
+                                                    ? "border-white/10 bg-white/5" 
+                                                    : "border-blue-200 bg-blue-50/50"
+                                            )}>
+                                                <div className={cn(
+                                                    "text-[11px] font-semibold",
+                                                    isDark ? "text-white" : "text-slate-900"
+                                                )}>Export</div>
                                                 <div className="mt-3 grid gap-2">
                                                     {["PDF Document", "Word (.docx)", "Plain Text"].map((row) => (
-                                                        <div key={row} className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm px-3 py-2 text-xs text-slate-300 hover:bg-white/10 transition-colors">
+                                                        <div key={row} className={cn(
+                                                            "rounded-xl border backdrop-blur-sm px-3 py-2 text-xs transition-colors",
+                                                            isDark 
+                                                                ? "border-white/10 bg-white/5 text-slate-300 hover:bg-white/10" 
+                                                                : "border-blue-200 bg-white text-slate-700 hover:bg-blue-50"
+                                                        )}>
                                                             {row}
                                                         </div>
                                                     ))}
@@ -843,47 +1045,97 @@ export default function Landing() {
             </section>
 
             {/* STEPS */}
-            <section className="relative bg-gradient-to-b from-slate-900 to-slate-950 py-20 md:py-32 overflow-hidden">
+            <section className={cn(
+                "relative py-20 md:py-32 overflow-hidden transition-colors duration-300",
+                isDark 
+                    ? "bg-gradient-to-b from-slate-900 to-slate-950" 
+                    : "bg-gradient-to-b from-white via-blue-50/30 to-white"
+            )}>
                 <div className="absolute inset-0">
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-orange-500/5 rounded-full blur-3xl" />
+                    <div className={cn(
+                        "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-3xl",
+                        isDark ? "bg-orange-500/5" : "bg-orange-400/3"
+                    )} />
                 </div>
                 
                 <div className="container relative mx-auto px-4 md:px-6 z-10">
                     <div className="mx-auto max-w-3xl text-center mb-16">
-                        <h2 className="text-4xl font-bold tracking-tight text-white md:text-5xl animate-in fade-in slide-in-from-bottom-4 duration-700">Assignment upgrades in 3 steps</h2>
-                        <p className="mt-6 text-lg text-slate-300 md:text-xl animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100">
+                        <h2 className={cn(
+                            "text-4xl font-bold tracking-tight md:text-5xl animate-in fade-in slide-in-from-bottom-4 duration-700",
+                            isDark ? "text-white" : "text-slate-900"
+                        )}>Assignment upgrades in 3 steps</h2>
+                        <p className={cn(
+                            "mt-6 text-lg md:text-xl animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100",
+                            isDark ? "text-slate-300" : "text-slate-600"
+                        )}>
                             A short, focused flow designed to get you to a better submission fast.
                         </p>
                     </div>
 
                     <div className="mt-10 grid gap-6 md:mt-14 md:grid-cols-3">
                         {steps.map((s, idx) => (
-                            <div key={s.title} className={`rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl hover:border-white/20 hover:bg-white/10 transition-all duration-500 animate-in fade-in slide-in-from-bottom-8`} style={{ animationDelay: `${200 + idx * 100}ms` }}>
+                            <div key={s.title} className={cn(
+                                "rounded-3xl border backdrop-blur-xl shadow-2xl transition-all duration-500 animate-in fade-in slide-in-from-bottom-8",
+                                isDark 
+                                    ? "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10" 
+                                    : "border-blue-200 bg-white hover:border-blue-300 hover:shadow-blue-500/20 shadow-blue-500/10"
+                            )} style={{ animationDelay: `${200 + idx * 100}ms` }}>
                                 <div className="p-6">
                                     <div className="flex items-center gap-3">
                                         <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-blue-500 text-white border border-white/20 font-bold shadow-lg">
                                             {idx + 1}
                                         </div>
-                                        <div className="text-base font-semibold text-white">{s.title}</div>
+                                        <div className={cn(
+                                            "text-base font-semibold",
+                                            isDark ? "text-white" : "text-slate-900"
+                                        )}>{s.title}</div>
                                     </div>
-                                    <p className="mt-3 text-sm text-slate-300 leading-relaxed">{s.description}</p>
+                                    <p className={cn(
+                                        "mt-3 text-sm leading-relaxed",
+                                        isDark ? "text-slate-300" : "text-slate-600"
+                                    )}>{s.description}</p>
 
                                     {/* mini UI previews */}
                                     {idx === 0 && (
-                                        <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
+                                        <div className={cn(
+                                            "mt-5 rounded-2xl border backdrop-blur-sm p-4",
+                                            isDark 
+                                                ? "border-white/10 bg-white/5" 
+                                                : "border-blue-200 bg-blue-50/50"
+                                        )}>
                                             <div className="space-y-2">
-                                                <div className="h-8 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm px-3 flex items-center text-xs text-slate-400">
+                                                <div className={cn(
+                                                    "h-8 rounded-lg border backdrop-blur-sm px-3 flex items-center text-xs",
+                                                    isDark 
+                                                        ? "border-white/10 bg-white/5 text-slate-400" 
+                                                        : "border-blue-200 bg-white text-slate-500"
+                                                )}>
                                                     Document title…
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-2">
-                                                    <div className="h-8 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm px-3 flex items-center text-xs text-slate-400">
+                                                    <div className={cn(
+                                                        "h-8 rounded-lg border backdrop-blur-sm px-3 flex items-center text-xs",
+                                                        isDark 
+                                                            ? "border-white/10 bg-white/5 text-slate-400" 
+                                                            : "border-blue-200 bg-white text-slate-500"
+                                                    )}>
                                                         Type: Essay
                                                     </div>
-                                                    <div className="h-8 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm px-3 flex items-center text-xs text-slate-400">
+                                                    <div className={cn(
+                                                        "h-8 rounded-lg border backdrop-blur-sm px-3 flex items-center text-xs",
+                                                        isDark 
+                                                            ? "border-white/10 bg-white/5 text-slate-400" 
+                                                            : "border-blue-200 bg-white text-slate-500"
+                                                    )}>
                                                         Level: UG
                                                     </div>
                                                 </div>
-                                                <div className="h-8 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm px-3 flex items-center text-xs text-slate-400">
+                                                <div className={cn(
+                                                    "h-8 rounded-lg border backdrop-blur-sm px-3 flex items-center text-xs",
+                                                    isDark 
+                                                        ? "border-white/10 bg-white/5 text-slate-400" 
+                                                        : "border-blue-200 bg-white text-slate-500"
+                                                )}>
                                                     Style: APA 7th
                                                 </div>
                                             </div>
@@ -891,15 +1143,42 @@ export default function Landing() {
                                     )}
 
                                     {idx === 1 && (
-                                        <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
-                                            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-3">
-                                                <div className="h-2 w-24 rounded bg-white/20" />
+                                        <div className={cn(
+                                            "mt-5 rounded-2xl border backdrop-blur-sm p-4",
+                                            isDark 
+                                                ? "border-white/10 bg-white/5" 
+                                                : "border-blue-200 bg-blue-50/50"
+                                        )}>
+                                            <div className={cn(
+                                                "rounded-xl border backdrop-blur-sm p-3",
+                                                isDark 
+                                                    ? "border-white/10 bg-white/5" 
+                                                    : "border-blue-200 bg-white"
+                                            )}>
+                                                <div className={cn(
+                                                    "h-2 w-24 rounded",
+                                                    isDark ? "bg-white/20" : "bg-blue-200"
+                                                )} />
                                                 <div className="mt-3 space-y-2">
-                                                    <div className="h-2 w-full rounded bg-white/10" />
-                                                    <div className="h-2 w-[92%] rounded bg-white/10" />
-                                                    <div className="h-2 w-[80%] rounded bg-white/10" />
+                                                    <div className={cn(
+                                                        "h-2 w-full rounded",
+                                                        isDark ? "bg-white/10" : "bg-blue-100"
+                                                    )} />
+                                                    <div className={cn(
+                                                        "h-2 w-[92%] rounded",
+                                                        isDark ? "bg-white/10" : "bg-blue-100"
+                                                    )} />
+                                                    <div className={cn(
+                                                        "h-2 w-[80%] rounded",
+                                                        isDark ? "bg-white/10" : "bg-blue-100"
+                                                    )} />
                                                 </div>
-                                                <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-orange-500/30 bg-orange-500/10 backdrop-blur-sm px-3 py-1 text-[11px] font-semibold text-orange-300">
+                                                <div className={cn(
+                                                    "mt-3 inline-flex items-center gap-2 rounded-full border backdrop-blur-sm px-3 py-1 text-[11px] font-semibold",
+                                                    isDark 
+                                                        ? "border-orange-500/30 bg-orange-500/10 text-orange-300" 
+                                                        : "border-orange-200 bg-orange-50 text-orange-700"
+                                                )}>
                                                     Highlight: informal phrase
                                                 </div>
                                             </div>
@@ -907,16 +1186,37 @@ export default function Landing() {
                                     )}
 
                                     {idx === 2 && (
-                                        <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
-                                            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-3">
+                                        <div className={cn(
+                                            "mt-5 rounded-2xl border backdrop-blur-sm p-4",
+                                            isDark 
+                                                ? "border-white/10 bg-white/5" 
+                                                : "border-blue-200 bg-blue-50/50"
+                                        )}>
+                                            <div className={cn(
+                                                "rounded-xl border backdrop-blur-sm p-3",
+                                                isDark 
+                                                    ? "border-white/10 bg-white/5" 
+                                                    : "border-blue-200 bg-white"
+                                            )}>
                                                 <div className="flex items-center justify-between">
-                                                    <div className="text-xs font-semibold text-white">Export</div>
-                                                    <div className="text-[11px] text-slate-400">Choose format</div>
+                                                    <div className={cn(
+                                                        "text-xs font-semibold",
+                                                        isDark ? "text-white" : "text-slate-900"
+                                                    )}>Export</div>
+                                                    <div className={cn(
+                                                        "text-[11px]",
+                                                        isDark ? "text-slate-400" : "text-slate-500"
+                                                    )}>Choose format</div>
                                                 </div>
                                                 <div className="mt-3 grid gap-2">
-                                                    <div className="rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm px-3 py-2 text-xs text-slate-300 hover:bg-white/10 transition-colors">PDF Document</div>
-                                                    <div className="rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm px-3 py-2 text-xs text-slate-300 hover:bg-white/10 transition-colors">Word (.docx)</div>
-                                                    <div className="rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm px-3 py-2 text-xs text-slate-300 hover:bg-white/10 transition-colors">Plain Text</div>
+                                                    {["PDF Document", "Word (.docx)", "Plain Text"].map((row) => (
+                                                        <div key={row} className={cn(
+                                                            "rounded-lg border backdrop-blur-sm px-3 py-2 text-xs transition-colors",
+                                                            isDark 
+                                                                ? "border-white/10 bg-white/5 text-slate-300 hover:bg-white/10" 
+                                                                : "border-blue-200 bg-white text-slate-700 hover:bg-blue-50"
+                                                        )}>{row}</div>
+                                                    ))}
                                                 </div>
                                             </div>
                                         </div>
@@ -929,34 +1229,56 @@ export default function Landing() {
             </section>
 
             {/* INTEGRITY / COMPARISON (clean table style) */}
-            <section className="relative bg-gradient-to-b from-slate-950 to-slate-900 py-20 md:py-32 overflow-hidden">
+            <section className={cn(
+                "relative py-20 md:py-32 overflow-hidden transition-colors duration-300",
+                isDark 
+                    ? "bg-gradient-to-b from-slate-950 to-slate-900" 
+                    : "bg-gradient-to-b from-white via-blue-50/20 to-white"
+            )}>
                 <div className="absolute inset-0">
-                    <div className="absolute top-1/2 right-1/4 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-3xl" />
+                    <div className={cn(
+                        "absolute top-1/2 right-1/4 w-[500px] h-[500px] rounded-full blur-3xl",
+                        isDark ? "bg-blue-500/5" : "bg-blue-400/3"
+                    )} />
                 </div>
                 
                 <div className="container relative mx-auto px-4 md:px-6 z-10">
                     <div className="grid items-start gap-10 lg:grid-cols-12">
                         <div className="lg:col-span-5 animate-in fade-in slide-in-from-left-8 duration-1000">
-                            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm px-3 py-1.5 text-xs font-semibold text-white/90">
-                                <ShieldCheck className="h-4 w-4 text-orange-400" />
+                            <div className={cn(
+                                "inline-flex items-center gap-2 rounded-full border backdrop-blur-sm px-3 py-1.5 text-xs font-semibold",
+                                isDark 
+                                    ? "border-white/10 bg-white/5 text-white/90" 
+                                    : "border-blue-200 bg-blue-50 text-blue-700"
+                            )}>
+                                <ShieldCheck className="h-4 w-4 text-orange-500" />
                                 Integrity-first
                             </div>
-                            <h2 className="mt-5 text-3xl font-bold tracking-tight text-white md:text-4xl lg:text-5xl">
+                            <h2 className={cn(
+                                "mt-5 text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl",
+                                isDark ? "text-white" : "text-slate-900"
+                            )}>
                                 No generic essays.
                                 <span className="block mt-2">Transform your own work.</span>
                             </h2>
-                            <p className="mt-5 text-base text-slate-300 md:text-lg">
+                            <p className={cn(
+                                "mt-5 text-base md:text-lg",
+                                isDark ? "text-slate-300" : "text-slate-600"
+                            )}>
                                 Improve structure, tone, and clarity while keeping your thesis, sources, and ideas intact.
                             </p>
 
-                            <div className="mt-6 space-y-3 text-sm text-slate-300">
+                            <div className={cn(
+                                "mt-6 space-y-3 text-sm",
+                                isDark ? "text-slate-300" : "text-slate-600"
+                            )}>
                                 {[
                                     "You provide the content; we improve the academic register.",
                                     "Clear diagnostics explain what changed and why.",
                                     "Export when you're ready to submit.",
                                 ].map((t, idx) => (
                                     <div key={t} className="flex items-start gap-3 animate-in fade-in slide-in-from-left-4 duration-700" style={{ animationDelay: `${idx * 100}ms` }}>
-                                        <Check className="mt-0.5 h-4 w-4 text-green-400 flex-shrink-0" />
+                                        <Check className="mt-0.5 h-4 w-4 text-green-500 flex-shrink-0" />
                                         <span>{t}</span>
                                     </div>
                                 ))}
@@ -964,17 +1286,38 @@ export default function Landing() {
                         </div>
 
                         <div className="lg:col-span-7 animate-in fade-in slide-in-from-right-8 duration-1000 delay-200">
-                            <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl">
-                                <div className="grid grid-cols-2 border-b border-white/10">
-                                    <div className="px-6 py-4 text-sm font-semibold text-white/70 bg-white/5">
+                            <div className={cn(
+                                "overflow-hidden rounded-3xl border backdrop-blur-xl shadow-2xl",
+                                isDark 
+                                    ? "border-white/10 bg-white/5" 
+                                    : "border-blue-200 bg-white shadow-blue-500/10"
+                            )}>
+                                <div className={cn(
+                                    "grid grid-cols-2 border-b",
+                                    isDark ? "border-white/10" : "border-blue-100"
+                                )}>
+                                    <div className={cn(
+                                        "px-6 py-4 text-sm font-semibold",
+                                        isDark 
+                                            ? "text-white/70 bg-white/5" 
+                                            : "text-slate-600 bg-blue-50/50"
+                                    )}>
                                         Generic AI writers
                                     </div>
-                                    <div className="px-6 py-4 text-sm font-semibold text-white bg-gradient-to-r from-orange-500/20 to-blue-500/20">
+                                    <div className={cn(
+                                        "px-6 py-4 text-sm font-semibold bg-gradient-to-r",
+                                        isDark 
+                                            ? "text-white from-orange-500/20 to-blue-500/20" 
+                                            : "text-blue-700 from-orange-50 to-blue-50"
+                                    )}>
                                         Docley
                                     </div>
                                 </div>
 
-                                <div className="divide-y divide-white/10">
+                                <div className={cn(
+                                    "divide-y",
+                                    isDark ? "divide-white/10" : "divide-blue-100"
+                                )}>
                                     {[
                                         { label: "Preserves your meaning", left: false, right: true },
                                         { label: "Improves academic tone", left: true, right: true },
@@ -982,39 +1325,80 @@ export default function Landing() {
                                         { label: "Export workflow built-in", left: false, right: true },
                                     ].map((row) => (
                                         <div key={row.label} className="grid grid-cols-2">
-                                            <div className="px-6 py-4 text-sm text-slate-300 flex items-center justify-between gap-3">
+                                            <div className={cn(
+                                                "px-6 py-4 text-sm flex items-center justify-between gap-3",
+                                                isDark ? "text-slate-300" : "text-slate-600"
+                                            )}>
                                                 <span className="min-w-0">{row.label}</span>
                                                 {row.left ? (
-                                                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                                                    <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
                                                 ) : (
-                                                    <X className="h-4 w-4 text-slate-500 flex-shrink-0" />
+                                                    <X className={cn(
+                                                        "h-4 w-4 flex-shrink-0",
+                                                        isDark ? "text-slate-500" : "text-slate-400"
+                                                    )} />
                                                 )}
                                             </div>
-                                            <div className="px-6 py-4 text-sm text-slate-300 flex items-center justify-between gap-3 bg-white/5">
+                                            <div className={cn(
+                                                "px-6 py-4 text-sm flex items-center justify-between gap-3",
+                                                isDark 
+                                                    ? "text-slate-300 bg-white/5" 
+                                                    : "text-slate-600 bg-white"
+                                            )}>
                                                 <span className="min-w-0">{row.label}</span>
                                                 {row.right ? (
-                                                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                                                    <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
                                                 ) : (
-                                                    <X className="h-4 w-4 text-slate-500 flex-shrink-0" />
+                                                    <X className={cn(
+                                                        "h-4 w-4 flex-shrink-0",
+                                                        isDark ? "text-slate-500" : "text-slate-400"
+                                                    )} />
                                                 )}
                                             </div>
                                         </div>
                                     ))}
                                 </div>
 
-                                <div className="grid grid-cols-1 gap-3 border-t border-white/10 bg-white/5 p-5 md:grid-cols-2">
-                                    <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
-                                        <div className="text-xs font-semibold text-white">What you control</div>
-                                        <div className="mt-2 space-y-2 text-xs text-slate-300">
-                                            <div className="flex items-center gap-2"><Check className="h-4 w-4 text-green-400" /> Topic, thesis, and structure</div>
-                                            <div className="flex items-center gap-2"><Check className="h-4 w-4 text-green-400" /> Sources and citations</div>
+                                <div className={cn(
+                                    "grid grid-cols-1 gap-3 border-t p-5 md:grid-cols-2",
+                                    isDark 
+                                        ? "border-white/10 bg-white/5" 
+                                        : "border-blue-100 bg-blue-50/30"
+                                )}>
+                                    <div className={cn(
+                                        "rounded-2xl border backdrop-blur-sm p-4",
+                                        isDark 
+                                            ? "border-white/10 bg-white/5" 
+                                            : "border-blue-200 bg-white"
+                                    )}>
+                                        <div className={cn(
+                                            "text-xs font-semibold",
+                                            isDark ? "text-white" : "text-slate-900"
+                                        )}>What you control</div>
+                                        <div className={cn(
+                                            "mt-2 space-y-2 text-xs",
+                                            isDark ? "text-slate-300" : "text-slate-600"
+                                        )}>
+                                            <div className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Topic, thesis, and structure</div>
+                                            <div className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Sources and citations</div>
                                         </div>
                                     </div>
-                                    <div className="rounded-2xl border border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-blue-500/10 backdrop-blur-sm p-4">
-                                        <div className="text-xs font-semibold text-white">What Docley improves</div>
-                                        <div className="mt-2 space-y-2 text-xs text-slate-300">
-                                            <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-orange-400" /> Academic tone and clarity</div>
-                                            <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-blue-400" /> Actionable diagnostics</div>
+                                    <div className={cn(
+                                        "rounded-2xl border backdrop-blur-sm p-4",
+                                        isDark 
+                                            ? "border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-blue-500/10" 
+                                            : "border-orange-200 bg-gradient-to-br from-orange-50 to-blue-50"
+                                    )}>
+                                        <div className={cn(
+                                            "text-xs font-semibold",
+                                            isDark ? "text-white" : "text-slate-900"
+                                        )}>What Docley improves</div>
+                                        <div className={cn(
+                                            "mt-2 space-y-2 text-xs",
+                                            isDark ? "text-slate-300" : "text-slate-600"
+                                        )}>
+                                            <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-orange-500" /> Academic tone and clarity</div>
+                                            <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-blue-500" /> Actionable diagnostics</div>
                                         </div>
                                     </div>
                                 </div>
@@ -1025,39 +1409,73 @@ export default function Landing() {
             </section>
 
             {/* METRICS */}
-            <section className="relative bg-gradient-to-b from-slate-900 to-slate-950 py-20 md:py-32 overflow-hidden">
+            <section className={cn(
+                "relative py-20 md:py-32 overflow-hidden transition-colors duration-300",
+                isDark 
+                    ? "bg-gradient-to-b from-slate-900 to-slate-950" 
+                    : "bg-gradient-to-b from-white via-blue-50/20 to-white"
+            )}>
                 <div className="absolute inset-0">
-                    <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-orange-500/5 rounded-full blur-3xl" />
+                    <div className={cn(
+                        "absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full blur-3xl",
+                        isDark ? "bg-orange-500/5" : "bg-orange-400/3"
+                    )} />
                 </div>
                 
                 <div className="container relative mx-auto px-4 md:px-6 z-10">
                     <div className="mx-auto max-w-3xl text-center mb-16">
-                        <h2 className="text-4xl font-bold tracking-tight text-white md:text-5xl animate-in fade-in slide-in-from-bottom-4 duration-700">Clear diagnostics, not guesswork</h2>
-                        <p className="mt-6 text-lg text-slate-300 md:text-xl animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100">
+                        <h2 className={cn(
+                            "text-4xl font-bold tracking-tight md:text-5xl animate-in fade-in slide-in-from-bottom-4 duration-700",
+                            isDark ? "text-white" : "text-slate-900"
+                        )}>Clear diagnostics, not guesswork</h2>
+                        <p className={cn(
+                            "mt-6 text-lg md:text-xl animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100",
+                            isDark ? "text-slate-300" : "text-slate-600"
+                        )}>
                             A report that's easy to understand and easy to act on.
                         </p>
                     </div>
 
                     <div className="mx-auto mt-10 max-w-5xl md:mt-14">
-                        <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl animate-in fade-in zoom-in-95 duration-1000 delay-200">
-                            <div className="grid divide-y divide-white/10 md:grid-cols-3 md:divide-x md:divide-y-0">
+                        <div className={cn(
+                            "rounded-3xl border backdrop-blur-xl shadow-2xl animate-in fade-in zoom-in-95 duration-1000 delay-200",
+                            isDark 
+                                ? "border-white/10 bg-white/5" 
+                                : "border-blue-200 bg-white shadow-blue-500/10"
+                        )}>
+                            <div className={cn(
+                                "grid divide-y md:grid-cols-3 md:divide-x md:divide-y-0",
+                                isDark ? "divide-white/10" : "divide-blue-100"
+                            )}>
                                 {[
                                     { label: "Diagnostic categories", value: "4", note: "Tone, structure, clarity, citations" },
                                     { label: "Citation styles", value: "4", note: "APA, MLA, Harvard, Chicago" },
                                     { label: "Export formats", value: "3", note: "PDF, Word (.docx), plain text" },
                                 ].map((m, idx) => (
                                     <div key={m.label} className={`p-8 animate-in fade-in slide-in-from-bottom-4 duration-700`} style={{ animationDelay: `${300 + idx * 100}ms` }}>
-                                        <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">{m.label}</div>
+                                        <div className={cn(
+                                            "text-xs font-semibold uppercase tracking-wide",
+                                            isDark ? "text-slate-400" : "text-slate-500"
+                                        )}>{m.label}</div>
                                         <div className="mt-4 flex items-baseline gap-2">
-                                            <div className="text-5xl font-bold tracking-tight bg-gradient-to-r from-orange-400 to-blue-400 bg-clip-text text-transparent">{m.value}</div>
-                                            <div className="text-sm font-semibold text-slate-400">core</div>
+                                            <div className="text-5xl font-bold tracking-tight bg-gradient-to-r from-orange-500 to-blue-500 bg-clip-text text-transparent">{m.value}</div>
+                                            <div className={cn(
+                                                "text-sm font-semibold",
+                                                isDark ? "text-slate-400" : "text-slate-500"
+                                            )}>core</div>
                                         </div>
-                                        <div className="mt-3 text-sm text-slate-300">{m.note}</div>
+                                        <div className={cn(
+                                            "mt-3 text-sm",
+                                            isDark ? "text-slate-300" : "text-slate-600"
+                                        )}>{m.note}</div>
                                     </div>
                                 ))}
                             </div>
                         </div>
-                        <p className="mt-6 text-center text-sm text-slate-400 animate-in fade-in duration-700 delay-600">
+                        <p className={cn(
+                            "mt-6 text-center text-sm animate-in fade-in duration-700 delay-600",
+                            isDark ? "text-slate-400" : "text-slate-500"
+                        )}>
                             Designed to be simple, fast, and clear—so students know exactly what to improve.
                         </p>
                     </div>
@@ -1065,23 +1483,45 @@ export default function Landing() {
             </section>
 
             {/* PRODUCT PREVIEW (moved down as requested) */}
-            <section className="relative bg-gradient-to-b from-slate-950 to-slate-900 py-20 md:py-32 overflow-hidden">
+            <section className={cn(
+                "relative py-20 md:py-32 overflow-hidden transition-colors duration-300",
+                isDark 
+                    ? "bg-gradient-to-b from-slate-950 to-slate-900" 
+                    : "bg-gradient-to-b from-white via-blue-50/20 to-white"
+            )}>
                 <div className="absolute inset-0">
-                    <div className="absolute top-1/2 left-1/4 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-3xl" />
-                    <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-orange-500/10 rounded-full blur-3xl" />
+                    <div className={cn(
+                        "absolute top-1/2 left-1/4 w-[500px] h-[500px] rounded-full blur-3xl",
+                        isDark ? "bg-blue-500/10" : "bg-blue-400/5"
+                    )} />
+                    <div className={cn(
+                        "absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full blur-3xl",
+                        isDark ? "bg-orange-500/10" : "bg-orange-400/5"
+                    )} />
                 </div>
                 
                 <div className="container relative mx-auto px-4 md:px-6 z-10">
                     <div className="mx-auto max-w-3xl text-center mb-16">
-                        <h2 className="text-4xl font-bold tracking-tight text-white md:text-5xl animate-in fade-in slide-in-from-bottom-4 duration-700">See the editor in action</h2>
-                        <p className="mt-6 text-lg text-slate-300 md:text-xl animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100">
+                        <h2 className={cn(
+                            "text-4xl font-bold tracking-tight md:text-5xl animate-in fade-in slide-in-from-bottom-4 duration-700",
+                            isDark ? "text-white" : "text-slate-900"
+                        )}>See the editor in action</h2>
+                        <p className={cn(
+                            "mt-6 text-lg md:text-xl animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100",
+                            isDark ? "text-slate-300" : "text-slate-600"
+                        )}>
                             A quick look at the workspace: write, run diagnostics, apply upgrades, and export.
                         </p>
                     </div>
 
                     <div className="mt-10 md:mt-14 animate-in fade-in zoom-in-95 duration-1000 delay-200">
                         <div className="relative mx-auto max-w-6xl">
-                            <div className="absolute inset-0 -z-10 rounded-[32px] bg-gradient-to-r from-orange-500/30 via-blue-500/30 to-orange-500/30 blur-3xl opacity-50 animate-pulse" />
+                            <div className={cn(
+                                "absolute inset-0 -z-10 rounded-[32px] blur-3xl opacity-50 animate-pulse",
+                                isDark 
+                                    ? "bg-gradient-to-r from-orange-500/30 via-blue-500/30 to-orange-500/30" 
+                                    : "bg-gradient-to-r from-orange-400/20 via-blue-400/20 to-orange-400/20"
+                            )} />
                             <BrowserFrame url="docley.app/dashboard/editor" isDark={isDark}>
                                 <ProductUIMock isDark={isDark} />
                             </BrowserFrame>
@@ -1091,15 +1531,29 @@ export default function Landing() {
             </section>
 
             {/* FAQ */}
-            <section className="relative bg-gradient-to-b from-slate-900 to-slate-950 py-20 md:py-32 overflow-hidden">
+            <section className={cn(
+                "relative py-20 md:py-32 overflow-hidden transition-colors duration-300",
+                isDark 
+                    ? "bg-gradient-to-b from-slate-900 to-slate-950" 
+                    : "bg-gradient-to-b from-white via-blue-50/20 to-white"
+            )}>
                 <div className="absolute inset-0">
-                    <div className="absolute top-1/2 right-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-orange-500/5 rounded-full blur-3xl" />
+                    <div className={cn(
+                        "absolute top-1/2 right-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full blur-3xl",
+                        isDark ? "bg-orange-500/5" : "bg-orange-400/3"
+                    )} />
                 </div>
                 
                 <div className="container relative mx-auto px-4 md:px-6 z-10">
                     <div className="mx-auto max-w-3xl text-center mb-16">
-                        <h2 className="text-4xl font-bold tracking-tight text-white md:text-5xl animate-in fade-in slide-in-from-bottom-4 duration-700">Frequently asked questions</h2>
-                        <p className="mt-6 text-lg text-slate-300 md:text-xl animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100">
+                        <h2 className={cn(
+                            "text-4xl font-bold tracking-tight md:text-5xl animate-in fade-in slide-in-from-bottom-4 duration-700",
+                            isDark ? "text-white" : "text-slate-900"
+                        )}>Frequently asked questions</h2>
+                        <p className={cn(
+                            "mt-6 text-lg md:text-xl animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100",
+                            isDark ? "text-slate-300" : "text-slate-600"
+                        )}>
                             Quick answers to the most common questions.
                         </p>
                     </div>
@@ -1120,19 +1574,44 @@ export default function Landing() {
             </section>
 
             {/* FINAL CTA */}
-            <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-20 md:py-32">
+            <section className={cn(
+                "relative overflow-hidden py-20 md:py-32 transition-colors duration-300",
+                isDark 
+                    ? "bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" 
+                    : "bg-gradient-to-b from-white via-blue-50/30 to-white"
+            )}>
                 <div className="pointer-events-none absolute inset-0">
-                    <div className="absolute top-0 right-[-10%] h-[600px] w-[600px] rounded-full bg-orange-500/20 blur-3xl animate-blob" />
-                    <div className="absolute bottom-0 left-[-15%] h-[700px] w-[700px] rounded-full bg-blue-500/20 blur-3xl animate-blob animation-delay-2000" />
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-orange-400/10 blur-3xl animate-blob animation-delay-4000" />
+                    <div className={cn(
+                        "absolute top-0 right-[-10%] h-[600px] w-[600px] rounded-full blur-3xl animate-blob",
+                        isDark ? "bg-orange-500/20" : "bg-orange-400/10"
+                    )} />
+                    <div className={cn(
+                        "absolute bottom-0 left-[-15%] h-[700px] w-[700px] rounded-full blur-3xl animate-blob animation-delay-2000",
+                        isDark ? "bg-blue-500/20" : "bg-blue-400/10"
+                    )} />
+                    <div className={cn(
+                        "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-3xl animate-blob animation-delay-4000",
+                        isDark ? "bg-orange-400/10" : "bg-orange-300/5"
+                    )} />
                 </div>
 
                 <div className="container relative mx-auto px-4 md:px-6 z-10">
-                    <div className="mx-auto max-w-4xl rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl p-8 text-center shadow-2xl md:p-12 animate-in fade-in zoom-in-95 duration-1000">
-                        <h3 className="text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
+                    <div className={cn(
+                        "mx-auto max-w-4xl rounded-3xl border backdrop-blur-2xl p-8 text-center shadow-2xl md:p-12 animate-in fade-in zoom-in-95 duration-1000",
+                        isDark 
+                            ? "border-white/10 bg-white/5" 
+                            : "border-blue-200 bg-white shadow-blue-500/10"
+                    )}>
+                        <h3 className={cn(
+                            "text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl",
+                            isDark ? "text-white" : "text-slate-900"
+                        )}>
                             Ready to upgrade your next assignment?
                         </h3>
-                        <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-300 md:text-xl">
+                        <p className={cn(
+                            "mx-auto mt-6 max-w-2xl text-lg md:text-xl",
+                            isDark ? "text-slate-300" : "text-slate-600"
+                        )}>
                             Create a document, run diagnostics, and refine your work into a cleaner, more academic submission.
                         </p>
                         <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -1142,12 +1621,20 @@ export default function Landing() {
                                 </Button>
                             </Link>
                             <Link to="/pricing" className="w-full sm:w-auto">
-                                <Button variant="outline" size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-semibold bg-white/5 border-white/20 text-white hover:bg-white/10 backdrop-blur-md transition-all duration-300 hover:scale-105">
+                                <Button variant="outline" size="lg" className={cn(
+                                    "w-full sm:w-auto h-14 px-8 text-base font-semibold backdrop-blur-md transition-all duration-300 hover:scale-105",
+                                    isDark 
+                                        ? "bg-white/5 border-white/20 text-white hover:bg-white/10" 
+                                        : "bg-white border-blue-200 text-blue-700 hover:bg-blue-50 shadow-sm"
+                                )}>
                                     View Pricing
                                 </Button>
                             </Link>
                         </div>
-                        <p className="mt-6 text-sm text-slate-400">No credit card required. Cancel anytime.</p>
+                        <p className={cn(
+                            "mt-6 text-sm",
+                            isDark ? "text-slate-400" : "text-slate-500"
+                        )}>No credit card required. Cancel anytime.</p>
                     </div>
                 </div>
             </section>
