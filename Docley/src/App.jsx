@@ -48,6 +48,13 @@ function App() {
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
 
+            {/* Protected Editor Route - Standalone without sidebar */}
+            <Route path="/dashboard/editor/:id" element={
+              <ProtectedRoute>
+                <EditorPage />
+              </ProtectedRoute>
+            } />
+
             {/* Protected Dashboard Routes */}
             <Route path="/dashboard" element={
               <ProtectedRoute>
@@ -56,7 +63,6 @@ function App() {
             }>
               <Route index element={<DashboardHome />} />
               <Route path="documents" element={<DashboardDocuments />} />
-              <Route path="editor/:id" element={<EditorPage />} />
               <Route path="settings" element={<DashboardSettings />} />
             </Route>
           </Routes>
