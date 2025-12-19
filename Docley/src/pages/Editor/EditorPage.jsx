@@ -1,7 +1,6 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Placeholder } from '@tiptap/extension-placeholder';
-import { Underline } from '@tiptap/extension-underline';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import { Highlight } from '@tiptap/extension-highlight';
@@ -141,6 +140,7 @@ import { DiagnosticReport } from '../../components/modals/DiagnosticReport';
 import { EDITOR_CONFIG } from './editorConfig';
 import { Pagination } from './extensions/Pagination';
 import './Editor.css';
+import { exportToPDF, exportToWord } from './lib/exportUtils';
 import { getDocument, updateDocument, autoSaveDocument, deleteDocument } from '../../services/documentsService';
 
 const MenuBar = ({ editor, zoom, setZoom }) => {
@@ -620,6 +620,7 @@ export default function EditorPage() {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const { addToast } = useToast();
     const autoSaveTimeoutRef = useRef(null);
+    const editorRef = useRef(null);
 
     // Load document
     useEffect(() => {
@@ -677,11 +678,12 @@ export default function EditorPage() {
     const editor = useEditor(
         {
             extensions: [
-                StarterKit,
+                StarterKit.configure({
+                    history: true,
+                }),
                 Placeholder.configure({
                     placeholder: 'Start writing or paste your assignment here...',
                 }),
-                Underline,
                 TextStyle,
                 Color,
                 Highlight.configure({ multicolor: true }),
@@ -759,12 +761,33 @@ export default function EditorPage() {
         }, 2500);
     };
 
-    const handleExport = (format) => {
-        addToast(`Exporting as ${format}...`, 'info');
-        setTimeout(() => {
-            addToast('Download started', 'success');
+    const handleExport = async (format) => {
+        setIsExporting(true);
+        addToast(`Preparing ${format} export...`, 'info');
+
+        try {
+            const fileName = `${doc?.title || 'Document'}.${format === 'PDF' ? 'pdf' : 'docx'}`;
+
+            if (format === 'PDF') {
+                if (!editorRef.current) throw new Error('Editor element not found');
+                await exportToPDF(editorRef.current, fileName);
+            } else if (format === 'Word') {
+                if (!editor) throw new Error('Editor not initialized');
+                const html = editor.getHTML();
+                await exportToWord(html, fileName, {
+                    title: doc?.title,
+                    description: `Academic ${doc?.document_type || 'Document'} created with Docley`
+                });
+            }
+
+            addToast(`${format} exported successfully`, 'success');
+        } catch (error) {
+            console.error('Export failed:', error);
+            addToast(`Failed to export ${format}`, 'error');
+        } finally {
             setIsExporting(false);
-        }, 1000);
+            setShowSettings(false);
+        }
     };
 
     const handleDelete = async () => {
@@ -955,6 +978,7 @@ export default function EditorPage() {
                     <div
                         className="cursor-text"
                         onClick={() => editor?.chain().focus().run()}
+                        ref={editorRef}
                     >
                         <EditorContent editor={editor} />
                     </div>

@@ -38,14 +38,14 @@ export const Pagination = Extension.create({
                         let currentHeight = margins.top;
                         let pageCount = 1;
 
-                        // Add Initial Page Header (Page 1)
+                        // Add Initial Page Header (Page 1) - Reduced spacing
                         decorations.push(
                             Decoration.widget(0, () => {
                                 const div = document.createElement('div');
                                 div.className = 'page-header first-page';
-                                div.style.padding = `${margins.top / 2}px ${margins.right}px 0 ${margins.left}px`;
+                                div.style.padding = `${margins.top / 4}px ${margins.right}px 0 ${margins.left}px`;
                                 div.innerHTML = `
-                                    <div class="header-content">Header</div>
+                                    <div class="header-content"></div>
                                     ${extension.options.showPageNumbers && extension.options.pageNumberPosition === 'header-right' ? `<span class="page-number">Page 1</span>` : ''}
                                 `;
                                 return div;
@@ -70,12 +70,12 @@ export const Pagination = Extension.create({
                                             div.className = 'page-break-container';
                                             div.innerHTML = `
                                                 <div class="page-footer" style="padding: 0 ${margins.right}px ${margins.bottom / 2}px ${margins.left}px">
-                                                    <div class="footer-content">Footer</div>
+                                                    <div class="footer-content"></div>
                                                     ${extension.options.showPageNumbers && extension.options.pageNumberPosition.startsWith('footer') ? `<span class="page-number">Page ${footerPage}</span>` : ''}
                                                 </div>
                                                 <div class="page-gap"></div>
                                                 <div class="page-header" style="padding: ${margins.top / 2}px ${margins.right}px 0 ${margins.left}px">
-                                                    <div class="header-content">Header</div>
+                                                    <div class="header-content"></div>
                                                     ${extension.options.showPageNumbers && extension.options.pageNumberPosition === 'header-right' ? `<span class="page-number">Page ${pageCount}</span>` : ''}
                                                 </div>
                                             `;
