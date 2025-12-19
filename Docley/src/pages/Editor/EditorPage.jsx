@@ -131,15 +131,19 @@ import {
     Type as FontIcon,
     ChevronDown,
     Eraser,
+    Layout,
 } from 'lucide-react';
 import { Link, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { cn } from '../../lib/utils';
 import { useToast } from '../../context/ToastContext';
 import { DiagnosticReport } from '../../components/modals/DiagnosticReport';
+import { EDITOR_CONFIG } from './editorConfig';
+import { Pagination } from './extensions/Pagination';
+import './Editor.css';
 import { getDocument, updateDocument, autoSaveDocument, deleteDocument } from '../../services/documentsService';
 
-const MenuBar = ({ editor }) => {
+const MenuBar = ({ editor, zoom, setZoom }) => {
     if (!editor) {
         return null;
     }
@@ -147,6 +151,7 @@ const MenuBar = ({ editor }) => {
     const [showFontFamily, setShowFontFamily] = useState(false);
     const [showHeadings, setShowHeadings] = useState(false);
     const [showLineHeight, setShowLineHeight] = useState(false);
+    const [showPageSetup, setShowPageSetup] = useState(false);
 
     const lineHeights = [
         { label: 'Single', value: '1.0' },
@@ -494,6 +499,107 @@ const MenuBar = ({ editor }) => {
             >
                 <Eraser className="h-4 w-4" />
             </button>
+
+            {/* Zoom Controls */}
+            <div className="flex items-center gap-1 ml-auto border-l border-slate-200 pl-2">
+                <button
+                    onClick={() => {
+                        const currentIndex = EDITOR_CONFIG.ZOOM_LEVELS.findIndex(z => z.value === zoom);
+                        if (currentIndex > 0) setZoom(EDITOR_CONFIG.ZOOM_LEVELS[currentIndex - 1].value);
+                    }}
+                    className="p-1.5 rounded hover:bg-slate-200 text-slate-600"
+                    title="Zoom Out"
+                >
+                    <span className="text-lg font-bold">-</span>
+                </button>
+                <div className="relative group">
+                    <select
+                        value={zoom}
+                        onChange={(e) => setZoom(parseFloat(e.target.value))}
+                        className="appearance-none bg-transparent hover:bg-slate-200 px-2 py-1 rounded text-sm font-medium text-slate-600 focus:outline-none cursor-pointer"
+                    >
+                        {EDITOR_CONFIG.ZOOM_LEVELS.map(z => (
+                            <option key={z.value} value={z.value}>{z.label}</option>
+                        ))}
+                    </select>
+                </div>
+                <button
+                    onClick={() => {
+                        const currentIndex = EDITOR_CONFIG.ZOOM_LEVELS.findIndex(z => z.value === zoom);
+                        if (currentIndex < EDITOR_CONFIG.ZOOM_LEVELS.length - 1) setZoom(EDITOR_CONFIG.ZOOM_LEVELS[currentIndex + 1].value);
+                    }}
+                    className="p-1.5 rounded hover:bg-slate-200 text-slate-600"
+                    title="Zoom In"
+                >
+                    <span className="text-lg font-bold">+</span>
+                </button>
+            </div>
+
+            <div className="w-px h-6 bg-slate-200 mx-1" />
+
+            {/* Page Setup */}
+            <div className="relative group">
+                <button
+                    onClick={() => setShowPageSetup(!showPageSetup)}
+                    className="flex items-center gap-1.5 px-2 py-1.5 rounded hover:bg-slate-200 text-sm text-slate-700"
+                    title="Page Setup"
+                >
+                    <Layout className="h-4 w-4 text-slate-600" />
+                    <span>Page Setup</span>
+                    <ChevronDown className="h-3 w-3" />
+                </button>
+                {showPageSetup && (
+                    <div className="absolute top-full right-0 mt-1 w-56 bg-white shadow-xl border border-slate-200 rounded-md py-2 z-40 animate-in fade-in slide-in-from-top-1">
+                        <div className="px-3 py-1.5 text-xs font-bold text-slate-400 uppercase">Page Numbers</div>
+                        <button
+                            onClick={() => {
+                                editor.setOptions({
+                                    pagination: { showPageNumbers: true, pageNumberPosition: 'footer-right' }
+                                });
+                                setShowPageSetup(false);
+                            }}
+                            className="w-full px-3 py-1.5 text-left text-sm hover:bg-slate-50 flex items-center justify-between"
+                        >
+                            <span>Bottom Right</span>
+                            <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                        </button>
+                        <button
+                            onClick={() => {
+                                editor.setOptions({
+                                    pagination: { showPageNumbers: true, pageNumberPosition: 'footer-center' }
+                                });
+                                setShowPageSetup(false);
+                            }}
+                            className="w-full px-3 py-1.5 text-left text-sm hover:bg-slate-50"
+                        >
+                            Bottom Center
+                        </button>
+                        <button
+                            onClick={() => {
+                                editor.setOptions({
+                                    pagination: { showPageNumbers: true, pageNumberPosition: 'header-right' }
+                                });
+                                setShowPageSetup(false);
+                            }}
+                            className="w-full px-3 py-1.5 text-left text-sm hover:bg-slate-50"
+                        >
+                            Top Right
+                        </button>
+                        <div className="h-px bg-slate-100 my-1" />
+                        <button
+                            onClick={() => {
+                                editor.setOptions({
+                                    pagination: { showPageNumbers: false }
+                                });
+                                setShowPageSetup(false);
+                            }}
+                            className="w-full px-3 py-1.5 text-left text-sm text-red-600 hover:bg-red-50"
+                        >
+                            Disable Page Numbers
+                        </button>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
@@ -508,6 +614,7 @@ export default function EditorPage() {
     const [lastSaved, setLastSaved] = useState(null);
     const [isExporting, setIsExporting] = useState(false);
     const [isUpgrading, setIsUpgrading] = useState(false);
+    const [zoom, setZoom] = useState(1.0);
     const [showReport, setShowReport] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -584,15 +691,16 @@ export default function EditorPage() {
                 }),
                 FontSize,
                 LineHeight,
+                Pagination.configure({
+                    pageWidth: EDITOR_CONFIG.PAGE_WIDTH,
+                    pageHeight: EDITOR_CONFIG.PAGE_HEIGHT,
+                    margins: EDITOR_CONFIG.DEFAULT_MARGINS,
+                }),
             ],
             content: doc?.content_html || doc?.content || '',
             editorProps: {
                 attributes: {
-                    class: 'prose prose-slate max-w-none focus:outline-none min-h-[1056px] px-[96px] py-[96px] text-[#3c4043] leading-[1.5] text-base relative outline-none border-none shadow-none',
-                    style: `
-                        background: linear-gradient(to bottom, #ffffff 1056px, #f1f5f9 1056px, #f1f5f9 1076px, #ffffff 1076px);
-                        background-size: 100% 1076px;
-                    `,
+                    class: 'focus:outline-none relative outline-none border-none shadow-none',
                 },
             },
             onUpdate: ({ editor }) => {
@@ -832,12 +940,18 @@ export default function EditorPage() {
                 </div>
 
                 {/* Toolbar */}
-                <MenuBar editor={editor} />
+                <MenuBar editor={editor} zoom={zoom} setZoom={setZoom} />
             </header>
 
-            {/* Editor Canvas - Full Page / Google Docs Style */}
-            <main className="flex-1 overflow-y-auto bg-slate-100 custom-scrollbar p-12">
-                <div className="max-w-[816px] mx-auto shadow-xl bg-white min-h-[1056px]">
+            {/* Editor Canvas - Page-Based Scrolling Canvas */}
+            <main className="flex-1 overflow-auto bg-[#cbd5e1] custom-scrollbar p-12">
+                <div
+                    className="editor-canvas"
+                    style={{
+                        transform: `scale(${zoom})`,
+                        transformOrigin: 'top center'
+                    }}
+                >
                     <div
                         className="cursor-text"
                         onClick={() => editor?.chain().focus().run()}
