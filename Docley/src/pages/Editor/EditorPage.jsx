@@ -1,6 +1,100 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Placeholder from '@tiptap/extension-placeholder';
+import { Placeholder } from '@tiptap/extension-placeholder';
+import { Underline } from '@tiptap/extension-underline';
+import { TextStyle } from '@tiptap/extension-text-style';
+import { Color } from '@tiptap/extension-color';
+import { Highlight } from '@tiptap/extension-highlight';
+import { FontFamily } from '@tiptap/extension-font-family';
+import { TextAlign } from '@tiptap/extension-text-align';
+import { Extension } from '@tiptap/core';
+
+const FontSize = Extension.create({
+    name: 'fontSize',
+    addOptions() {
+        return {
+            types: ['textStyle'],
+        };
+    },
+    addGlobalAttributes() {
+        return [
+            {
+                types: this.options.types,
+                attributes: {
+                    fontSize: {
+                        default: null,
+                        parseHTML: element => element.style.fontSize.replace('px', ''),
+                        renderHTML: attributes => {
+                            if (!attributes.fontSize) {
+                                return {};
+                            }
+                            return {
+                                style: `font-size: ${attributes.fontSize}px`,
+                            };
+                        },
+                    },
+                },
+            },
+        ];
+    },
+    addCommands() {
+        return {
+            setFontSize: fontSize => ({ chain }) => {
+                return chain()
+                    .setMark('textStyle', { fontSize })
+                    .run();
+            },
+            unsetFontSize: () => ({ chain }) => {
+                return chain()
+                    .setMark('textStyle', { fontSize: null })
+                    .removeEmptyTextStyle()
+                    .run();
+            },
+        };
+    },
+});
+
+const LineHeight = Extension.create({
+    name: 'lineHeight',
+    addOptions() {
+        return {
+            types: ['paragraph', 'heading'],
+            defaultLineHeight: '1.5',
+        };
+    },
+    addGlobalAttributes() {
+        return [
+            {
+                types: this.options.types,
+                attributes: {
+                    lineHeight: {
+                        default: this.options.defaultLineHeight,
+                        parseHTML: element => element.style.lineHeight || this.options.defaultLineHeight,
+                        renderHTML: attributes => {
+                            if (!attributes.lineHeight) {
+                                return {};
+                            }
+                            return {
+                                style: `line-height: ${attributes.lineHeight}`,
+                            };
+                        },
+                    },
+                },
+            },
+        ];
+    },
+    addCommands() {
+        return {
+            setLineHeight: lineHeight => ({ commands }) => {
+                return this.options.types.every(type => commands.updateAttributes(type, { lineHeight }));
+            },
+            unsetLineHeight: () => ({ commands }) => {
+                return this.options.types.every(type => commands.resetAttributes(type, 'lineHeight'));
+            },
+        };
+    },
+});
+
 import { Button } from '../../components/ui/Button';
 import {
     ArrowLeft,
@@ -9,9 +103,11 @@ import {
     Wand2,
     Bold,
     Italic,
+    Underline as UnderlineIcon,
     List,
     ListOrdered,
     Quote,
+    Type,
     Heading1,
     Heading2,
     Heading3,
@@ -26,6 +122,15 @@ import {
     Settings,
     Trash2,
     Clock,
+    AlignLeft,
+    AlignCenter,
+    AlignRight,
+    AlignJustify,
+    Palette,
+    Highlighter,
+    Type as FontIcon,
+    ChevronDown,
+    Eraser,
 } from 'lucide-react';
 import { Link, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState, useCallback, useRef } from 'react';
@@ -39,42 +144,356 @@ const MenuBar = ({ editor }) => {
         return null;
     }
 
-    const buttons = [
-        { icon: Undo, action: () => editor.chain().focus().undo().run(), disabled: !editor.can().undo(), label: 'Undo' },
-        { icon: Redo, action: () => editor.chain().focus().redo().run(), disabled: !editor.can().redo(), label: 'Redo' },
-        { type: 'divider' },
-        { icon: Bold, action: () => editor.chain().focus().toggleBold().run(), isActive: editor.isActive('bold'), label: 'Bold' },
-        { icon: Italic, action: () => editor.chain().focus().toggleItalic().run(), isActive: editor.isActive('italic'), label: 'Italic' },
-        { type: 'divider' },
-        { icon: Heading1, action: () => editor.chain().focus().toggleHeading({ level: 1 }).run(), isActive: editor.isActive('heading', { level: 1 }), label: 'Heading 1' },
-        { icon: Heading2, action: () => editor.chain().focus().toggleHeading({ level: 2 }).run(), isActive: editor.isActive('heading', { level: 2 }), label: 'Heading 2' },
-        { icon: Heading3, action: () => editor.chain().focus().toggleHeading({ level: 3 }).run(), isActive: editor.isActive('heading', { level: 3 }), label: 'Heading 3' },
-        { type: 'divider' },
-        { icon: List, action: () => editor.chain().focus().toggleBulletList().run(), isActive: editor.isActive('bulletList'), label: 'Bullet List' },
-        { icon: ListOrdered, action: () => editor.chain().focus().toggleOrderedList().run(), isActive: editor.isActive('orderedList'), label: 'Numbered List' },
-        { icon: Quote, action: () => editor.chain().focus().toggleBlockquote().run(), isActive: editor.isActive('blockquote'), label: 'Quote' },
+    const [showFontFamily, setShowFontFamily] = useState(false);
+    const [showHeadings, setShowHeadings] = useState(false);
+    const [showLineHeight, setShowLineHeight] = useState(false);
+
+    const lineHeights = [
+        { label: 'Single', value: '1.0' },
+        { label: '1.15', value: '1.15' },
+        { label: '1.5', value: '1.5' },
+        { label: 'Double', value: '2.0' },
     ];
 
+    const fonts = [
+        { name: 'Default', value: '' },
+        { name: 'Arial', value: 'Arial' },
+        { name: 'Roboto', value: 'Roboto' },
+        { name: 'Sans-Serif', value: 'sans-serif' },
+        { name: 'Serif', value: 'serif' },
+        { name: 'Monospace', value: 'monospace' },
+    ];
+
+    const fontSizes = [8, 9, 10, 11, 12, 14, 18, 24, 30, 36, 48, 60, 72, 96];
+
+    const currentFontSize = editor.getAttributes('textStyle').fontSize || '16';
+
+    const updateFontSize = (newSize) => {
+        if (newSize) {
+            editor.chain().focus().setFontSize(newSize).run();
+        }
+    };
+
+    const incrementFontSize = () => {
+        const size = parseInt(currentFontSize);
+        updateFontSize((size + 1).toString());
+    };
+
+    const decrementFontSize = () => {
+        const size = parseInt(currentFontSize);
+        if (size > 1) {
+            updateFontSize((size - 1).toString());
+        }
+    };
+
+    const headingLevels = [
+        { label: 'Normal Text', level: 0 },
+        { label: 'Heading 1', level: 1 },
+        { label: 'Heading 2', level: 2 },
+        { label: 'Heading 3', level: 3 },
+    ];
+
+    const addColor = (e) => {
+        editor.chain().focus().setColor(e.target.value).run();
+    };
+
+    const addHighlight = (e) => {
+        editor.chain().focus().toggleHighlight({ color: e.target.value }).run();
+    };
+
     return (
-        <div className="flex flex-wrap items-center gap-0.5 px-4 py-2 bg-white border-b border-slate-200">
-            {buttons.map((btn, index) => (
-                btn.type === 'divider' ? (
-                    <div key={index} className="w-px h-6 bg-slate-200 mx-2" />
-                ) : (
-                    <button
-                        key={index}
-                        onClick={btn.action}
-                        disabled={btn.disabled}
-                        title={btn.label}
-                        className={cn(
-                            'p-2 rounded-md hover:bg-slate-100 text-slate-600 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed',
-                            btn.isActive && 'bg-indigo-100 text-indigo-700'
-                        )}
-                    >
-                        <btn.icon className="h-4 w-4" />
-                    </button>
-                )
-            ))}
+        <div className="flex flex-wrap items-center gap-0.5 px-3 py-1.5 bg-slate-50 border-b border-slate-200 sticky top-0 z-30">
+            {/* History */}
+            <div className="flex items-center">
+                <button
+                    onClick={() => editor.chain().focus().undo().run()}
+                    disabled={!editor.can().undo()}
+                    className="p-1.5 rounded hover:bg-slate-200 text-slate-600 disabled:opacity-30"
+                    title="Undo"
+                >
+                    <Undo className="h-4 w-4" />
+                </button>
+                <button
+                    onClick={() => editor.chain().focus().redo().run()}
+                    disabled={!editor.can().redo()}
+                    className="p-1.5 rounded hover:bg-slate-200 text-slate-600 disabled:opacity-30"
+                    title="Redo"
+                >
+                    <Redo className="h-4 w-4" />
+                </button>
+            </div>
+
+            <div className="w-px h-6 bg-slate-200 mx-1" />
+
+            {/* Headings */}
+            <div className="relative group">
+                <button
+                    onClick={() => setShowHeadings(!showHeadings)}
+                    className="flex items-center gap-1 px-2 py-1.5 rounded hover:bg-slate-200 text-sm text-slate-700 min-w-[100px]"
+                >
+                    {headingLevels.find(h => h.level === (editor.isActive('heading', { level: 1 }) ? 1 : editor.isActive('heading', { level: 2 }) ? 2 : editor.isActive('heading', { level: 3 }) ? 3 : 0))?.label || 'Normal Text'}
+                    <ChevronDown className="h-3 w-3" />
+                </button>
+                {showHeadings && (
+                    <div className="absolute top-full left-0 mt-1 w-40 bg-white shadow-lg border border-slate-200 rounded-md py-1 z-40">
+                        {headingLevels.map(h => (
+                            <button
+                                key={h.level}
+                                onClick={() => {
+                                    if (h.level === 0) editor.chain().focus().setParagraph().run();
+                                    else editor.chain().focus().toggleHeading({ level: h.level }).run();
+                                    setShowHeadings(false);
+                                }}
+                                className={cn(
+                                    "w-full px-3 py-1.5 text-left text-sm hover:bg-slate-100",
+                                    (h.level === 0 ? !editor.isActive('heading') : editor.isActive('heading', { level: h.level })) && "text-indigo-600 bg-indigo-50 font-medium"
+                                )}
+                            >
+                                {h.label}
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            <div className="w-px h-6 bg-slate-200 mx-1" />
+
+            {/* Font Family */}
+            <div className="relative group">
+                <button
+                    onClick={() => setShowFontFamily(!showFontFamily)}
+                    className="flex items-center gap-1 px-2 py-1.5 rounded hover:bg-slate-200 text-sm text-slate-700 min-w-[100px]"
+                >
+                    <span className="truncate">{fonts.find(f => editor.isActive('textStyle', { fontFamily: f.value }))?.name || 'Arial'}</span>
+                    <ChevronDown className="h-3 w-3" />
+                </button>
+                {showFontFamily && (
+                    <div className="absolute top-full left-0 mt-1 w-40 bg-white shadow-lg border border-slate-200 rounded-md py-1 z-40">
+                        {fonts.map(f => (
+                            <button
+                                key={f.name}
+                                onClick={() => {
+                                    editor.chain().focus().setFontFamily(f.value).run();
+                                    setShowFontFamily(false);
+                                }}
+                                style={{ fontFamily: f.value }}
+                                className={cn(
+                                    "w-full px-3 py-1.5 text-left text-sm hover:bg-slate-100",
+                                    editor.isActive('textStyle', { fontFamily: f.value }) && "text-indigo-600 bg-indigo-50 font-medium"
+                                )}
+                            >
+                                {f.name}
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            <div className="w-px h-6 bg-slate-200 mx-1" />
+
+            {/* Font Size */}
+            <div className="flex items-center gap-1">
+                <button
+                    onClick={decrementFontSize}
+                    className="p-1.5 rounded hover:bg-slate-200 text-slate-600"
+                    title="Decrease font size"
+                >
+                    <span className="text-lg font-bold">-</span>
+                </button>
+                <div className="relative group">
+                    <input
+                        type="text"
+                        value={currentFontSize}
+                        onChange={(e) => updateFontSize(e.target.value)}
+                        className="w-10 h-7 text-center text-sm border border-slate-200 rounded hover:border-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    />
+                </div>
+                <button
+                    onClick={incrementFontSize}
+                    className="p-1.5 rounded hover:bg-slate-200 text-slate-600"
+                    title="Increase font size"
+                >
+                    <span className="text-lg font-bold">+</span>
+                </button>
+            </div>
+
+            <div className="w-px h-6 bg-slate-200 mx-1" />
+
+            {/* Basic Formatting */}
+            <div className="flex items-center gap-0.5">
+                <button
+                    onClick={() => editor.chain().focus().toggleBold().run()}
+                    className={cn(
+                        "p-1.5 rounded hover:bg-slate-200 text-slate-600",
+                        editor.isActive('bold') && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                    )}
+                    title="Bold (Ctrl+B)"
+                >
+                    <Bold className="h-4 w-4" />
+                </button>
+                <button
+                    onClick={() => editor.chain().focus().toggleItalic().run()}
+                    className={cn(
+                        "p-1.5 rounded hover:bg-slate-200 text-slate-600",
+                        editor.isActive('italic') && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                    )}
+                    title="Italic (Ctrl+I)"
+                >
+                    <Italic className="h-4 w-4" />
+                </button>
+                <button
+                    onClick={() => editor.chain().focus().toggleUnderline().run()}
+                    className={cn(
+                        "p-1.5 rounded hover:bg-slate-200 text-slate-600",
+                        editor.isActive('underline') && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                    )}
+                    title="Underline (Ctrl+U)"
+                >
+                    <UnderlineIcon className="h-4 w-4" />
+                </button>
+
+                {/* Text Color */}
+                <div className="relative flex items-center p-1.5 rounded hover:bg-slate-200 text-slate-600 group cursor-pointer">
+                    <Palette className="h-4 w-4" />
+                    <input
+                        type="color"
+                        onInput={addColor}
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                        title="Text Color"
+                    />
+                    <div className="absolute bottom-1 left-1.5 right-1.5 h-0.5" style={{ backgroundColor: editor.getAttributes('textStyle').color || '#000000' }} />
+                </div>
+
+                {/* Highlight Color */}
+                <div className="relative flex items-center p-1.5 rounded hover:bg-slate-200 text-slate-600 group cursor-pointer">
+                    <Highlighter className="h-4 w-4" />
+                    <input
+                        type="color"
+                        onInput={addHighlight}
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                        title="Highlight Color"
+                    />
+                    <div className="absolute bottom-1 left-1.5 right-1.5 h-0.5" style={{ backgroundColor: editor.getAttributes('highlight').color || '#ffff00' }} />
+                </div>
+            </div>
+
+            <div className="w-px h-6 bg-slate-200 mx-1" />
+
+            {/* Alignment */}
+            <div className="flex items-center gap-0.5">
+                <button
+                    onClick={() => editor.chain().focus().setTextAlign('left').run()}
+                    className={cn(
+                        "p-1.5 rounded hover:bg-slate-200 text-slate-600",
+                        editor.isActive({ textAlign: 'left' }) && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                    )}
+                    title="Align Left"
+                >
+                    <AlignLeft className="h-4 w-4" />
+                </button>
+                <button
+                    onClick={() => editor.chain().focus().setTextAlign('center').run()}
+                    className={cn(
+                        "p-1.5 rounded hover:bg-slate-200 text-slate-600",
+                        editor.isActive({ textAlign: 'center' }) && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                    )}
+                    title="Align Center"
+                >
+                    <AlignCenter className="h-4 w-4" />
+                </button>
+                <button
+                    onClick={() => editor.chain().focus().setTextAlign('right').run()}
+                    className={cn(
+                        "p-1.5 rounded hover:bg-slate-200 text-slate-600",
+                        editor.isActive({ textAlign: 'right' }) && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                    )}
+                    title="Align Right"
+                >
+                    <AlignRight className="h-4 w-4" />
+                </button>
+                <button
+                    onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+                    className={cn(
+                        "p-1.5 rounded hover:bg-slate-200 text-slate-600",
+                        editor.isActive({ textAlign: 'justify' }) && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                    )}
+                    title="Justify"
+                >
+                    <AlignJustify className="h-4 w-4" />
+                </button>
+            </div>
+
+            <div className="w-px h-6 bg-slate-200 mx-1" />
+
+            {/* Lists */}
+            <div className="flex items-center gap-0.5">
+                <button
+                    onClick={() => editor.chain().focus().toggleBulletList().run()}
+                    className={cn(
+                        "p-1.5 rounded hover:bg-slate-200 text-slate-600",
+                        editor.isActive('bulletList') && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                    )}
+                    title="Bullet List"
+                >
+                    <List className="h-4 w-4" />
+                </button>
+                <button
+                    onClick={() => editor.chain().focus().toggleOrderedList().run()}
+                    className={cn(
+                        "p-1.5 rounded hover:bg-slate-200 text-slate-600",
+                        editor.isActive('orderedList') && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                    )}
+                    title="Numbered List"
+                >
+                    <ListOrdered className="h-4 w-4" />
+                </button>
+            </div>
+
+            <div className="w-px h-6 bg-slate-200 mx-1" />
+
+            {/* Line Spacing */}
+            <div className="relative group">
+                <button
+                    onClick={() => setShowLineHeight(!showLineHeight)}
+                    className="p-1.5 rounded hover:bg-slate-200 text-slate-600"
+                    title="Line spacing"
+                >
+                    <div className="flex flex-col items-center leading-[0.5]">
+                        <span className="text-[10px] font-bold">---</span>
+                        <span className="text-[10px] font-bold">---</span>
+                    </div>
+                </button>
+                {showLineHeight && (
+                    <div className="absolute top-full left-0 mt-1 w-32 bg-white shadow-lg border border-slate-200 rounded-md py-1 z-40">
+                        {lineHeights.map(lh => (
+                            <button
+                                key={lh.value}
+                                onClick={() => {
+                                    editor.chain().focus().setLineHeight(lh.value).run();
+                                    setShowLineHeight(false);
+                                }}
+                                className={cn(
+                                    "w-full px-3 py-1.5 text-left text-sm hover:bg-slate-100",
+                                    editor.getAttributes('paragraph').lineHeight === lh.value && "text-indigo-600 bg-indigo-50 font-medium"
+                                )}
+                            >
+                                {lh.label}
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            <div className="w-px h-6 bg-slate-200 mx-1" />
+
+            {/* Clear Formatting */}
+            <button
+                onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}
+                className="p-1.5 rounded hover:bg-slate-200 text-slate-600"
+                title="Clear Formatting"
+            >
+                <Eraser className="h-4 w-4" />
+            </button>
         </div>
     );
 };
@@ -155,11 +574,25 @@ export default function EditorPage() {
                 Placeholder.configure({
                     placeholder: 'Start writing or paste your assignment here...',
                 }),
+                Underline,
+                TextStyle,
+                Color,
+                Highlight.configure({ multicolor: true }),
+                FontFamily,
+                TextAlign.configure({
+                    types: ['heading', 'paragraph'],
+                }),
+                FontSize,
+                LineHeight,
             ],
             content: doc?.content_html || doc?.content || '',
             editorProps: {
                 attributes: {
-                    class: 'prose prose-slate max-w-none focus:outline-none min-h-[calc(100vh-200px)] px-16 py-12 text-base leading-relaxed',
+                    class: 'prose prose-slate max-w-none focus:outline-none min-h-[1056px] px-[96px] py-[96px] text-[#3c4043] leading-[1.5] text-base relative outline-none border-none shadow-none',
+                    style: `
+                        background: linear-gradient(to bottom, #ffffff 1056px, #f1f5f9 1056px, #f1f5f9 1076px, #ffffff 1076px);
+                        background-size: 100% 1076px;
+                    `,
                 },
             },
             onUpdate: ({ editor }) => {
@@ -174,7 +607,7 @@ export default function EditorPage() {
                 }, 2000);
             },
         },
-        [doc]
+        []
     );
 
     // Update content when doc loads
@@ -402,11 +835,11 @@ export default function EditorPage() {
                 <MenuBar editor={editor} />
             </header>
 
-            {/* Editor Canvas - Full Page */}
-            <main className="flex-1 overflow-y-auto">
-                <div className="max-w-4xl mx-auto my-8">
+            {/* Editor Canvas - Full Page / Google Docs Style */}
+            <main className="flex-1 overflow-y-auto bg-slate-100 custom-scrollbar p-12">
+                <div className="max-w-[816px] mx-auto shadow-xl bg-white min-h-[1056px]">
                     <div
-                        className="bg-white shadow-lg rounded-lg min-h-[calc(100vh-180px)] cursor-text"
+                        className="cursor-text"
                         onClick={() => editor?.chain().focus().run()}
                     >
                         <EditorContent editor={editor} />

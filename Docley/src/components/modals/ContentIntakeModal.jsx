@@ -2,11 +2,19 @@ import { useState, useRef } from 'react';
 import { X, Upload, FileText, ClipboardPaste, ChevronRight, File, Trash2, CheckCircle } from 'lucide-react';
 import { Button } from '../ui/Button';
 
+import mammoth from 'mammoth';
+import * as pdfjs from 'pdfjs-dist';
+
+// Set worker for pdfjs
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+
 export function ContentIntakeModal({ isOpen, onClose, onContinue }) {
     const [activeTab, setActiveTab] = useState('paste'); // 'paste' or 'upload'
     const [content, setContent] = useState('');
+    const [htmlContent, setHtmlContent] = useState('');
     const [file, setFile] = useState(null);
     const [isDragging, setIsDragging] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const fileInputRef = useRef(null);
 
@@ -29,10 +37,14 @@ export function ContentIntakeModal({ isOpen, onClose, onContinue }) {
         handleFileSelect(droppedFile);
     };
 
-    const handleFileSelect = (selectedFile) => {
+    const handleFileSelect = async (selectedFile) => {
         setError('');
+        setIsLoading(true);
 
-        if (!selectedFile) return;
+        if (!selectedFile) {
+            setIsLoading(false);
+            return;
+        }
 
         const validTypes = [
             'application/pdf',
@@ -42,23 +54,52 @@ export function ContentIntakeModal({ isOpen, onClose, onContinue }) {
 
         if (!validTypes.includes(selectedFile.type)) {
             setError('Please upload a PDF, DOCX, or TXT file');
+            setIsLoading(false);
             return;
         }
 
         if (selectedFile.size > 20 * 1024 * 1024) { // 20MB limit
             setError('File size must be less than 20MB');
+            setIsLoading(false);
             return;
         }
 
         setFile(selectedFile);
 
-        // For TXT files, read the content directly
-        if (selectedFile.type === 'text/plain') {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                setContent(e.target.result);
-            };
-            reader.readAsText(selectedFile);
+        try {
+            if (selectedFile.type === 'text/plain') {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const text = e.target.result;
+                    setContent(text);
+                    setHtmlContent(text.split('\n').map(line => `<p>${line}</p>`).join(''));
+                    setIsLoading(false);
+                };
+                reader.readAsText(selectedFile);
+            } else if (selectedFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+                const arrayBuffer = await selectedFile.arrayBuffer();
+                const result = await mammoth.convertToHtml({ arrayBuffer });
+                setHtmlContent(result.value);
+                setContent(selectedFile.name); // Just a placeholder for raw content
+                setIsLoading(false);
+            } else if (selectedFile.type === 'application/pdf') {
+                const arrayBuffer = await selectedFile.arrayBuffer();
+                const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+                let fullText = '';
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
+                    fullText += pageText + '\n\n';
+                }
+                setContent(fullText);
+                setHtmlContent(fullText.split('\n\n').map(para => `<p>${para}</p>`).join(''));
+                setIsLoading(false);
+            }
+        } catch (err) {
+            console.error('File parsing error:', err);
+            setError('Failed to parse file. It might be corrupted or protected.');
+            setIsLoading(false);
         }
     };
 
@@ -73,7 +114,8 @@ export function ContentIntakeModal({ isOpen, onClose, onContinue }) {
         }
 
         onContinue({
-            content: activeTab === 'paste' ? content : (file?.type === 'text/plain' ? content : ''),
+            content: activeTab === 'paste' ? content : content,
+            contentHtml: activeTab === 'paste' ? content.split('\n').filter(l => l.trim()).map(l => `<p>${l}</p>`).join('') : htmlContent,
             file: activeTab === 'upload' ? file : null,
             inputType: activeTab,
         });
@@ -122,8 +164,8 @@ export function ContentIntakeModal({ isOpen, onClose, onContinue }) {
                     <button
                         onClick={() => { setActiveTab('paste'); setError(''); }}
                         className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-all border-b-2 ${activeTab === 'paste'
-                                ? 'text-orange-600 border-orange-600 bg-white'
-                                : 'text-slate-500 border-transparent hover:text-slate-700 hover:bg-slate-100'
+                            ? 'text-orange-600 border-orange-600 bg-white'
+                            : 'text-slate-500 border-transparent hover:text-slate-700 hover:bg-slate-100'
                             }`}
                     >
                         <ClipboardPaste className="h-4 w-4" />
@@ -132,8 +174,8 @@ export function ContentIntakeModal({ isOpen, onClose, onContinue }) {
                     <button
                         onClick={() => { setActiveTab('upload'); setError(''); }}
                         className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-all border-b-2 ${activeTab === 'upload'
-                                ? 'text-orange-600 border-orange-600 bg-white'
-                                : 'text-slate-500 border-transparent hover:text-slate-700 hover:bg-slate-100'
+                            ? 'text-orange-600 border-orange-600 bg-white'
+                            : 'text-slate-500 border-transparent hover:text-slate-700 hover:bg-slate-100'
                             }`}
                     >
                         <Upload className="h-4 w-4" />
@@ -177,8 +219,8 @@ You can paste directly from Word, Google Docs, or any other text editor. We'll p
                                     onDrop={handleDrop}
                                     onClick={() => fileInputRef.current?.click()}
                                     className={`border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all ${isDragging
-                                            ? 'border-orange-500 bg-orange-50'
-                                            : 'border-slate-300 hover:border-orange-400 hover:bg-orange-50/50'
+                                        ? 'border-orange-500 bg-orange-50'
+                                        : 'border-slate-300 hover:border-orange-400 hover:bg-orange-50/50'
                                         }`}
                                 >
                                     <input

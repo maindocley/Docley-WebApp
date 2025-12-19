@@ -31,7 +31,7 @@ export function IntakeModal({ isOpen, onClose, onBack, initialContent = null }) 
             const document = await createDocument({
                 title: formData.title,
                 content: initialContent?.content || '',
-                contentHtml: initialContent?.content ? `<p>${initialContent.content}</p>` : '',
+                contentHtml: initialContent?.contentHtml || (initialContent?.content ? `<p>${initialContent.content}</p>` : ''),
                 academicLevel: formData.level,
                 citationStyle: formData.style,
                 documentType: formData.type,
@@ -186,8 +186,8 @@ export function IntakeModal({ isOpen, onClose, onBack, initialContent = null }) 
                                     key={style.value}
                                     onClick={() => setFormData({ ...formData, style: style.value })}
                                     className={`px-4 py-3 rounded-lg text-sm font-medium border-2 transition-all text-left ${formData.style === style.value
-                                            ? 'bg-indigo-50 border-indigo-500 text-indigo-700 ring-2 ring-indigo-200 shadow-sm'
-                                            : 'bg-white border-slate-200 text-slate-600 hover:border-indigo-200 hover:bg-slate-50'
+                                        ? 'bg-indigo-50 border-indigo-500 text-indigo-700 ring-2 ring-indigo-200 shadow-sm'
+                                        : 'bg-white border-slate-200 text-slate-600 hover:border-indigo-200 hover:bg-slate-50'
                                         }`}
                                 >
                                     <div className="font-semibold">{style.label}</div>
