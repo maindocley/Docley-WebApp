@@ -7,6 +7,7 @@ import { Highlight } from '@tiptap/extension-highlight';
 import { FontFamily } from '@tiptap/extension-font-family';
 import { TextAlign } from '@tiptap/extension-text-align';
 import { Extension } from '@tiptap/core';
+import { useMemo, useCallback, memo } from 'react';
 
 const FontSize = Extension.create({
     name: 'fontSize',
@@ -133,7 +134,7 @@ import {
     Layout,
 } from 'lucide-react';
 import { Link, useParams, useNavigate, useLocation } from 'react-router-dom';
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { cn } from '../../lib/utils';
 import { useToast } from '../../context/ToastContext';
 import { DiagnosticReport } from '../../components/modals/DiagnosticReport';
@@ -143,85 +144,152 @@ import './Editor.css';
 import { exportToPDF, exportToWord } from './lib/exportUtils';
 import { getDocument, updateDocument, autoSaveDocument, deleteDocument } from '../../services/documentsService';
 
-const MenuBar = ({ editor, zoom, setZoom }) => {
-    if (!editor) {
-        return null;
-    }
-
+// Memoized MenuBar component to prevent unnecessary re-renders
+const MenuBar = memo(({ editor, zoom, setZoom }) => {
     const [showFontFamily, setShowFontFamily] = useState(false);
     const [showHeadings, setShowHeadings] = useState(false);
     const [showLineHeight, setShowLineHeight] = useState(false);
     const [showPageSetup, setShowPageSetup] = useState(false);
 
-    const lineHeights = [
+    // Memoize static data
+    const lineHeights = useMemo(() => [
         { label: 'Single', value: '1.0' },
         { label: '1.15', value: '1.15' },
         { label: '1.5', value: '1.5' },
         { label: 'Double', value: '2.0' },
-    ];
+    ], []);
 
-    const fonts = [
+    const fonts = useMemo(() => [
         { name: 'Default', value: '' },
         { name: 'Arial', value: 'Arial' },
         { name: 'Roboto', value: 'Roboto' },
         { name: 'Sans-Serif', value: 'sans-serif' },
         { name: 'Serif', value: 'serif' },
         { name: 'Monospace', value: 'monospace' },
-    ];
+    ], []);
 
-    const fontSizes = [8, 9, 10, 11, 12, 14, 18, 24, 30, 36, 48, 60, 72, 96];
-
-    const currentFontSize = editor.getAttributes('textStyle').fontSize || '16';
-
-    const updateFontSize = (newSize) => {
-        if (newSize) {
-            editor.chain().focus().setFontSize(newSize).run();
-        }
-    };
-
-    const incrementFontSize = () => {
-        const size = parseInt(currentFontSize);
-        updateFontSize((size + 1).toString());
-    };
-
-    const decrementFontSize = () => {
-        const size = parseInt(currentFontSize);
-        if (size > 1) {
-            updateFontSize((size - 1).toString());
-        }
-    };
-
-    const headingLevels = [
+    const headingLevels = useMemo(() => [
         { label: 'Normal Text', level: 0 },
         { label: 'Heading 1', level: 1 },
         { label: 'Heading 2', level: 2 },
         { label: 'Heading 3', level: 3 },
-    ];
+    ], []);
 
-    const addColor = (e) => {
+    // Memoize current font size to avoid recalculation
+    const currentFontSize = useMemo(() => {
+        if (!editor) return '16';
+        return editor.getAttributes('textStyle').fontSize || '16';
+    }, [editor?.state.selection]);
+
+    // Optimize formatting callbacks with useCallback
+    const updateFontSize = useCallback((newSize) => {
+        if (!editor || !newSize) return;
+        editor.chain().focus().setFontSize(newSize).run();
+    }, [editor]);
+
+    const incrementFontSize = useCallback(() => {
+        const size = parseInt(currentFontSize) || 16;
+        updateFontSize((size + 1).toString());
+    }, [currentFontSize, updateFontSize]);
+
+    const decrementFontSize = useCallback(() => {
+        const size = parseInt(currentFontSize) || 16;
+        if (size > 1) {
+            updateFontSize((size - 1).toString());
+        }
+    }, [currentFontSize, updateFontSize]);
+
+    const addColor = useCallback((e) => {
+        if (!editor) return;
         editor.chain().focus().setColor(e.target.value).run();
-    };
+    }, [editor]);
 
-    const addHighlight = (e) => {
+    const addHighlight = useCallback((e) => {
+        if (!editor) return;
         editor.chain().focus().toggleHighlight({ color: e.target.value }).run();
-    };
+    }, [editor]);
+
+    // Memoize formatting button handlers
+    const handleBold = useCallback(() => editor?.chain().focus().toggleBold().run(), [editor]);
+    const handleItalic = useCallback(() => editor?.chain().focus().toggleItalic().run(), [editor]);
+    const handleUnderline = useCallback(() => editor?.chain().focus().toggleUnderline().run(), [editor]);
+    const handleUndo = useCallback(() => editor?.chain().focus().undo().run(), [editor]);
+    const handleRedo = useCallback(() => editor?.chain().focus().redo().run(), [editor]);
+
+    // Memoize heading handlers
+    const handleHeading = useCallback((level) => {
+        if (!editor) return;
+        if (level === 0) {
+            editor.chain().focus().setParagraph().run();
+        } else {
+            editor.chain().focus().toggleHeading({ level }).run();
+        }
+        setShowHeadings(false);
+    }, [editor]);
+
+    // Memoize font family handler
+    const handleFontFamily = useCallback((value) => {
+        if (!editor) return;
+        editor.chain().focus().setFontFamily(value).run();
+        setShowFontFamily(false);
+    }, [editor]);
+
+    // Memoize line height handler
+    const handleLineHeight = useCallback((value) => {
+        if (!editor) return;
+        editor.chain().focus().setLineHeight(value).run();
+        setShowLineHeight(false);
+    }, [editor]);
+
+    // Memoize alignment handlers
+    const handleAlign = useCallback((align) => {
+        if (!editor) return;
+        editor.chain().focus().setTextAlign(align).run();
+    }, [editor]);
+
+    // Memoize list handlers
+    const handleBulletList = useCallback(() => editor?.chain().focus().toggleBulletList().run(), [editor]);
+    const handleOrderedList = useCallback(() => editor?.chain().focus().toggleOrderedList().run(), [editor]);
+
+    // Memoize clear formatting
+    const handleClearFormatting = useCallback(() => {
+        if (!editor) return;
+        editor.chain().focus().unsetAllMarks().clearNodes().run();
+    }, [editor]);
+
+    if (!editor) {
+        return null;
+    }
+
+    // Get active states (memoized)
+    const isBold = editor.isActive('bold');
+    const isItalic = editor.isActive('italic');
+    const isUnderline = editor.isActive('underline');
+    const canUndo = editor.can().undo();
+    const canRedo = editor.can().redo();
+    const activeHeading = editor.isActive('heading', { level: 1 }) ? 1 : 
+                          editor.isActive('heading', { level: 2 }) ? 2 : 
+                          editor.isActive('heading', { level: 3 }) ? 3 : 0;
+    const activeFontFamily = fonts.find(f => editor.isActive('textStyle', { fontFamily: f.value }))?.value || '';
+    const activeLineHeight = editor.getAttributes('paragraph').lineHeight || '1.5';
+    const textAlign = editor.getAttributes('textAlign') || 'left';
 
     return (
         <div className="flex flex-wrap items-center gap-0.5 px-3 py-1.5 bg-slate-50 border-b border-slate-200 sticky top-0 z-30">
             {/* History */}
             <div className="flex items-center">
                 <button
-                    onClick={() => editor.chain().focus().undo().run()}
-                    disabled={!editor.can().undo()}
-                    className="p-1.5 rounded hover:bg-slate-200 text-slate-600 disabled:opacity-30"
+                    onClick={handleUndo}
+                    disabled={!canUndo}
+                    className="p-1.5 rounded hover:bg-slate-200 text-slate-600 disabled:opacity-30 transition-colors"
                     title="Undo"
                 >
                     <Undo className="h-4 w-4" />
                 </button>
                 <button
-                    onClick={() => editor.chain().focus().redo().run()}
-                    disabled={!editor.can().redo()}
-                    className="p-1.5 rounded hover:bg-slate-200 text-slate-600 disabled:opacity-30"
+                    onClick={handleRedo}
+                    disabled={!canRedo}
+                    className="p-1.5 rounded hover:bg-slate-200 text-slate-600 disabled:opacity-30 transition-colors"
                     title="Redo"
                 >
                     <Redo className="h-4 w-4" />
@@ -234,30 +302,29 @@ const MenuBar = ({ editor, zoom, setZoom }) => {
             <div className="relative group">
                 <button
                     onClick={() => setShowHeadings(!showHeadings)}
-                    className="flex items-center gap-1 px-2 py-1.5 rounded hover:bg-slate-200 text-sm text-slate-700 min-w-[100px]"
+                    className="flex items-center gap-1 px-2 py-1.5 rounded hover:bg-slate-200 text-sm text-slate-700 min-w-[100px] transition-colors"
                 >
-                    {headingLevels.find(h => h.level === (editor.isActive('heading', { level: 1 }) ? 1 : editor.isActive('heading', { level: 2 }) ? 2 : editor.isActive('heading', { level: 3 }) ? 3 : 0))?.label || 'Normal Text'}
+                    {headingLevels.find(h => h.level === activeHeading)?.label || 'Normal Text'}
                     <ChevronDown className="h-3 w-3" />
                 </button>
                 {showHeadings && (
-                    <div className="absolute top-full left-0 mt-1 w-40 bg-white shadow-lg border border-slate-200 rounded-md py-1 z-40">
-                        {headingLevels.map(h => (
-                            <button
-                                key={h.level}
-                                onClick={() => {
-                                    if (h.level === 0) editor.chain().focus().setParagraph().run();
-                                    else editor.chain().focus().toggleHeading({ level: h.level }).run();
-                                    setShowHeadings(false);
-                                }}
-                                className={cn(
-                                    "w-full px-3 py-1.5 text-left text-sm hover:bg-slate-100",
-                                    (h.level === 0 ? !editor.isActive('heading') : editor.isActive('heading', { level: h.level })) && "text-indigo-600 bg-indigo-50 font-medium"
-                                )}
-                            >
-                                {h.label}
-                            </button>
-                        ))}
-                    </div>
+                    <>
+                        <div className="fixed inset-0 z-39" onClick={() => setShowHeadings(false)} />
+                        <div className="absolute top-full left-0 mt-1 w-40 bg-white shadow-lg border border-slate-200 rounded-md py-1 z-40">
+                            {headingLevels.map(h => (
+                                <button
+                                    key={h.level}
+                                    onClick={() => handleHeading(h.level)}
+                                    className={cn(
+                                        "w-full px-3 py-1.5 text-left text-sm hover:bg-slate-100 transition-colors",
+                                        activeHeading === h.level && "text-indigo-600 bg-indigo-50 font-medium"
+                                    )}
+                                >
+                                    {h.label}
+                                </button>
+                            ))}
+                        </div>
+                    </>
                 )}
             </div>
 
@@ -267,30 +334,30 @@ const MenuBar = ({ editor, zoom, setZoom }) => {
             <div className="relative group">
                 <button
                     onClick={() => setShowFontFamily(!showFontFamily)}
-                    className="flex items-center gap-1 px-2 py-1.5 rounded hover:bg-slate-200 text-sm text-slate-700 min-w-[100px]"
+                    className="flex items-center gap-1 px-2 py-1.5 rounded hover:bg-slate-200 text-sm text-slate-700 min-w-[100px] transition-colors"
                 >
-                    <span className="truncate">{fonts.find(f => editor.isActive('textStyle', { fontFamily: f.value }))?.name || 'Arial'}</span>
+                    <span className="truncate">{fonts.find(f => f.value === activeFontFamily)?.name || 'Arial'}</span>
                     <ChevronDown className="h-3 w-3" />
                 </button>
                 {showFontFamily && (
-                    <div className="absolute top-full left-0 mt-1 w-40 bg-white shadow-lg border border-slate-200 rounded-md py-1 z-40">
-                        {fonts.map(f => (
-                            <button
-                                key={f.name}
-                                onClick={() => {
-                                    editor.chain().focus().setFontFamily(f.value).run();
-                                    setShowFontFamily(false);
-                                }}
-                                style={{ fontFamily: f.value }}
-                                className={cn(
-                                    "w-full px-3 py-1.5 text-left text-sm hover:bg-slate-100",
-                                    editor.isActive('textStyle', { fontFamily: f.value }) && "text-indigo-600 bg-indigo-50 font-medium"
-                                )}
-                            >
-                                {f.name}
-                            </button>
-                        ))}
-                    </div>
+                    <>
+                        <div className="fixed inset-0 z-39" onClick={() => setShowFontFamily(false)} />
+                        <div className="absolute top-full left-0 mt-1 w-40 bg-white shadow-lg border border-slate-200 rounded-md py-1 z-40">
+                            {fonts.map(f => (
+                                <button
+                                    key={f.name}
+                                    onClick={() => handleFontFamily(f.value)}
+                                    style={{ fontFamily: f.value }}
+                                    className={cn(
+                                        "w-full px-3 py-1.5 text-left text-sm hover:bg-slate-100 transition-colors",
+                                        activeFontFamily === f.value && "text-indigo-600 bg-indigo-50 font-medium"
+                                    )}
+                                >
+                                    {f.name}
+                                </button>
+                            ))}
+                        </div>
+                    </>
                 )}
             </div>
 
@@ -300,22 +367,23 @@ const MenuBar = ({ editor, zoom, setZoom }) => {
             <div className="flex items-center gap-1">
                 <button
                     onClick={decrementFontSize}
-                    className="p-1.5 rounded hover:bg-slate-200 text-slate-600"
+                    className="p-1.5 rounded hover:bg-slate-200 text-slate-600 transition-colors"
                     title="Decrease font size"
                 >
                     <span className="text-lg font-bold">-</span>
                 </button>
-                <div className="relative group">
-                    <input
-                        type="text"
-                        value={currentFontSize}
-                        onChange={(e) => updateFontSize(e.target.value)}
-                        className="w-10 h-7 text-center text-sm border border-slate-200 rounded hover:border-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                    />
-                </div>
+                <input
+                    type="text"
+                    value={currentFontSize}
+                    onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '');
+                        if (value) updateFontSize(value);
+                    }}
+                    className="w-10 h-7 text-center text-sm border border-slate-200 rounded hover:border-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-colors"
+                />
                 <button
                     onClick={incrementFontSize}
-                    className="p-1.5 rounded hover:bg-slate-200 text-slate-600"
+                    className="p-1.5 rounded hover:bg-slate-200 text-slate-600 transition-colors"
                     title="Increase font size"
                 >
                     <span className="text-lg font-bold">+</span>
@@ -327,30 +395,30 @@ const MenuBar = ({ editor, zoom, setZoom }) => {
             {/* Basic Formatting */}
             <div className="flex items-center gap-0.5">
                 <button
-                    onClick={() => editor.chain().focus().toggleBold().run()}
+                    onClick={handleBold}
                     className={cn(
-                        "p-1.5 rounded hover:bg-slate-200 text-slate-600",
-                        editor.isActive('bold') && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                        "p-1.5 rounded hover:bg-slate-200 text-slate-600 transition-colors",
+                        isBold && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
                     )}
                     title="Bold (Ctrl+B)"
                 >
                     <Bold className="h-4 w-4" />
                 </button>
                 <button
-                    onClick={() => editor.chain().focus().toggleItalic().run()}
+                    onClick={handleItalic}
                     className={cn(
-                        "p-1.5 rounded hover:bg-slate-200 text-slate-600",
-                        editor.isActive('italic') && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                        "p-1.5 rounded hover:bg-slate-200 text-slate-600 transition-colors",
+                        isItalic && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
                     )}
                     title="Italic (Ctrl+I)"
                 >
                     <Italic className="h-4 w-4" />
                 </button>
                 <button
-                    onClick={() => editor.chain().focus().toggleUnderline().run()}
+                    onClick={handleUnderline}
                     className={cn(
-                        "p-1.5 rounded hover:bg-slate-200 text-slate-600",
-                        editor.isActive('underline') && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                        "p-1.5 rounded hover:bg-slate-200 text-slate-600 transition-colors",
+                        isUnderline && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
                     )}
                     title="Underline (Ctrl+U)"
                 >
@@ -358,7 +426,7 @@ const MenuBar = ({ editor, zoom, setZoom }) => {
                 </button>
 
                 {/* Text Color */}
-                <div className="relative flex items-center p-1.5 rounded hover:bg-slate-200 text-slate-600 group cursor-pointer">
+                <div className="relative flex items-center p-1.5 rounded hover:bg-slate-200 text-slate-600 group cursor-pointer transition-colors">
                     <Palette className="h-4 w-4" />
                     <input
                         type="color"
@@ -370,7 +438,7 @@ const MenuBar = ({ editor, zoom, setZoom }) => {
                 </div>
 
                 {/* Highlight Color */}
-                <div className="relative flex items-center p-1.5 rounded hover:bg-slate-200 text-slate-600 group cursor-pointer">
+                <div className="relative flex items-center p-1.5 rounded hover:bg-slate-200 text-slate-600 group cursor-pointer transition-colors">
                     <Highlighter className="h-4 w-4" />
                     <input
                         type="color"
@@ -387,40 +455,40 @@ const MenuBar = ({ editor, zoom, setZoom }) => {
             {/* Alignment */}
             <div className="flex items-center gap-0.5">
                 <button
-                    onClick={() => editor.chain().focus().setTextAlign('left').run()}
+                    onClick={() => handleAlign('left')}
                     className={cn(
-                        "p-1.5 rounded hover:bg-slate-200 text-slate-600",
-                        editor.isActive({ textAlign: 'left' }) && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                        "p-1.5 rounded hover:bg-slate-200 text-slate-600 transition-colors",
+                        textAlign === 'left' && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
                     )}
                     title="Align Left"
                 >
                     <AlignLeft className="h-4 w-4" />
                 </button>
                 <button
-                    onClick={() => editor.chain().focus().setTextAlign('center').run()}
+                    onClick={() => handleAlign('center')}
                     className={cn(
-                        "p-1.5 rounded hover:bg-slate-200 text-slate-600",
-                        editor.isActive({ textAlign: 'center' }) && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                        "p-1.5 rounded hover:bg-slate-200 text-slate-600 transition-colors",
+                        textAlign === 'center' && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
                     )}
                     title="Align Center"
                 >
                     <AlignCenter className="h-4 w-4" />
                 </button>
                 <button
-                    onClick={() => editor.chain().focus().setTextAlign('right').run()}
+                    onClick={() => handleAlign('right')}
                     className={cn(
-                        "p-1.5 rounded hover:bg-slate-200 text-slate-600",
-                        editor.isActive({ textAlign: 'right' }) && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                        "p-1.5 rounded hover:bg-slate-200 text-slate-600 transition-colors",
+                        textAlign === 'right' && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
                     )}
                     title="Align Right"
                 >
                     <AlignRight className="h-4 w-4" />
                 </button>
                 <button
-                    onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+                    onClick={() => handleAlign('justify')}
                     className={cn(
-                        "p-1.5 rounded hover:bg-slate-200 text-slate-600",
-                        editor.isActive({ textAlign: 'justify' }) && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                        "p-1.5 rounded hover:bg-slate-200 text-slate-600 transition-colors",
+                        textAlign === 'justify' && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
                     )}
                     title="Justify"
                 >
@@ -433,9 +501,9 @@ const MenuBar = ({ editor, zoom, setZoom }) => {
             {/* Lists */}
             <div className="flex items-center gap-0.5">
                 <button
-                    onClick={() => editor.chain().focus().toggleBulletList().run()}
+                    onClick={handleBulletList}
                     className={cn(
-                        "p-1.5 rounded hover:bg-slate-200 text-slate-600",
+                        "p-1.5 rounded hover:bg-slate-200 text-slate-600 transition-colors",
                         editor.isActive('bulletList') && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
                     )}
                     title="Bullet List"
@@ -443,9 +511,9 @@ const MenuBar = ({ editor, zoom, setZoom }) => {
                     <List className="h-4 w-4" />
                 </button>
                 <button
-                    onClick={() => editor.chain().focus().toggleOrderedList().run()}
+                    onClick={handleOrderedList}
                     className={cn(
-                        "p-1.5 rounded hover:bg-slate-200 text-slate-600",
+                        "p-1.5 rounded hover:bg-slate-200 text-slate-600 transition-colors",
                         editor.isActive('orderedList') && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
                     )}
                     title="Numbered List"
@@ -460,7 +528,7 @@ const MenuBar = ({ editor, zoom, setZoom }) => {
             <div className="relative group">
                 <button
                     onClick={() => setShowLineHeight(!showLineHeight)}
-                    className="p-1.5 rounded hover:bg-slate-200 text-slate-600"
+                    className="p-1.5 rounded hover:bg-slate-200 text-slate-600 transition-colors"
                     title="Line spacing"
                 >
                     <div className="flex flex-col items-center leading-[0.5]">
@@ -469,23 +537,23 @@ const MenuBar = ({ editor, zoom, setZoom }) => {
                     </div>
                 </button>
                 {showLineHeight && (
-                    <div className="absolute top-full left-0 mt-1 w-32 bg-white shadow-lg border border-slate-200 rounded-md py-1 z-40">
-                        {lineHeights.map(lh => (
-                            <button
-                                key={lh.value}
-                                onClick={() => {
-                                    editor.chain().focus().setLineHeight(lh.value).run();
-                                    setShowLineHeight(false);
-                                }}
-                                className={cn(
-                                    "w-full px-3 py-1.5 text-left text-sm hover:bg-slate-100",
-                                    editor.getAttributes('paragraph').lineHeight === lh.value && "text-indigo-600 bg-indigo-50 font-medium"
-                                )}
-                            >
-                                {lh.label}
-                            </button>
-                        ))}
-                    </div>
+                    <>
+                        <div className="fixed inset-0 z-39" onClick={() => setShowLineHeight(false)} />
+                        <div className="absolute top-full left-0 mt-1 w-32 bg-white shadow-lg border border-slate-200 rounded-md py-1 z-40">
+                            {lineHeights.map(lh => (
+                                <button
+                                    key={lh.value}
+                                    onClick={() => handleLineHeight(lh.value)}
+                                    className={cn(
+                                        "w-full px-3 py-1.5 text-left text-sm hover:bg-slate-100 transition-colors",
+                                        activeLineHeight === lh.value && "text-indigo-600 bg-indigo-50 font-medium"
+                                    )}
+                                >
+                                    {lh.label}
+                                </button>
+                            ))}
+                        </div>
+                    </>
                 )}
             </div>
 
@@ -493,8 +561,8 @@ const MenuBar = ({ editor, zoom, setZoom }) => {
 
             {/* Clear Formatting */}
             <button
-                onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}
-                className="p-1.5 rounded hover:bg-slate-200 text-slate-600"
+                onClick={handleClearFormatting}
+                className="p-1.5 rounded hover:bg-slate-200 text-slate-600 transition-colors"
                 title="Clear Formatting"
             >
                 <Eraser className="h-4 w-4" />
@@ -507,28 +575,26 @@ const MenuBar = ({ editor, zoom, setZoom }) => {
                         const currentIndex = EDITOR_CONFIG.ZOOM_LEVELS.findIndex(z => z.value === zoom);
                         if (currentIndex > 0) setZoom(EDITOR_CONFIG.ZOOM_LEVELS[currentIndex - 1].value);
                     }}
-                    className="p-1.5 rounded hover:bg-slate-200 text-slate-600"
+                    className="p-1.5 rounded hover:bg-slate-200 text-slate-600 transition-colors"
                     title="Zoom Out"
                 >
                     <span className="text-lg font-bold">-</span>
                 </button>
-                <div className="relative group">
-                    <select
-                        value={zoom}
-                        onChange={(e) => setZoom(parseFloat(e.target.value))}
-                        className="appearance-none bg-transparent hover:bg-slate-200 px-2 py-1 rounded text-sm font-medium text-slate-600 focus:outline-none cursor-pointer"
-                    >
-                        {EDITOR_CONFIG.ZOOM_LEVELS.map(z => (
-                            <option key={z.value} value={z.value}>{z.label}</option>
-                        ))}
-                    </select>
-                </div>
+                <select
+                    value={zoom}
+                    onChange={(e) => setZoom(parseFloat(e.target.value))}
+                    className="appearance-none bg-transparent hover:bg-slate-200 px-2 py-1 rounded text-sm font-medium text-slate-600 focus:outline-none cursor-pointer transition-colors"
+                >
+                    {EDITOR_CONFIG.ZOOM_LEVELS.map(z => (
+                        <option key={z.value} value={z.value}>{z.label}</option>
+                    ))}
+                </select>
                 <button
                     onClick={() => {
                         const currentIndex = EDITOR_CONFIG.ZOOM_LEVELS.findIndex(z => z.value === zoom);
                         if (currentIndex < EDITOR_CONFIG.ZOOM_LEVELS.length - 1) setZoom(EDITOR_CONFIG.ZOOM_LEVELS[currentIndex + 1].value);
                     }}
-                    className="p-1.5 rounded hover:bg-slate-200 text-slate-600"
+                    className="p-1.5 rounded hover:bg-slate-200 text-slate-600 transition-colors"
                     title="Zoom In"
                 >
                     <span className="text-lg font-bold">+</span>
@@ -541,7 +607,7 @@ const MenuBar = ({ editor, zoom, setZoom }) => {
             <div className="relative group">
                 <button
                     onClick={() => setShowPageSetup(!showPageSetup)}
-                    className="flex items-center gap-1.5 px-2 py-1.5 rounded hover:bg-slate-200 text-sm text-slate-700"
+                    className="flex items-center gap-1.5 px-2 py-1.5 rounded hover:bg-slate-200 text-sm text-slate-700 transition-colors"
                     title="Page Setup"
                 >
                     <Layout className="h-4 w-4 text-slate-600" />
@@ -549,60 +615,65 @@ const MenuBar = ({ editor, zoom, setZoom }) => {
                     <ChevronDown className="h-3 w-3" />
                 </button>
                 {showPageSetup && (
-                    <div className="absolute top-full right-0 mt-1 w-56 bg-white shadow-xl border border-slate-200 rounded-md py-2 z-40 animate-in fade-in slide-in-from-top-1">
-                        <div className="px-3 py-1.5 text-xs font-bold text-slate-400 uppercase">Page Numbers</div>
-                        <button
-                            onClick={() => {
-                                editor.setOptions({
-                                    pagination: { showPageNumbers: true, pageNumberPosition: 'footer-right' }
-                                });
-                                setShowPageSetup(false);
-                            }}
-                            className="w-full px-3 py-1.5 text-left text-sm hover:bg-slate-50 flex items-center justify-between"
-                        >
-                            <span>Bottom Right</span>
-                            <div className="w-2 h-2 rounded-full bg-indigo-500" />
-                        </button>
-                        <button
-                            onClick={() => {
-                                editor.setOptions({
-                                    pagination: { showPageNumbers: true, pageNumberPosition: 'footer-center' }
-                                });
-                                setShowPageSetup(false);
-                            }}
-                            className="w-full px-3 py-1.5 text-left text-sm hover:bg-slate-50"
-                        >
-                            Bottom Center
-                        </button>
-                        <button
-                            onClick={() => {
-                                editor.setOptions({
-                                    pagination: { showPageNumbers: true, pageNumberPosition: 'header-right' }
-                                });
-                                setShowPageSetup(false);
-                            }}
-                            className="w-full px-3 py-1.5 text-left text-sm hover:bg-slate-50"
-                        >
-                            Top Right
-                        </button>
-                        <div className="h-px bg-slate-100 my-1" />
-                        <button
-                            onClick={() => {
-                                editor.setOptions({
-                                    pagination: { showPageNumbers: false }
-                                });
-                                setShowPageSetup(false);
-                            }}
-                            className="w-full px-3 py-1.5 text-left text-sm text-red-600 hover:bg-red-50"
-                        >
-                            Disable Page Numbers
-                        </button>
-                    </div>
+                    <>
+                        <div className="fixed inset-0 z-39" onClick={() => setShowPageSetup(false)} />
+                        <div className="absolute top-full right-0 mt-1 w-56 bg-white shadow-xl border border-slate-200 rounded-md py-2 z-40 animate-in fade-in slide-in-from-top-1">
+                            <div className="px-3 py-1.5 text-xs font-bold text-slate-400 uppercase">Page Numbers</div>
+                            <button
+                                onClick={() => {
+                                    editor.setOptions({
+                                        pagination: { showPageNumbers: true, pageNumberPosition: 'footer-right' }
+                                    });
+                                    setShowPageSetup(false);
+                                }}
+                                className="w-full px-3 py-1.5 text-left text-sm hover:bg-slate-50 flex items-center justify-between transition-colors"
+                            >
+                                <span>Bottom Right</span>
+                                <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                            </button>
+                            <button
+                                onClick={() => {
+                                    editor.setOptions({
+                                        pagination: { showPageNumbers: true, pageNumberPosition: 'footer-center' }
+                                    });
+                                    setShowPageSetup(false);
+                                }}
+                                className="w-full px-3 py-1.5 text-left text-sm hover:bg-slate-50 transition-colors"
+                            >
+                                Bottom Center
+                            </button>
+                            <button
+                                onClick={() => {
+                                    editor.setOptions({
+                                        pagination: { showPageNumbers: true, pageNumberPosition: 'header-right' }
+                                    });
+                                    setShowPageSetup(false);
+                                }}
+                                className="w-full px-3 py-1.5 text-left text-sm hover:bg-slate-50 transition-colors"
+                            >
+                                Top Right
+                            </button>
+                            <div className="h-px bg-slate-100 my-1" />
+                            <button
+                                onClick={() => {
+                                    editor.setOptions({
+                                        pagination: { showPageNumbers: false }
+                                    });
+                                    setShowPageSetup(false);
+                                }}
+                                className="w-full px-3 py-1.5 text-left text-sm text-red-600 hover:bg-red-50 transition-colors"
+                            >
+                                Disable Page Numbers
+                            </button>
+                        </div>
+                    </>
                 )}
             </div>
         </div>
     );
-};
+});
+
+MenuBar.displayName = 'MenuBar';
 
 export default function EditorPage() {
     const { id } = useParams();
@@ -626,7 +697,6 @@ export default function EditorPage() {
     useEffect(() => {
         const loadDocument = async () => {
             if (id === 'new') {
-                // Handle new document from navigation state
                 const initialState = location.state || {};
                 setDoc({
                     id: 'new',
@@ -659,7 +729,7 @@ export default function EditorPage() {
         loadDocument();
     }, [id, location.state, navigate, addToast]);
 
-    // Auto-save function
+    // Optimized auto-save with debouncing
     const handleAutoSave = useCallback(async (content, html) => {
         if (id === 'new' || !doc?.id) return;
 
@@ -675,30 +745,33 @@ export default function EditorPage() {
         }
     }, [id, doc?.id]);
 
+    // Optimized editor configuration
+    const editorExtensions = useMemo(() => [
+        StarterKit.configure({
+            history: true,
+        }),
+        Placeholder.configure({
+            placeholder: 'Start writing or paste your assignment here...',
+        }),
+        TextStyle,
+        Color,
+        Highlight.configure({ multicolor: true }),
+        FontFamily,
+        TextAlign.configure({
+            types: ['heading', 'paragraph'],
+        }),
+        FontSize,
+        LineHeight,
+        Pagination.configure({
+            pageWidth: EDITOR_CONFIG.PAGE_WIDTH,
+            pageHeight: EDITOR_CONFIG.PAGE_HEIGHT,
+            margins: EDITOR_CONFIG.DEFAULT_MARGINS,
+        }),
+    ], []);
+
     const editor = useEditor(
         {
-            extensions: [
-                StarterKit.configure({
-                    history: true,
-                }),
-                Placeholder.configure({
-                    placeholder: 'Start writing or paste your assignment here...',
-                }),
-                TextStyle,
-                Color,
-                Highlight.configure({ multicolor: true }),
-                FontFamily,
-                TextAlign.configure({
-                    types: ['heading', 'paragraph'],
-                }),
-                FontSize,
-                LineHeight,
-                Pagination.configure({
-                    pageWidth: EDITOR_CONFIG.PAGE_WIDTH,
-                    pageHeight: EDITOR_CONFIG.PAGE_HEIGHT,
-                    margins: EDITOR_CONFIG.DEFAULT_MARGINS,
-                }),
-            ],
+            extensions: editorExtensions,
             content: doc?.content_html || doc?.content || '',
             editorProps: {
                 attributes: {
@@ -706,7 +779,7 @@ export default function EditorPage() {
                 },
             },
             onUpdate: ({ editor }) => {
-                // Debounced auto-save
+                // Debounced auto-save - increased delay for better performance
                 if (autoSaveTimeoutRef.current) {
                     clearTimeout(autoSaveTimeoutRef.current);
                 }
@@ -714,10 +787,10 @@ export default function EditorPage() {
                     const text = editor.getText();
                     const html = editor.getHTML();
                     handleAutoSave(text, html);
-                }, 2000);
+                }, 3000); // Increased to 3 seconds for better performance
             },
         },
-        []
+        [doc?.content_html, doc?.content, handleAutoSave]
     );
 
     // Update content when doc loads
@@ -739,7 +812,7 @@ export default function EditorPage() {
         };
     }, []);
 
-    const handleTitleChange = async (newTitle) => {
+    const handleTitleChange = useCallback(async (newTitle) => {
         setDoc(prev => ({ ...prev, title: newTitle }));
         if (id !== 'new' && doc?.id) {
             try {
@@ -748,20 +821,19 @@ export default function EditorPage() {
                 console.error('Failed to update title:', error);
             }
         }
-    };
+    }, [id, doc?.id]);
 
-    const handleUpgrade = () => {
+    const handleUpgrade = useCallback(() => {
         setIsUpgrading(true);
         addToast('Starting academic analysis...', 'info');
 
-        // Simulate API call
         setTimeout(() => {
             setIsUpgrading(false);
             addToast('Upgrade complete! Improvements applied.', 'success');
         }, 2500);
-    };
+    }, [addToast]);
 
-    const handleExport = async (format) => {
+    const handleExport = useCallback(async (format) => {
         setIsExporting(true);
         addToast(`Preparing ${format} export...`, 'info');
 
@@ -769,8 +841,13 @@ export default function EditorPage() {
             const fileName = `${doc?.title || 'Document'}.${format === 'PDF' ? 'pdf' : 'docx'}`;
 
             if (format === 'PDF') {
-                if (!editorRef.current) throw new Error('Editor element not found');
-                await exportToPDF(editorRef.current, fileName);
+                // Wait for editor to be ready
+                await new Promise(resolve => setTimeout(resolve, 100));
+                const editorElement = document.querySelector('.ProseMirror');
+                if (!editorElement) {
+                    throw new Error('Editor element not found');
+                }
+                await exportToPDF(editorElement, fileName);
             } else if (format === 'Word') {
                 if (!editor) throw new Error('Editor not initialized');
                 const html = editor.getHTML();
@@ -783,14 +860,14 @@ export default function EditorPage() {
             addToast(`${format} exported successfully`, 'success');
         } catch (error) {
             console.error('Export failed:', error);
-            addToast(`Failed to export ${format}`, 'error');
+            addToast(`Failed to export ${format}: ${error.message}`, 'error');
         } finally {
             setIsExporting(false);
             setShowSettings(false);
         }
-    };
+    }, [doc, editor, addToast]);
 
-    const handleDelete = async () => {
+    const handleDelete = useCallback(async () => {
         if (!doc?.id || id === 'new') return;
 
         try {
@@ -801,9 +878,9 @@ export default function EditorPage() {
             console.error('Failed to delete:', error);
             addToast('Failed to delete document', 'error');
         }
-    };
+    }, [doc?.id, id, navigate, addToast]);
 
-    const formatLastSaved = () => {
+    const formatLastSaved = useCallback(() => {
         if (!lastSaved) return null;
         const now = new Date();
         const diffMs = now - lastSaved;
@@ -813,7 +890,7 @@ export default function EditorPage() {
         if (diffMins === 1) return 'Saved 1 minute ago';
         if (diffMins < 60) return `Saved ${diffMins} minutes ago`;
         return `Saved at ${lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-    };
+    }, [lastSaved]);
 
     if (isLoading) {
         return (
@@ -830,7 +907,7 @@ export default function EditorPage() {
         <div className="fixed inset-0 bg-slate-100 flex flex-col">
             <DiagnosticReport isOpen={showReport} onClose={() => setShowReport(false)} />
 
-            {/* Top Navigation Bar - Google Docs Style */}
+            {/* Top Navigation Bar */}
             <header className="bg-white border-b border-slate-200 flex-shrink-0">
                 <div className="flex items-center justify-between px-4 py-2">
                     {/* Left: Back + Title */}
@@ -922,7 +999,7 @@ export default function EditorPage() {
                                             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Settings</p>
                                         </div>
                                         <div className="py-1">
-                                            <button className="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-3">
+                                            <button className="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-3 transition-colors">
                                                 <Settings className="h-4 w-4 text-slate-400" />
                                                 Document Settings
                                             </button>
@@ -933,14 +1010,16 @@ export default function EditorPage() {
                                         <div className="py-1">
                                             <button
                                                 onClick={() => handleExport('PDF')}
-                                                className="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-3"
+                                                disabled={isExporting}
+                                                className="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-3 disabled:opacity-50 transition-colors"
                                             >
                                                 <Download className="h-4 w-4 text-slate-400" />
                                                 Export as PDF
                                             </button>
                                             <button
                                                 onClick={() => handleExport('Word')}
-                                                className="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-3"
+                                                disabled={isExporting}
+                                                className="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-3 disabled:opacity-50 transition-colors"
                                             >
                                                 <Download className="h-4 w-4 text-slate-400" />
                                                 Export as Word
@@ -949,7 +1028,7 @@ export default function EditorPage() {
                                         <div className="py-1 border-t border-slate-100">
                                             <button
                                                 onClick={() => setShowDeleteConfirm(true)}
-                                                className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-3"
+                                                className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"
                                             >
                                                 <Trash2 className="h-4 w-4" />
                                                 Delete Document
@@ -966,7 +1045,7 @@ export default function EditorPage() {
                 <MenuBar editor={editor} zoom={zoom} setZoom={setZoom} />
             </header>
 
-            {/* Editor Canvas - Page-Based Scrolling Canvas */}
+            {/* Editor Canvas */}
             <main className="flex-1 overflow-auto bg-[#cbd5e1] custom-scrollbar p-12">
                 <div
                     className="editor-canvas"

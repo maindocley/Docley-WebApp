@@ -17,6 +17,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { OnboardingFlow, isOnboardingCompleted } from '../onboarding/OnboardingFlow';
+import { submitFeedback } from '../../services/feedbackService';
 
 export function DashboardLayout() {
     const location = useLocation();
@@ -68,17 +69,17 @@ export function DashboardLayout() {
     return (
         <div className={cn(
             "min-h-screen flex transition-colors duration-300",
-            isDark 
-                ? "bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900" 
+            isDark
+                ? "bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900"
                 : "bg-gradient-to-br from-slate-50 via-white to-slate-50"
         )}>
             {/* Onboarding Flow */}
             {showOnboarding && <OnboardingFlow onComplete={handleOnboardingComplete} />}
-            
+
             {/* Feedback Modal */}
             {showFeedbackModal && (
-                <FeedbackModal 
-                    isOpen={showFeedbackModal} 
+                <FeedbackModal
+                    isOpen={showFeedbackModal}
                     onClose={() => setShowFeedbackModal(false)}
                     isDark={isDark}
                 />
@@ -115,8 +116,8 @@ export function DashboardLayout() {
                     // Desktop: always visible, collapsed by default, expands on hover
                     'lg:translate-x-0',
                     isCollapsed ? 'lg:w-[70px]' : 'lg:w-[260px]',
-                    isDark 
-                        ? 'bg-white/5 border-r border-white/10' 
+                    isDark
+                        ? 'bg-white/5 border-r border-white/10'
                         : 'bg-white/80 border-r border-slate-200'
                 )}
             >
@@ -125,8 +126,8 @@ export function DashboardLayout() {
                     className={cn(
                         'h-16 flex items-center transition-all duration-300 relative',
                         isCollapsed ? 'justify-center px-0' : 'justify-center px-5',
-                        isDark 
-                            ? 'border-b border-white/10 bg-gradient-to-r from-white/5 to-white/5' 
+                        isDark
+                            ? 'border-b border-white/10 bg-gradient-to-r from-white/5 to-white/5'
                             : 'border-b border-slate-200 bg-gradient-to-r from-white to-indigo-50/30'
                     )}
                 >
@@ -176,8 +177,8 @@ export function DashboardLayout() {
                             <item.icon
                                 className={cn(
                                     'h-5 w-5 flex-shrink-0 transition-colors',
-                                    isActive(item.href) 
-                                        ? isDark ? 'text-orange-400' : 'text-orange-600' 
+                                    isActive(item.href)
+                                        ? isDark ? 'text-orange-400' : 'text-orange-600'
                                         : isDark ? 'text-slate-400 group-hover:text-slate-300' : 'text-slate-400 group-hover:text-slate-600',
                                     !isCollapsed && 'mr-3'
                                 )}
@@ -192,8 +193,8 @@ export function DashboardLayout() {
                             {isCollapsed && (
                                 <div className={cn(
                                     "fixed left-[80px] text-xs px-2.5 py-1.5 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-[60] pointer-events-none",
-                                    isDark 
-                                        ? "bg-white/10 backdrop-blur-md border border-white/20 text-white" 
+                                    isDark
+                                        ? "bg-white/10 backdrop-blur-md border border-white/20 text-white"
                                         : "bg-slate-900 text-white"
                                 )}>
                                     {item.name}
@@ -206,8 +207,8 @@ export function DashboardLayout() {
                 {/* Bottom Sidebar */}
                 <div className={cn(
                     "p-3 space-y-2 border-t bg-gradient-to-b",
-                    isDark 
-                        ? "border-white/10 from-white/5 to-white/5" 
+                    isDark
+                        ? "border-white/10 from-white/5 to-white/5"
                         : "border-slate-200 from-white to-slate-50/50"
                 )}>
                     {/* Send Feedback Button */}
@@ -277,8 +278,8 @@ export function DashboardLayout() {
                 {/* Mobile Header */}
                 <div className={cn(
                     "lg:hidden flex items-center h-16 px-4 sticky top-0 z-30 shadow-sm backdrop-blur-xl border-b",
-                    isDark 
-                        ? "bg-white/5 border-white/10" 
+                    isDark
+                        ? "bg-white/5 border-white/10"
                         : "bg-white/80 border-slate-200"
                 )}>
                     <span className={cn(
@@ -314,14 +315,17 @@ function FeedbackModal({ isOpen, onClose, isDark }) {
         }
 
         setIsSubmitting(true);
-        // Simulate API call
-        setTimeout(() => {
-            setIsSubmitting(false);
+        try {
+            await submitFeedback(rating, feedback);
             addToast('Thank you for your feedback!', 'success');
             setFeedback('');
             setRating(0);
             onClose();
-        }, 1000);
+        } catch (error) {
+            addToast('Failed to send feedback. Please try again.', 'error');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (

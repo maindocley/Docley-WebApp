@@ -5,8 +5,13 @@ import { Button } from '../ui/Button';
 import mammoth from 'mammoth';
 import * as pdfjs from 'pdfjs-dist';
 
-// Set worker for pdfjs
-pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+// Set worker for pdfjs - use unpkg CDN (more reliable than cdnjs)
+// unpkg serves files directly from npm packages and is generally more reliable
+if (typeof window !== 'undefined') {
+    const workerVersion = pdfjs.version;
+    // Use unpkg CDN - more reliable than cdnjs
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${workerVersion}/build/pdf.worker.min.mjs`;
+}
 
 export function ContentIntakeModal({ isOpen, onClose, onContinue }) {
     const [activeTab, setActiveTab] = useState('paste'); // 'paste' or 'upload'
@@ -83,18 +88,70 @@ export function ContentIntakeModal({ isOpen, onClose, onContinue }) {
                 setContent(selectedFile.name); // Just a placeholder for raw content
                 setIsLoading(false);
             } else if (selectedFile.type === 'application/pdf') {
-                const arrayBuffer = await selectedFile.arrayBuffer();
-                const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
-                let fullText = '';
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
-                    const pageText = textContent.items.map(item => item.str).join(' ');
-                    fullText += pageText + '\n\n';
+                try {
+                    // Verify worker is configured
+                    if (!pdfjs.GlobalWorkerOptions.workerSrc) {
+                        // Fallback worker configuration
+                        pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+                    }
+                    
+                    const arrayBuffer = await selectedFile.arrayBuffer();
+                    
+                    // Configure PDF.js with better error handling
+                    const loadingTask = pdfjs.getDocument({
+                        data: arrayBuffer,
+                        verbosity: 0, // Reduce console noise
+                        // Remove cMapUrl to avoid additional CDN dependencies
+                        // cMapUrl: `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/cmaps/`,
+                        // cMapPacked: true,
+                    });
+                    
+                    const pdf = await loadingTask.promise;
+                    
+                    if (!pdf || pdf.numPages === 0) {
+                        throw new Error('PDF appears to be empty or corrupted');
+                    }
+                    
+                    let fullText = '';
+                    const maxPages = Math.min(pdf.numPages, 50); // Limit to 50 pages for performance
+                    
+                    for (let i = 1; i <= maxPages; i++) {
+                        try {
+                            const page = await pdf.getPage(i);
+                            const textContent = await page.getTextContent({
+                                normalizeWhitespace: true,
+                                disableCombineTextItems: false
+                            });
+                            
+                            if (textContent && textContent.items && textContent.items.length > 0) {
+                                const pageText = textContent.items
+                                    .map(item => item.str || '')
+                                    .filter(str => str.trim().length > 0)
+                                    .join(' ');
+                                
+                                if (pageText.trim()) {
+                                    fullText += pageText + '\n\n';
+                                }
+                            }
+                        } catch (pageError) {
+                            console.warn(`Error reading page ${i}:`, pageError);
+                            // Continue with next page
+                        }
+                    }
+                    
+                    if (!fullText.trim()) {
+                        throw new Error('Could not extract text from PDF. The PDF might be image-based or protected.');
+                    }
+                    
+                    setContent(fullText);
+                    setHtmlContent(fullText.split('\n\n').filter(p => p.trim()).map(para => `<p>${para.trim()}</p>`).join(''));
+                    setIsLoading(false);
+                } catch (pdfError) {
+                    console.error('PDF parsing error:', pdfError);
+                    setError(`Failed to parse PDF: ${pdfError.message || 'The file might be corrupted, password-protected, or image-based. Please try a different PDF or paste the text manually.'}`);
+                    setIsLoading(false);
+                    setFile(null);
                 }
-                setContent(fullText);
-                setHtmlContent(fullText.split('\n\n').map(para => `<p>${para}</p>`).join(''));
-                setIsLoading(false);
             }
         } catch (err) {
             console.error('File parsing error:', err);

@@ -43,7 +43,7 @@ export const Pagination = Extension.create({
                             Decoration.widget(0, () => {
                                 const div = document.createElement('div');
                                 div.className = 'page-header first-page';
-                                div.style.padding = `${margins.top / 4}px ${margins.right}px 0 ${margins.left}px`;
+                                div.style.padding = `${margins.top / 2}px ${margins.right}px 0 ${margins.left}px`;
                                 div.innerHTML = `
                                     <div class="header-content"></div>
                                     ${extension.options.showPageNumbers && extension.options.pageNumberPosition === 'header-right' ? `<span class="page-number">Page 1</span>` : ''}
