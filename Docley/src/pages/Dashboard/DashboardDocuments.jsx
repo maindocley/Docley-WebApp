@@ -22,7 +22,7 @@ import { useState, useEffect } from 'react';
 import { useToast } from '../../context/ToastContext';
 import { ContentIntakeModal } from '../../components/modals/ContentIntakeModal';
 import { IntakeModal } from '../../components/modals/IntakeModal';
-import { getDocuments, deleteDocument } from '../../services/documentsService';
+import { getDocuments, deleteDocument, permanentlyDeleteDocument } from '../../services/documentsService';
 
 export default function DashboardDocuments() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -34,6 +34,7 @@ export default function DashboardDocuments() {
     const [documents, setDocuments] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [activeMenu, setActiveMenu] = useState(null);
+    const [deleteConfirmDoc, setDeleteConfirmDoc] = useState(null);
     const { addToast } = useToast();
 
     // Load documents
@@ -70,19 +71,20 @@ export default function DashboardDocuments() {
         setShowContentModal(true);
     };
 
-    const handleDelete = async (e, docId, docTitle) => {
-        e.preventDefault();
-        e.stopPropagation();
+    const handleDelete = async () => {
+        if (!deleteConfirmDoc) return;
 
         try {
-            await deleteDocument(docId);
-            addToast(`"${docTitle}" moved to trash`, 'success');
+            await permanentlyDeleteDocument(deleteConfirmDoc.id);
+            addToast(`"${deleteConfirmDoc.title}" deleted permanently`, 'success');
             loadDocuments();
         } catch (error) {
             console.error('Error deleting document:', error);
-            addToast('Failed to delete document', 'error');
+            addToast(error.message || 'Failed to delete document', 'error');
+        } finally {
+            setDeleteConfirmDoc(null);
+            setActiveMenu(null);
         }
-        setActiveMenu(null);
     };
 
     const formatDate = (dateString) => {
@@ -218,8 +220,8 @@ export default function DashboardDocuments() {
                             <button
                                 onClick={() => setViewMode('grid')}
                                 className={`p-2.5 transition-colors ${viewMode === 'grid'
-                                        ? 'bg-indigo-50 text-indigo-600'
-                                        : 'bg-white text-slate-500 hover:bg-slate-50'
+                                    ? 'bg-indigo-50 text-indigo-600'
+                                    : 'bg-white text-slate-500 hover:bg-slate-50'
                                     }`}
                             >
                                 <Grid3x3 className="h-4 w-4" />
@@ -227,8 +229,8 @@ export default function DashboardDocuments() {
                             <button
                                 onClick={() => setViewMode('list')}
                                 className={`p-2.5 transition-colors border-l border-slate-200 ${viewMode === 'list'
-                                        ? 'bg-indigo-50 text-indigo-600'
-                                        : 'bg-white text-slate-500 hover:bg-slate-50'
+                                    ? 'bg-indigo-50 text-indigo-600'
+                                    : 'bg-white text-slate-500 hover:bg-slate-50'
                                     }`}
                             >
                                 <List className="h-4 w-4" />
@@ -259,8 +261,8 @@ export default function DashboardDocuments() {
                                         <div className="flex items-start justify-between mb-4">
                                             <div
                                                 className={`h-12 w-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${doc.status === 'upgraded'
-                                                        ? 'bg-gradient-to-br from-indigo-100 to-indigo-50 text-indigo-600'
-                                                        : 'bg-slate-100 text-slate-500'
+                                                    ? 'bg-gradient-to-br from-indigo-100 to-indigo-50 text-indigo-600'
+                                                    : 'bg-slate-100 text-slate-500'
                                                     }`}
                                             >
                                                 <FileText className="h-6 w-6" />
@@ -283,11 +285,15 @@ export default function DashboardDocuments() {
                                                             <div className="fixed inset-0 z-40" onClick={(e) => { e.preventDefault(); setActiveMenu(null); }} />
                                                             <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-lg shadow-xl border border-slate-200 py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                                                                 <button
-                                                                    onClick={(e) => handleDelete(e, doc.id, doc.title)}
-                                                                    className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                                                                    onClick={(e) => {
+                                                                        e.preventDefault();
+                                                                        e.stopPropagation();
+                                                                        setDeleteConfirmDoc(doc);
+                                                                    }}
+                                                                    className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 font-medium"
                                                                 >
                                                                     <Trash2 className="h-4 w-4" />
-                                                                    Delete
+                                                                    Delete Document
                                                                 </button>
                                                             </div>
                                                         </>
@@ -332,8 +338,8 @@ export default function DashboardDocuments() {
                                     <CardContent className="p-5 flex items-center gap-5">
                                         <div
                                             className={`h-14 w-14 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${doc.status === 'upgraded'
-                                                    ? 'bg-gradient-to-br from-indigo-100 to-indigo-50 text-indigo-600'
-                                                    : 'bg-slate-100 text-slate-500'
+                                                ? 'bg-gradient-to-br from-indigo-100 to-indigo-50 text-indigo-600'
+                                                : 'bg-slate-100 text-slate-500'
                                                 }`}
                                         >
                                             <FileText className="h-7 w-7" />
@@ -372,7 +378,12 @@ export default function DashboardDocuments() {
                                                     variant="ghost"
                                                     size="icon"
                                                     className="h-9 w-9 text-slate-400 hover:text-red-600 hover:bg-red-50"
-                                                    onClick={(e) => handleDelete(e, doc.id, doc.title)}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        setDeleteConfirmDoc(doc);
+                                                    }}
+                                                    title="Delete Document"
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -413,6 +424,35 @@ export default function DashboardDocuments() {
                         </div>
                     </CardContent>
                 </Card>
+            )}
+            {/* Delete Confirmation Modal */}
+            {deleteConfirmDoc && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-in zoom-in-95 duration-150">
+                        <div className="flex items-start gap-4 mb-6">
+                            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                                <Trash2 className="h-6 w-6 text-red-600" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-900">Delete Permanently?</h3>
+                                <p className="text-sm text-slate-600 mt-1">
+                                    Are you sure you want to delete "{deleteConfirmDoc.title}"? This action cannot be undone.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex justify-end gap-3">
+                            <Button variant="ghost" onClick={() => setDeleteConfirmDoc(null)}>
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handleDelete}
+                                className="bg-red-600 hover:bg-red-700 text-white"
+                            >
+                                Delete Forever
+                            </Button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

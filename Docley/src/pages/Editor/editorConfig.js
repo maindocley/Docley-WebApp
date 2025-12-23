@@ -9,14 +9,14 @@ export const EDITOR_CONFIG = {
 
     // Default Margins (1 inch = 96px)
     DEFAULT_MARGINS: {
-        top: 96,
-        bottom: 96,
-        left: 96,
-        right: 96
+        top: 50,
+        bottom: 50,
+        left: 50,
+        right: 50
     },
 
     // Academic Defaults
-    DEFAULT_FONT_SIZE: '16',
+    DEFAULT_FONT_SIZE: '12',
     DEFAULT_LINE_HEIGHT: '1.5',
     DEFAULT_FONT_FAMILY: 'Arial',
 

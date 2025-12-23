@@ -10,13 +10,13 @@
     position: relative;
     background-color: white;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    margin: 40px auto;
+    margin: 20px auto;
     min-height: 1123px;
     /* A4 Height */
     width: 816px;
     /* A4 Width */
     outline: none !important;
-    padding: 96px;
+    padding: 50px;
     /* Default Margins */
     transition: all 0.3s ease;
 }
@@ -25,8 +25,8 @@
 .page-break-container {
     user-select: none;
     pointer-events: none;
-    margin: 0 -96px;
-    width: calc(100% + 192px);
+    margin: 0 -50px;
+    width: calc(100% + 100px);
     display: flex;
     flex-direction: column;
 }
@@ -43,7 +43,7 @@
 
 .page-footer,
 .page-header {
-    height: 96px;
+    height: 50px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -55,12 +55,12 @@
 
 .page-header {
     border-bottom: 1px dashed transparent;
-    margin-bottom: 32px;
+    margin-bottom: 16px;
 }
 
 .page-footer {
     border-top: 1px dashed transparent;
-    margin-top: 32px;
+    margin-top: 16px;
 }
 
 .page-number {
@@ -96,4 +96,22 @@
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
+}
+
+/* Image Styling */
+.ProseMirror img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 1em 0;
+    border-radius: 4px;
+}
+
+.ProseMirror img.editor-image {
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.ProseMirror img.editor-image:hover {
+    opacity: 0.9;
 }

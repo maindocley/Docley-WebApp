@@ -1,5 +1,5 @@
 import html2pdf from 'html2pdf.js/dist/html2pdf.bundle.min.js';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, ImageRun, Media } from 'docx';
 
 /**
  * Convert oklch color to RGB hex
@@ -88,16 +88,19 @@ export const exportToPDF = async (element, fileName = 'document.pdf') => {
     container.style.padding = '0';
     container.style.margin = '0';
 
-    // Clone the editor content
+    // Clone the editor content - use deep clone to preserve all nodes
     const clone = element.cloneNode(true);
     
-    // Deep sanitize styles before adding to container
+    // Preserve the original HTML structure first
+    const originalHTML = clone.innerHTML;
+    
+    // Deep sanitize styles before cleaning HTML
     sanitizeStyles(clone);
     
-    // Clean HTML content
-    clone.innerHTML = deepCleanHTML(clone.innerHTML);
+    // Clean HTML content but preserve structure
+    clone.innerHTML = deepCleanHTML(originalHTML);
 
-    // Remove problematic styles
+    // Remove problematic styles but keep content structure
     clone.style.transform = 'none';
     clone.style.margin = '0';
     clone.style.padding = '0';
@@ -106,12 +109,31 @@ export const exportToPDF = async (element, fileName = 'document.pdf') => {
     clone.style.position = 'relative';
     clone.style.display = 'block';
     clone.style.width = '816px';
+    clone.style.minHeight = 'auto';
+
+    // Ensure ProseMirror class is preserved for styling
+    if (!clone.classList.contains('ProseMirror')) {
+        clone.classList.add('ProseMirror');
+    }
 
     container.appendChild(clone);
     document.body.appendChild(container);
 
-    // Wait for fonts/images to load
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Wait for fonts/images to load - increased timeout for images
+    const images = clone.querySelectorAll('img');
+    const imagePromises = Array.from(images).map(img => {
+        return new Promise((resolve) => {
+            if (img.complete) {
+                resolve();
+            } else {
+                img.onload = resolve;
+                img.onerror = resolve; // Continue even if image fails
+                setTimeout(resolve, 2000); // Max 2s wait per image
+            }
+        });
+    });
+    await Promise.all(imagePromises);
+    await new Promise(resolve => setTimeout(resolve, 300)); // Additional wait
 
     const opt = {
         margin: [0, 0, 0, 0],
@@ -120,6 +142,7 @@ export const exportToPDF = async (element, fileName = 'document.pdf') => {
         html2canvas: {
             scale: 2,
             useCORS: true,
+            allowTaint: true, // Allow cross-origin images
             logging: false,
             width: 816,
             height: undefined, // Auto height
@@ -182,8 +205,28 @@ export const exportToPDF = async (element, fileName = 'document.pdf') => {
                         font-weight: 600;
                         color: #64748b;
                     }
+                    img {
+                        max-width: 100% !important;
+                        height: auto !important;
+                        display: block !important;
+                        margin: 1em 0 !important;
+                    }
+                    .editor-image {
+                        max-width: 100% !important;
+                        height: auto !important;
+                    }
                 `;
                 clonedDoc.head.appendChild(essentialStyle);
+                
+                // Ensure all images are loaded and converted to base64 if needed
+                const clonedImages = clonedDoc.querySelectorAll('img');
+                clonedImages.forEach(img => {
+                    // If image is base64, ensure it's properly formatted
+                    if (img.src && img.src.startsWith('data:')) {
+                        img.style.maxWidth = '100%';
+                        img.style.height = 'auto';
+                    }
+                });
 
                 // Sanitize all elements in cloned document
                 const allElements = clonedDoc.querySelectorAll('*');
@@ -214,8 +257,12 @@ export const exportToPDF = async (element, fileName = 'document.pdf') => {
             throw new Error('PDF library (html2pdf) not correctly loaded');
         }
 
+        // Use the container directly, not the clone
         const exporter = html2pdf().from(container).set(opt);
+        
+        // Save the PDF
         await exporter.save();
+        
         console.log('PDF Export successful');
     } catch (error) {
         console.error('PDF Export failed details:', error);
@@ -394,6 +441,15 @@ function htmlToDocxElements(htmlString) {
             case 'br':
                 return new Paragraph({
                     children: [new TextRun('')],
+                    spacing: { after: 120 }
+                });
+            case 'img':
+                // Handle images - create a paragraph with image placeholder
+                // Note: Full image support requires converting base64 to proper format
+                // For now, we'll add a text placeholder
+                const imgAlt = node.getAttribute('alt') || 'Image';
+                return new Paragraph({
+                    children: [new TextRun({ text: `[${imgAlt}]`, italics: true })],
                     spacing: { after: 120 }
                 });
             case 'div':

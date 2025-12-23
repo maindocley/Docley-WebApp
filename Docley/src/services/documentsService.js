@@ -120,16 +120,14 @@ export async function deleteDocument(id) {
         throw new Error('User not authenticated');
     }
 
-    const { data, error } = await supabase
+    const { error } = await supabase
         .from('documents')
         .update({ deleted_at: new Date().toISOString() })
         .eq('id', id)
-        .eq('user_id', user.id)
-        .select()
-        .single();
+        .eq('user_id', user.id);
 
     if (error) throw error;
-    return data;
+    return true;
 }
 
 // Permanently delete a document (admin use)

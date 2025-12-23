@@ -6,8 +6,9 @@ import { Color } from '@tiptap/extension-color';
 import { Highlight } from '@tiptap/extension-highlight';
 import { FontFamily } from '@tiptap/extension-font-family';
 import { TextAlign } from '@tiptap/extension-text-align';
+import { Image } from '@tiptap/extension-image';
 import { Extension } from '@tiptap/core';
-import { useMemo, useCallback, memo } from 'react';
+import { useEffect, useState, useMemo, useCallback, memo, useRef } from 'react';
 
 const FontSize = Extension.create({
     name: 'fontSize',
@@ -132,24 +133,30 @@ import {
     ChevronDown,
     Eraser,
     Layout,
+    Image as ImageIcon,
 } from 'lucide-react';
 import { Link, useParams, useNavigate, useLocation } from 'react-router-dom';
-import { useEffect, useState, useRef } from 'react';
+
 import { cn } from '../../lib/utils';
 import { useToast } from '../../context/ToastContext';
 import { DiagnosticReport } from '../../components/modals/DiagnosticReport';
 import { EDITOR_CONFIG } from './editorConfig';
 import { Pagination } from './extensions/Pagination';
 import './Editor.css';
+import { ColorPicker } from '../../components/ui/ColorPicker';
 import { exportToPDF, exportToWord } from './lib/exportUtils';
-import { getDocument, updateDocument, autoSaveDocument, deleteDocument } from '../../services/documentsService';
+import { getDocument, updateDocument, autoSaveDocument, deleteDocument, permanentlyDeleteDocument } from '../../services/documentsService';
+import { upgradeDocument } from '../../services/aiService';
 
 // Memoized MenuBar component to prevent unnecessary re-renders
-const MenuBar = memo(({ editor, zoom, setZoom }) => {
+const MenuBar = memo(({ editor, zoom, setZoom, onImageUpload, imageInputRef }) => {
     const [showFontFamily, setShowFontFamily] = useState(false);
     const [showHeadings, setShowHeadings] = useState(false);
     const [showLineHeight, setShowLineHeight] = useState(false);
     const [showPageSetup, setShowPageSetup] = useState(false);
+    const [showTextColor, setShowTextColor] = useState(false);
+    const [showHighlightColor, setShowHighlightColor] = useState(false);
+    const [showImageOptions, setShowImageOptions] = useState(false);
 
     // Memoize static data
     const lineHeights = useMemo(() => [
@@ -175,6 +182,13 @@ const MenuBar = memo(({ editor, zoom, setZoom }) => {
         { label: 'Heading 3', level: 3 },
     ], []);
 
+    // Helper for Font Size Clamping
+    const clampFontSize = (val) => {
+        const size = parseInt(val);
+        if (isNaN(size)) return 12;
+        return Math.min(Math.max(size, 6), 32);
+    };
+
     // Memoize current font size to avoid recalculation
     const currentFontSize = useMemo(() => {
         if (!editor) return '16';
@@ -184,7 +198,8 @@ const MenuBar = memo(({ editor, zoom, setZoom }) => {
     // Optimize formatting callbacks with useCallback
     const updateFontSize = useCallback((newSize) => {
         if (!editor || !newSize) return;
-        editor.chain().focus().setFontSize(newSize).run();
+        const clamped = clampFontSize(newSize);
+        editor.chain().focus().setFontSize(clamped.toString()).run();
     }, [editor]);
 
     const incrementFontSize = useCallback(() => {
@@ -199,14 +214,20 @@ const MenuBar = memo(({ editor, zoom, setZoom }) => {
         }
     }, [currentFontSize, updateFontSize]);
 
-    const addColor = useCallback((e) => {
+    const addColor = useCallback((color) => {
         if (!editor) return;
-        editor.chain().focus().setColor(e.target.value).run();
+        editor.chain().focus().setColor(color).run();
+        setShowTextColor(false);
     }, [editor]);
 
-    const addHighlight = useCallback((e) => {
+    const addHighlight = useCallback((color) => {
         if (!editor) return;
-        editor.chain().focus().toggleHighlight({ color: e.target.value }).run();
+        if (color === null) {
+            editor.chain().focus().unsetHighlight().run();
+        } else {
+            editor.chain().focus().toggleHighlight({ color }).run();
+        }
+        setShowHighlightColor(false);
     }, [editor]);
 
     // Memoize formatting button handlers
@@ -241,6 +262,14 @@ const MenuBar = memo(({ editor, zoom, setZoom }) => {
         setShowLineHeight(false);
     }, [editor]);
 
+    const handleImageUrl = useCallback(() => {
+        const url = window.prompt('Enter image URL');
+        if (url) {
+            editor.chain().focus().setImage({ src: url }).run();
+        }
+        setShowImageOptions(false);
+    }, [editor]);
+
     // Memoize alignment handlers
     const handleAlign = useCallback((align) => {
         if (!editor) return;
@@ -267,9 +296,9 @@ const MenuBar = memo(({ editor, zoom, setZoom }) => {
     const isUnderline = editor.isActive('underline');
     const canUndo = editor.can().undo();
     const canRedo = editor.can().redo();
-    const activeHeading = editor.isActive('heading', { level: 1 }) ? 1 : 
-                          editor.isActive('heading', { level: 2 }) ? 2 : 
-                          editor.isActive('heading', { level: 3 }) ? 3 : 0;
+    const activeHeading = editor.isActive('heading', { level: 1 }) ? 1 :
+        editor.isActive('heading', { level: 2 }) ? 2 :
+            editor.isActive('heading', { level: 3 }) ? 3 : 0;
     const activeFontFamily = fonts.find(f => editor.isActive('textStyle', { fontFamily: f.value }))?.value || '';
     const activeLineHeight = editor.getAttributes('paragraph').lineHeight || '1.5';
     const textAlign = editor.getAttributes('textAlign') || 'left';
@@ -426,27 +455,58 @@ const MenuBar = memo(({ editor, zoom, setZoom }) => {
                 </button>
 
                 {/* Text Color */}
-                <div className="relative flex items-center p-1.5 rounded hover:bg-slate-200 text-slate-600 group cursor-pointer transition-colors">
-                    <Palette className="h-4 w-4" />
-                    <input
-                        type="color"
-                        onInput={addColor}
-                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                <div className="relative group">
+                    <button
+                        onClick={() => setShowTextColor(!showTextColor)}
+                        className="flex items-center gap-1 p-1.5 rounded hover:bg-slate-200 text-slate-600 transition-colors"
                         title="Text Color"
-                    />
-                    <div className="absolute bottom-1 left-1.5 right-1.5 h-0.5" style={{ backgroundColor: editor.getAttributes('textStyle').color || '#000000' }} />
+                    >
+                        <div className="flex flex-col items-center">
+                            <span className="font-serif font-bold text-sm leading-none">A</span>
+                            <div className="h-1 w-4 mt-0.5" style={{ backgroundColor: editor.getAttributes('textStyle').color || '#000000' }} />
+                        </div>
+                        <ChevronDown className="h-3 w-3 ml-0.5" />
+                    </button>
+                    {showTextColor && (
+                        <>
+                            <div className="fixed inset-0 z-39" onClick={() => setShowTextColor(false)} />
+                            <div className="absolute top-full left-0 mt-1 bg-white shadow-lg border border-slate-200 rounded-md py-1 z-40">
+                                <ColorPicker
+                                    value={editor.getAttributes('textStyle').color || '#000000'}
+                                    onChange={addColor}
+                                    onClose={() => setShowTextColor(false)}
+                                />
+                            </div>
+                        </>
+                    )}
                 </div>
 
                 {/* Highlight Color */}
-                <div className="relative flex items-center p-1.5 rounded hover:bg-slate-200 text-slate-600 group cursor-pointer transition-colors">
-                    <Highlighter className="h-4 w-4" />
-                    <input
-                        type="color"
-                        onInput={addHighlight}
-                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                <div className="relative group">
+                    <button
+                        onClick={() => setShowHighlightColor(!showHighlightColor)}
+                        className="flex items-center gap-1 p-1.5 rounded hover:bg-slate-200 text-slate-600 transition-colors"
                         title="Highlight Color"
-                    />
-                    <div className="absolute bottom-1 left-1.5 right-1.5 h-0.5" style={{ backgroundColor: editor.getAttributes('highlight').color || '#ffff00' }} />
+                    >
+                        <div className="flex flex-col items-center">
+                            <Highlighter className="h-3.5 w-3.5" />
+                            <div className="h-1 w-4 mt-0.5" style={{ backgroundColor: editor.getAttributes('highlight').color || 'transparent' }} />
+                        </div>
+                        <ChevronDown className="h-3 w-3 ml-0.5" />
+                    </button>
+                    {showHighlightColor && (
+                        <>
+                            <div className="fixed inset-0 z-39" onClick={() => setShowHighlightColor(false)} />
+                            <div className="absolute top-full left-0 mt-1 bg-white shadow-lg border border-slate-200 rounded-md py-1 z-40">
+                                <ColorPicker
+                                    type="highlight"
+                                    value={editor.getAttributes('highlight').color}
+                                    onChange={addHighlight}
+                                    onClose={() => setShowHighlightColor(false)}
+                                />
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
 
@@ -552,6 +612,49 @@ const MenuBar = memo(({ editor, zoom, setZoom }) => {
                                     {lh.label}
                                 </button>
                             ))}
+                        </div>
+                    </>
+                )}
+            </div>
+
+            <div className="w-px h-6 bg-slate-200 mx-1" />
+
+            {/* Add Image */}
+            <div className="relative group">
+                <input
+                    ref={imageInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={onImageUpload}
+                    className="hidden"
+                />
+                <button
+                    onClick={() => setShowImageOptions(!showImageOptions)}
+                    className="flex items-center gap-1 p-1.5 rounded hover:bg-slate-200 text-slate-600 transition-colors"
+                    title="Insert Image"
+                >
+                    <ImageIcon className="h-4 w-4" />
+                    <ChevronDown className="h-3 w-3" />
+                </button>
+                {showImageOptions && (
+                    <>
+                        <div className="fixed inset-0 z-39" onClick={() => setShowImageOptions(false)} />
+                        <div className="absolute top-full left-0 mt-1 w-40 bg-white shadow-lg border border-slate-200 rounded-md py-1 z-40">
+                            <button
+                                onClick={() => {
+                                    imageInputRef.current?.click();
+                                    setShowImageOptions(false);
+                                }}
+                                className="w-full px-3 py-1.5 text-left text-sm hover:bg-slate-100 transition-colors"
+                            >
+                                Upload from Computer
+                            </button>
+                            <button
+                                onClick={handleImageUrl}
+                                className="w-full px-3 py-1.5 text-left text-sm hover:bg-slate-100 transition-colors"
+                            >
+                                By URL
+                            </button>
                         </div>
                     </>
                 )}
@@ -692,6 +795,7 @@ export default function EditorPage() {
     const { addToast } = useToast();
     const autoSaveTimeoutRef = useRef(null);
     const editorRef = useRef(null);
+    const imageInputRef = useRef(null);
 
     // Load document
     useEffect(() => {
@@ -760,6 +864,13 @@ export default function EditorPage() {
         TextAlign.configure({
             types: ['heading', 'paragraph'],
         }),
+        Image.configure({
+            inline: false,
+            allowBase64: true,
+            HTMLAttributes: {
+                class: 'editor-image',
+            },
+        }),
         FontSize,
         LineHeight,
         Pagination.configure({
@@ -793,6 +904,40 @@ export default function EditorPage() {
         [doc?.content_html, doc?.content, handleAutoSave]
     );
 
+    // Handle image upload
+    const handleImageSelect = useCallback((e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            addToast('Please select an image file', 'error');
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+            addToast('Image size must be less than 5MB', 'error');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const src = event.target.result;
+            if (editor) {
+                editor.chain().focus().setImage({ src }).run();
+                addToast('Image added successfully', 'success');
+            }
+        };
+        reader.onerror = () => {
+            addToast('Failed to load image', 'error');
+        };
+        reader.readAsDataURL(file);
+
+        // Reset input
+        if (imageInputRef.current) {
+            imageInputRef.current.value = '';
+        }
+    }, [editor, addToast]);
+
     // Update content when doc loads
     useEffect(() => {
         if (editor && doc) {
@@ -823,15 +968,34 @@ export default function EditorPage() {
         }
     }, [id, doc?.id]);
 
-    const handleUpgrade = useCallback(() => {
-        setIsUpgrading(true);
-        addToast('Starting academic analysis...', 'info');
+    const handleUpgrade = useCallback(async () => {
+        if (!editor) return;
 
-        setTimeout(() => {
+        setIsUpgrading(true);
+        addToast('Starting context expansion and academic analysis...', 'info');
+
+        try {
+            const currentContent = editor.getText();
+            // If content is too short, warn user? Or just proceed.
+            if (currentContent.trim().length < 10) {
+                addToast('Document is too short to upgrade.', 'error');
+                setIsUpgrading(false);
+                return;
+            }
+
+            const upgradedText = await upgradeDocument(currentContent);
+
+            if (upgradedText) {
+                editor.commands.setContent(upgradedText);
+                addToast('Upgrade complete! Content expanded and improved.', 'success');
+            }
+        } catch (error) {
+            console.error('Upgrade failed:', error);
+            addToast('Failed to upgrade document: ' + error.message, 'error');
+        } finally {
             setIsUpgrading(false);
-            addToast('Upgrade complete! Improvements applied.', 'success');
-        }, 2500);
-    }, [addToast]);
+        }
+    }, [editor, addToast]);
 
     const handleExport = useCallback(async (format) => {
         setIsExporting(true);
@@ -868,15 +1032,26 @@ export default function EditorPage() {
     }, [doc, editor, addToast]);
 
     const handleDelete = useCallback(async () => {
-        if (!doc?.id || id === 'new') return;
+        if (id === 'new') {
+            setShowDeleteConfirm(false);
+            setShowSettings(false);
+            addToast('Draft discarded', 'info');
+            navigate('/dashboard/documents');
+            return;
+        }
+
+        if (!doc?.id) return;
 
         try {
-            await deleteDocument(doc.id);
-            addToast('Document deleted', 'success');
+            await permanentlyDeleteDocument(doc.id);
+            addToast('Document deleted permanently', 'success');
             navigate('/dashboard/documents');
         } catch (error) {
             console.error('Failed to delete:', error);
             addToast('Failed to delete document', 'error');
+        } finally {
+            setShowDeleteConfirm(false);
+            setShowSettings(false);
         }
     }, [doc?.id, id, navigate, addToast]);
 
@@ -905,7 +1080,11 @@ export default function EditorPage() {
 
     return (
         <div className="fixed inset-0 bg-slate-100 flex flex-col">
-            <DiagnosticReport isOpen={showReport} onClose={() => setShowReport(false)} />
+            <DiagnosticReport
+                isOpen={showReport}
+                onClose={() => setShowReport(false)}
+                documentText={editor?.getText() || ''}
+            />
 
             {/* Top Navigation Bar */}
             <header className="bg-white border-b border-slate-200 flex-shrink-0">
@@ -1042,7 +1221,7 @@ export default function EditorPage() {
                 </div>
 
                 {/* Toolbar */}
-                <MenuBar editor={editor} zoom={zoom} setZoom={setZoom} />
+                <MenuBar editor={editor} zoom={zoom} setZoom={setZoom} onImageUpload={handleImageSelect} imageInputRef={imageInputRef} />
             </header>
 
             {/* Editor Canvas */}
@@ -1073,9 +1252,9 @@ export default function EditorPage() {
                                 <Trash2 className="h-6 w-6 text-red-600" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-bold text-slate-900">Delete Document?</h3>
+                                <h3 className="text-lg font-bold text-slate-900">Delete Permanently?</h3>
                                 <p className="text-sm text-slate-600 mt-1">
-                                    This will move "{doc?.title}" to trash. You can restore it later from settings.
+                                    Are you sure you want to delete "{doc?.title}"? This action cannot be undone.
                                 </p>
                             </div>
                         </div>
@@ -1084,13 +1263,10 @@ export default function EditorPage() {
                                 Cancel
                             </Button>
                             <Button
-                                onClick={() => {
-                                    setShowDeleteConfirm(false);
-                                    handleDelete();
-                                }}
+                                onClick={handleDelete}
                                 className="bg-red-600 hover:bg-red-700 text-white"
                             >
-                                Delete
+                                Delete Forever
                             </Button>
                         </div>
                     </div>
