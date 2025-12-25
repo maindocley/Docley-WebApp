@@ -1,25 +1,24 @@
-import { supabase } from '../lib/supabase';
+const API_URL = 'http://localhost:3000/ai/transform';
 
-/**
- * Invokes the 'transform-document' Edge Function.
- * @param {string} text - The text to transform.
- * @param {string} instruction - The instruction for the AI.
- * @returns {Promise<string>} - The transformed text.
- */
 export const transformDocument = async (text, instruction) => {
-    const { data, error } = await supabase.functions.invoke('transform-document', {
-        body: { text, instruction },
-    });
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text, instruction, mode: 'transform' }),
+        });
 
-    if (error) {
-        throw new Error(error.message);
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data.result;
+    } catch (error) {
+        throw new Error('Failed to transform document: ' + error.message);
     }
-
-    if (data?.error) {
-        throw new Error(data.error);
-    }
-
-    return data?.result || '';
 };
 
 /**
@@ -35,22 +34,35 @@ export const upgradeDocument = async (text) => {
 };
 
 /**
- * Invokes the 'transform-document' function in 'analysis' mode.
+ * Invokes the NestJS backend in 'analysis' mode.
  * @param {string} text 
  * @returns {Promise<Object>} JSON object with scores and improvements.
  */
 export const analyzeDocument = async (text) => {
-    const { data, error } = await supabase.functions.invoke('transform-document', {
-        body: { text, mode: 'analysis' },
-    });
-
-    if (error) throw new Error(error.message);
-    if (data?.error) throw new Error(data.error);
-
     try {
-        return JSON.parse(data.result);
-    } catch (e) {
-        console.error("Failed to parse analysis result", data.result);
-        throw new Error("Invalid response format from AI");
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text, mode: 'analysis' }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        try {
+            if (typeof data.result === 'string') {
+                return JSON.parse(data.result);
+            }
+            return data.result;
+        } catch (e) {
+            console.error("Failed to parse analysis result", data.result);
+            throw new Error("Invalid response format from AI");
+        }
+    } catch (error) {
+        throw new Error('Failed to analyze document: ' + error.message);
     }
 };

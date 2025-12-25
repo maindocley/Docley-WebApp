@@ -1,7 +1,7 @@
 export const EDITOR_CONFIG = {
-    // A4 Dimensions at 96 DPI
+    // Letter Dimensions at 96 DPI
     PAGE_WIDTH: 816, // 8.5in * 96
-    PAGE_HEIGHT: 1123, // 11.69in * 96 (Standard A4 is 210mm x 297mm)
+    PAGE_HEIGHT: 1056, // 11in * 96
 
     // Page Rendering Constants
     PAGE_GAP: 32,
@@ -9,14 +9,14 @@ export const EDITOR_CONFIG = {
 
     // Default Margins (1 inch = 96px)
     DEFAULT_MARGINS: {
-        top: 50,
-        bottom: 50,
-        left: 50,
-        right: 50
+        top: 96,
+        bottom: 96,
+        left: 96,
+        right: 96
     },
 
     // Academic Defaults
-    DEFAULT_FONT_SIZE: '12',
+    DEFAULT_FONT_SIZE: '11',
     DEFAULT_LINE_HEIGHT: '1.5',
     DEFAULT_FONT_FAMILY: 'Arial',
 

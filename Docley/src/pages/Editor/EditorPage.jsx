@@ -6,7 +6,7 @@ import { Color } from '@tiptap/extension-color';
 import { Highlight } from '@tiptap/extension-highlight';
 import { FontFamily } from '@tiptap/extension-font-family';
 import { TextAlign } from '@tiptap/extension-text-align';
-import { Image } from '@tiptap/extension-image';
+import { ResizableImage } from './extensions/ResizableImage';
 import { Extension } from '@tiptap/core';
 import { useEffect, useState, useMemo, useCallback, memo, useRef } from 'react';
 
@@ -167,12 +167,21 @@ const MenuBar = memo(({ editor, zoom, setZoom, onImageUpload, imageInputRef }) =
     ], []);
 
     const fonts = useMemo(() => [
-        { name: 'Default', value: '' },
         { name: 'Arial', value: 'Arial' },
-        { name: 'Roboto', value: 'Roboto' },
-        { name: 'Sans-Serif', value: 'sans-serif' },
-        { name: 'Serif', value: 'serif' },
-        { name: 'Monospace', value: 'monospace' },
+        { name: 'Calibri', value: 'Calibri' }, // System font
+        { name: 'Cambria', value: 'Cambria' }, // System font
+        { name: 'Consolas', value: 'Consolas' }, // System font
+        { name: 'Courier New', value: 'Courier New' },
+        { name: 'EB Garamond', value: 'EB Garamond' }, // Google Font
+        { name: 'Georgia', value: 'Georgia' },
+        { name: 'Lora', value: 'Lora' }, // Google Font
+        { name: 'Merriweather', value: 'Merriweather' }, // Google Font
+        { name: 'Montserrat', value: 'Montserrat' }, // Google Font
+        { name: 'Open Sans', value: 'Open Sans' }, // Google Font
+        { name: 'Roboto', value: 'Roboto' }, // Google Font
+        { name: 'Roboto Mono', value: 'Roboto Mono' }, // Google Font
+        { name: 'Source Code Pro', value: 'Source Code Pro' }, // Google Font
+        { name: 'Times New Roman', value: 'Times New Roman' },
     ], []);
 
     const headingLevels = useMemo(() => [
@@ -190,10 +199,17 @@ const MenuBar = memo(({ editor, zoom, setZoom, onImageUpload, imageInputRef }) =
     };
 
     // Memoize current font size to avoid recalculation
+    // Memoize current font size to avoid recalculation, handling both selection and stored marks
     const currentFontSize = useMemo(() => {
-        if (!editor) return '16';
-        return editor.getAttributes('textStyle').fontSize || '16';
-    }, [editor?.state.selection]);
+        if (!editor) return '11';
+        // Check for stored marks first (pending style)
+        const storedMarks = editor.getAttributes('textStyle');
+        if (storedMarks && storedMarks.fontSize) {
+            return storedMarks.fontSize;
+        }
+        // Fallback to selection attributes
+        return editor.getAttributes('textStyle').fontSize || '11';
+    }, [editor?.state.selection, editor?.state.storedMarks]);
 
     // Optimize formatting callbacks with useCallback
     const updateFontSize = useCallback((newSize) => {
@@ -203,16 +219,20 @@ const MenuBar = memo(({ editor, zoom, setZoom, onImageUpload, imageInputRef }) =
     }, [editor]);
 
     const incrementFontSize = useCallback(() => {
-        const size = parseInt(currentFontSize) || 16;
+        if (!editor) return;
+        // Logic to toggle stored mark if empty selection is missing here in simple implementation
+        // But setFontSize chain helper usually handles it.
+        const size = parseInt(currentFontSize) || 11;
         updateFontSize((size + 1).toString());
-    }, [currentFontSize, updateFontSize]);
+    }, [currentFontSize, updateFontSize, editor]);
 
     const decrementFontSize = useCallback(() => {
-        const size = parseInt(currentFontSize) || 16;
+        if (!editor) return;
+        const size = parseInt(currentFontSize) || 11;
         if (size > 1) {
             updateFontSize((size - 1).toString());
         }
-    }, [currentFontSize, updateFontSize]);
+    }, [currentFontSize, updateFontSize, editor]);
 
     const addColor = useCallback((color) => {
         if (!editor) return;
@@ -864,13 +884,7 @@ export default function EditorPage() {
         TextAlign.configure({
             types: ['heading', 'paragraph'],
         }),
-        Image.configure({
-            inline: false,
-            allowBase64: true,
-            HTMLAttributes: {
-                class: 'editor-image',
-            },
-        }),
+        ResizableImage,
         FontSize,
         LineHeight,
         Pagination.configure({
