@@ -80,14 +80,19 @@ export function DiagnosticReport({ isOpen, onClose, documentText }) {
                                     </div>
                                     <div className="text-right">
                                         <div className="text-5xl font-black tracking-tight">{data.overallGrade || 'N/A'}</div>
-                                        <div className="text-sm text-indigo-200 mt-1">{data.overallGradeText || 'Not Graded'}</div>
+                                        <div className="text-sm text-indigo-200 mt-1">Academic Level</div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Detailed Scores */}
                             <div className="grid sm:grid-cols-2 gap-4">
-                                {data.scores?.map((item) => (
+                                {[
+                                    { label: 'Structure Quality', score: data.structureScore },
+                                    { label: 'Academic Tone', score: data.toneScore },
+                                    { label: 'Clarity & Coherence', score: data.clarityScore },
+                                    { label: 'Plagiarism Risk', score: data.plagiarismScore }
+                                ].map((item) => (
                                     <div
                                         key={item.label}
                                         className="bg-gradient-to-br from-white to-slate-50/50 p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow"
@@ -100,13 +105,13 @@ export function DiagnosticReport({ isOpen, onClose, documentText }) {
                                                 <span className="font-semibold text-slate-700 text-sm">{item.label}</span>
                                             </div>
                                             <span className="font-bold text-lg text-indigo-600">
-                                                {item.score}/100
+                                                {item.score ?? 0}/100
                                             </span>
                                         </div>
                                         <div className="h-2.5 bg-slate-200 rounded-full overflow-hidden">
                                             <div
                                                 className="h-full bg-indigo-600 rounded-full transition-all duration-1000"
-                                                style={{ width: `${item.score}%` }}
+                                                style={{ width: `${item.score ?? 0}%` }}
                                             ></div>
                                         </div>
                                     </div>
@@ -120,19 +125,12 @@ export function DiagnosticReport({ isOpen, onClose, documentText }) {
                                     Key Improvements & Insights
                                 </div>
                                 <div className="divide-y divide-slate-100">
-                                    {data.improvements?.map((item, idx) => (
+                                    {data.insights?.map((item, idx) => (
                                         <div key={idx} className="p-4 flex gap-4 hover:bg-slate-50/50 transition-colors">
                                             <div
-                                                className={`h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 ${item.type === 'warning'
-                                                        ? 'bg-amber-100'
-                                                        : item.type === 'info'
-                                                            ? 'bg-blue-100'
-                                                            : 'bg-green-100'
-                                                    }`}
+                                                className="h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-blue-100"
                                             >
-                                                {item.type === 'warning' ? <AlertCircle className="h-5 w-5 text-amber-600" /> :
-                                                    item.type === 'info' ? <Info className="h-5 w-5 text-blue-600" /> :
-                                                        <CheckCircle2 className="h-5 w-5 text-green-600" />}
+                                                <Info className="h-5 w-5 text-blue-600" />
                                             </div>
                                             <div className="flex-1">
                                                 <p className="text-sm font-semibold text-slate-900 mb-1">{item.title}</p>

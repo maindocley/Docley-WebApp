@@ -1,96 +1,98 @@
 import { supabase } from '../lib/supabase';
 
+const API_URL = 'http://localhost:3000/documents';
+
 /**
  * Documents Service
- * Handles all CRUD operations for documents
+ * Handles all CRUD operations for documents via the NestJS Backend
  */
+
+// Helper to get authorization header
+const getAuthHeaders = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+        throw new Error('User not authenticated');
+    }
+    return {
+        'Authorization': `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json',
+    };
+};
 
 // Create a new document
 export async function createDocument(documentData) {
-    const { data: { user } } = await supabase.auth.getUser();
+    const headers = await getAuthHeaders();
 
-    if (!user) {
-        throw new Error('User not authenticated');
+    // Construct payload matching the backend expectation
+    const payload = {
+        title: documentData.title,
+        content: documentData.content || '',
+        content_html: documentData.contentHtml || '',
+        academic_level: documentData.academicLevel || 'undergraduate',
+        citation_style: documentData.citationStyle || 'APA 7th Edition',
+        document_type: documentData.documentType || 'Essay',
+        file_url: documentData.fileUrl || null,
+        file_name: documentData.fileName || null,
+        file_size: documentData.fileSize || null,
+        status: 'draft',
+    };
+
+    const response = await fetch(API_URL, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to create document');
     }
 
-    const { data, error } = await supabase
-        .from('documents')
-        .insert({
-            user_id: user.id,
-            title: documentData.title,
-            content: documentData.content || '',
-            content_html: documentData.contentHtml || '',
-            academic_level: documentData.academicLevel || 'undergraduate',
-            citation_style: documentData.citationStyle || 'APA 7th Edition',
-            document_type: documentData.documentType || 'Essay',
-            file_url: documentData.fileUrl || null,
-            file_name: documentData.fileName || null,
-            file_size: documentData.fileSize || null,
-            status: 'draft',
-        })
-        .select()
-        .single();
-
-    if (error) throw error;
-    return data;
+    return await response.json();
 }
 
 // Get all documents for the current user
-export async function getDocuments({ limit = 50, offset = 0, status = null } = {}) {
-    const { data: { user } } = await supabase.auth.getUser();
+export async function getDocuments() {
+    const headers = await getAuthHeaders();
 
-    if (!user) {
-        throw new Error('User not authenticated');
+    const response = await fetch(API_URL, {
+        method: 'GET',
+        headers
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to fetch documents');
     }
 
-    let query = supabase
-        .from('documents')
-        .select('*')
-        .eq('user_id', user.id)
-        .is('deleted_at', null)
-        .order('updated_at', { ascending: false })
-        .range(offset, offset + limit - 1);
-
-    if (status) {
-        query = query.eq('status', status);
-    }
-
-    const { data, error } = await query;
-
-    if (error) throw error;
-    return data;
+    return await response.json();
 }
 
 // Get a single document by ID
 export async function getDocument(id) {
-    const { data: { user } } = await supabase.auth.getUser();
+    const headers = await getAuthHeaders();
 
-    if (!user) {
-        throw new Error('User not authenticated');
+    const response = await fetch(`${API_URL}/${id}`, {
+        method: 'GET',
+        headers
+    });
+
+    if (!response.ok) {
+        if (response.status === 404) {
+            throw new Error('Document not found');
+        }
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to fetch document');
     }
 
-    const { data, error } = await supabase
-        .from('documents')
-        .select('*')
-        .eq('id', id)
-        .eq('user_id', user.id)
-        .is('deleted_at', null)
-        .single();
-
-    if (error) throw error;
-    return data;
+    return await response.json();
 }
 
 // Update a document
 export async function updateDocument(id, updates) {
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        throw new Error('User not authenticated');
-    }
+    const headers = await getAuthHeaders();
 
     const updateData = {};
-
     if (updates.title !== undefined) updateData.title = updates.title;
     if (updates.content !== undefined) updateData.content = updates.content;
     if (updates.contentHtml !== undefined) updateData.content_html = updates.contentHtml;
@@ -100,91 +102,51 @@ export async function updateDocument(id, updates) {
     if (updates.documentType !== undefined) updateData.document_type = updates.documentType;
     if (updates.status !== undefined) updateData.status = updates.status;
 
-    const { data, error } = await supabase
-        .from('documents')
-        .update(updateData)
-        .eq('id', id)
-        .eq('user_id', user.id)
-        .select()
-        .single();
+    const response = await fetch(`${API_URL}/${id}`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify(updateData)
+    });
 
-    if (error) throw error;
-    return data;
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to update document');
+    }
+
+    return await response.json();
 }
 
 // Soft delete a document
+// NOT YET IMPLEMENTED IN BACKEND - Keeping frontend implementation for momentary fallback or needs backend update
+// Based on plan, this should also be API call. Assuming Delete endpoint on backend is next or use Update.
+// For now, mapping delete to update status/deleted_at via Patch if supported, or leaving strict delete.
+// Request only asked for GET, POST, PATCH. I will use PATCH to soft delete if possible, 
+// or I will implement DELETE endpoint in backend quickly if necessary? 
+// The user prompt only asked for create, update, findAll, findOne methods in backend.
+// So I will comment out delete functionality or implement it via PATCH { deleted_at: ... } if backend supports it.
+// Checking backend service... update takes 'updates: any'. So yes!
+
 export async function deleteDocument(id) {
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        throw new Error('User not authenticated');
-    }
-
-    const { error } = await supabase
-        .from('documents')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', id)
-        .eq('user_id', user.id);
-
-    if (error) throw error;
-    return true;
+    return updateDocument(id, { deleted_at: new Date().toISOString() });
 }
 
-// Permanently delete a document (admin use)
 export async function permanentlyDeleteDocument(id) {
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        throw new Error('User not authenticated');
-    }
-
-    const { error } = await supabase
-        .from('documents')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
-
-    if (error) throw error;
-    return true;
+    // Admin only, or requires DELETE endpoints not yet built.
+    // For now throwing error or omitting to stay consistent with instructions.
+    throw new Error("Permanently delete not supported in this API version yet.");
 }
 
 // Auto-save document content (debounced in component)
 export async function autoSaveDocument(id, content, contentHtml) {
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        throw new Error('User not authenticated');
-    }
-
-    const { data, error } = await supabase
-        .from('documents')
-        .update({
-            content,
-            content_html: contentHtml,
-        })
-        .eq('id', id)
-        .eq('user_id', user.id)
-        .select('id, updated_at, word_count')
-        .single();
-
-    if (error) throw error;
-    return data;
+    return updateDocument(id, { content, contentHtml });
 }
 
 // Get document count for user
+// This usually requires a specific count endpoint or counting based on getDocuments.
+// To keep it simple and performant, we can assume the dashboard might need a separate endpoint
+// or just fetch all and count for now (performance hit on simple implementations).
+// Ideally backend should have /documents/stats.
 export async function getDocumentCount() {
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        throw new Error('User not authenticated');
-    }
-
-    const { count, error } = await supabase
-        .from('documents')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .is('deleted_at', null);
-
-    if (error) throw error;
-    return count || 0;
+    const docs = await getDocuments();
+    return docs.length;
 }

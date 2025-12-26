@@ -84,7 +84,7 @@ export function ContentIntakeModal({ isOpen, onClose, onContinue }) {
             } else if (selectedFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
                 const arrayBuffer = await selectedFile.arrayBuffer();
                 // Convert DOCX to HTML with images preserved
-                const result = await mammoth.convertToHtml({ 
+                const result = await mammoth.convertToHtml({
                     arrayBuffer,
                     convertImage: mammoth.images.imgElement((image) => {
                         // Convert images to base64 data URLs
@@ -95,7 +95,7 @@ export function ContentIntakeModal({ isOpen, onClose, onContinue }) {
                         });
                     })
                 });
-                
+
                 // Preserve the HTML structure from mammoth
                 setHtmlContent(result.value);
                 // Extract plain text for content preview
@@ -110,9 +110,9 @@ export function ContentIntakeModal({ isOpen, onClose, onContinue }) {
                         // Fallback worker configuration
                         pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
                     }
-                    
+
                     const arrayBuffer = await selectedFile.arrayBuffer();
-                    
+
                     // Configure PDF.js with better error handling
                     const loadingTask = pdfjs.getDocument({
                         data: arrayBuffer,
@@ -121,78 +121,74 @@ export function ContentIntakeModal({ isOpen, onClose, onContinue }) {
                         // cMapUrl: `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/cmaps/`,
                         // cMapPacked: true,
                     });
-                    
+
                     const pdf = await loadingTask.promise;
-                    
+
                     if (!pdf || pdf.numPages === 0) {
                         throw new Error('PDF appears to be empty or corrupted');
                     }
-                    
+
                     let htmlContent = '';
                     let fullText = '';
                     const maxPages = Math.min(pdf.numPages, 50); // Limit to 50 pages for performance
-                    
+
                     for (let i = 1; i <= maxPages; i++) {
                         try {
                             const page = await pdf.getPage(i);
-                            const textContent = await page.getTextContent({
-                                normalizeWhitespace: false, // Preserve whitespace for structure
-                                disableCombineTextItems: true // Preserve individual text items
-                            });
-                            
+                            const textContent = await page.getTextContent();
+
                             if (textContent && textContent.items && textContent.items.length > 0) {
-                                // Build HTML with better structure preservation
-                                let pageHtml = '';
-                                let currentLine = '';
-                                
-                                textContent.items.forEach((item, index) => {
-                                    const text = item.str || '';
-                                    const nextItem = textContent.items[index + 1];
-                                    
-                                    // Check if this is a new line based on transform
-                                    const isNewLine = nextItem && 
-                                        Math.abs((nextItem.transform[5] || 0) - (item.transform[5] || 0)) > 5;
-                                    
-                                    if (text.trim()) {
-                                        currentLine += text;
-                                        
-                                        // Check if item has font size to detect headings
-                                        const fontSize = item.height || 0;
-                                        const isHeading = fontSize > 14;
-                                        
-                                        if (isNewLine || !nextItem) {
-                                            if (isHeading && fontSize > 16) {
-                                                pageHtml += `<h2>${currentLine.trim()}</h2>`;
-                                            } else if (isHeading) {
-                                                pageHtml += `<h3>${currentLine.trim()}</h3>`;
-                                            } else {
-                                                pageHtml += `<p>${currentLine.trim()}</p>`;
-                                            }
-                                            fullText += currentLine.trim() + '\n\n';
-                                            currentLine = '';
-                                        } else {
-                                            currentLine += ' ';
+                                let pageText = '';
+                                let lastY = -1;
+
+                                // Sort items by Y then X to ensure reading order
+                                const items = textContent.items.sort((a, b) => {
+                                    if (Math.abs(a.transform[5] - b.transform[5]) > 5) {
+                                        return b.transform[5] - a.transform[5]; // Top to bottom
+                                    }
+                                    return a.transform[4] - b.transform[4]; // Left to right
+                                });
+
+                                items.forEach((item) => {
+                                    if ('str' in item) {
+                                        const text = item.str;
+                                        const currentY = item.transform[5];
+
+                                        // Detect new line
+                                        if (lastY !== -1 && Math.abs(currentY - lastY) > 5) {
+                                            pageText += '\n';
+                                        } else if (pageText.length > 0 && !pageText.endsWith(' ') && !text.startsWith(' ')) {
+                                            // Add space between words on same line if explicit space missing
+                                            pageText += ' ';
                                         }
+
+                                        pageText += text;
+                                        lastY = currentY;
                                     }
                                 });
-                                
-                                if (currentLine.trim()) {
-                                    pageHtml += `<p>${currentLine.trim()}</p>`;
-                                    fullText += currentLine.trim() + '\n\n';
+
+                                if (pageText.trim()) {
+                                    // Convert plain text page to HTML paragraphs
+                                    const paragraphs = pageText.split('\n').filter(line => line.trim());
+                                    const pageHtml = paragraphs.map(p => {
+                                        // Very basic heading detection based on length or capitalization could be added here
+                                        // For now, stick to paragraphs to ensure content visibility
+                                        return `<p>${p}</p>`;
+                                    }).join('');
+
+                                    htmlContent += pageHtml;
+                                    fullText += pageText + '\n\n';
                                 }
-                                
-                                htmlContent += pageHtml;
                             }
                         } catch (pageError) {
                             console.warn(`Error reading page ${i}:`, pageError);
-                            // Continue with next page
                         }
                     }
-                    
+
                     if (!fullText.trim() && !htmlContent.trim()) {
                         throw new Error('Could not extract text from PDF. The PDF might be image-based or protected.');
                     }
-                    
+
                     setContent(fullText);
                     setHtmlContent(htmlContent || fullText.split('\n\n').filter(p => p.trim()).map(para => `<p>${para.trim()}</p>`).join(''));
                     setIsLoading(false);

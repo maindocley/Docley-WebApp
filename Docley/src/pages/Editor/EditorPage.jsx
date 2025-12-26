@@ -149,7 +149,7 @@ import { getDocument, updateDocument, autoSaveDocument, deleteDocument, permanen
 import { upgradeDocument } from '../../services/aiService';
 
 // Memoized MenuBar component to prevent unnecessary re-renders
-const MenuBar = memo(({ editor, zoom, setZoom, onImageUpload, imageInputRef }) => {
+const MenuBar = memo(({ editor, zoom, setZoom, onImageUpload, imageInputRef, editorStateToken }) => {
     const [showFontFamily, setShowFontFamily] = useState(false);
     const [showHeadings, setShowHeadings] = useState(false);
     const [showLineHeight, setShowLineHeight] = useState(false);
@@ -209,7 +209,7 @@ const MenuBar = memo(({ editor, zoom, setZoom, onImageUpload, imageInputRef }) =
         }
         // Fallback to selection attributes
         return editor.getAttributes('textStyle').fontSize || '11';
-    }, [editor?.state.selection, editor?.state.storedMarks]);
+    }, [editor?.state.selection, editor?.state.storedMarks, editorStateToken]);
 
     // Optimize formatting callbacks with useCallback
     const updateFontSize = useCallback((newSize) => {
@@ -816,6 +816,7 @@ export default function EditorPage() {
     const autoSaveTimeoutRef = useRef(null);
     const editorRef = useRef(null);
     const imageInputRef = useRef(null);
+    const [editorStateToken, setEditorStateToken] = useState(0);
 
     // Load document
     useEffect(() => {
@@ -913,6 +914,9 @@ export default function EditorPage() {
                     const html = editor.getHTML();
                     handleAutoSave(text, html);
                 }, 3000); // Increased to 3 seconds for better performance
+            },
+            onTransaction: () => {
+                setEditorStateToken(prev => prev + 1);
             },
         },
         [doc?.content_html, doc?.content, handleAutoSave]
@@ -1235,7 +1239,14 @@ export default function EditorPage() {
                 </div>
 
                 {/* Toolbar */}
-                <MenuBar editor={editor} zoom={zoom} setZoom={setZoom} onImageUpload={handleImageSelect} imageInputRef={imageInputRef} />
+                <MenuBar
+                    editor={editor}
+                    zoom={zoom}
+                    setZoom={setZoom}
+                    onImageUpload={handleImageSelect}
+                    imageInputRef={imageInputRef}
+                    editorStateToken={editorStateToken}
+                />
             </header>
 
             {/* Editor Canvas */}

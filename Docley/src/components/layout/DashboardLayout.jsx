@@ -11,6 +11,7 @@ import {
     LogOut,
     Sparkles,
     MessageSquare,
+    Shield,
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -18,6 +19,7 @@ import { useAuth } from '../../context/AuthContext';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { OnboardingFlow, isOnboardingCompleted } from '../onboarding/OnboardingFlow';
 import { submitFeedback } from '../../services/feedbackService';
+import { isAdminEmail } from '../ProtectedRoute';
 
 export function DashboardLayout() {
     const location = useLocation();
@@ -42,6 +44,8 @@ export function DashboardLayout() {
         { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
         { name: 'My Documents', href: '/dashboard/documents', icon: FileText },
         { name: 'Settings', href: '/dashboard/settings', icon: Settings },
+        // Conditionally add Admin link
+        ...(user && isAdminEmail(user.email) ? [{ name: 'Admin Panel', href: '/admin', icon: Shield }] : []),
     ];
 
     const isActive = (path) => {

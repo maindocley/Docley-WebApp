@@ -1,68 +1,72 @@
+import { supabase } from '../lib/supabase';
+
 const API_URL = 'http://localhost:3000/ai/transform';
 
-export const transformDocument = async (text, instruction) => {
+// Helper to get authorization header
+const getAuthHeaders = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+        throw new Error('User not authenticated');
+    }
+    return {
+        'Authorization': `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json',
+    };
+};
+
+/**
+ * Generic function to call the AI endpoint.
+ * @param {string} text - The input text
+ * @param {string} instruction - Specific instructions for the AI
+ * @param {string} mode - 'diagnostic' or 'upgrade'
+ */
+export const transformDocument = async (text, instruction, mode = 'upgrade') => {
     try {
+        const headers = await getAuthHeaders();
         const response = await fetch(API_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ text, instruction, mode: 'transform' }),
+            headers,
+            body: JSON.stringify({ text, instruction, mode }),
         });
 
         if (!response.ok) {
+            if (response.status === 401) {
+                throw new Error("Unauthorized: Please log in again.");
+            }
             throw new Error(`Server error: ${response.statusText}`);
         }
 
         const data = await response.json();
-        return data.result;
+
+        // If mode is upgrade/transform, we return the result string.
+        // If mode is diagnostic, we return the whole object, but the caller might expect just the result?
+        // Let's keep the legacy return style for transform/upgrade.
+        if (mode === 'upgrade' || mode === 'transform') {
+            return data.result;
+        }
+
+        // For diagnostic, return the full object
+        return data;
+
     } catch (error) {
-        throw new Error('Failed to transform document: ' + error.message);
+        throw new Error('Failed to process AI request: ' + error.message);
     }
 };
 
 /**
- * Specific function for the "Upgrade" feature.
- * Uses a predefined instruction for academic improvement and context expansion.
- * @param {string} text 
- * @returns {Promise<string>}
+ * FEATURE: Upgrade
+ * Improves the text academically.
  */
 export const upgradeDocument = async (text) => {
-    // Instruction tailored for "Context Expansion/Elaboration" as requested
-    const instruction = "Analyze the text and rewrite it to be more academically rigorous. Expand on the context, provide deeper elaboration on key points, and ensure the tone is scholarly. Do not change the fundamental meaning.";
-    return transformDocument(text, instruction);
+    const instruction = "Analyze the text and rewrite it to be more academically rigorous. Expand on the context, provide deeper elaboration on key points, and ensure the tone is scholarly.";
+    return transformDocument(text, instruction, 'upgrade');
 };
 
 /**
- * Invokes the NestJS backend in 'analysis' mode.
- * @param {string} text 
- * @returns {Promise<Object>} JSON object with scores and improvements.
+ * FEATURE: Diagnostic
+ * Returns scores and insights.
  */
 export const analyzeDocument = async (text) => {
-    try {
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ text, mode: 'analysis' }),
-        });
-
-        if (!response.ok) {
-            throw new Error(`Server error: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        try {
-            if (typeof data.result === 'string') {
-                return JSON.parse(data.result);
-            }
-            return data.result;
-        } catch (e) {
-            console.error("Failed to parse analysis result", data.result);
-            throw new Error("Invalid response format from AI");
-        }
-    } catch (error) {
-        throw new Error('Failed to analyze document: ' + error.message);
-    }
+    // Re-uses transformDocument but with diagnostic mode and no instruction (service handles prompt)
+    return transformDocument(text, '', 'diagnostic');
 };

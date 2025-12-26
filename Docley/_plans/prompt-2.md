@@ -1,11 +1,6 @@
-Now that we've designed the frontends for:
+Phase 4: The "Pro-Launch" (Hardening)
+Goal: Performance and maintenance.
 
-- Dashboard and all components
-- pricing 
-- And all other pages
+Lightweight Refactor: Audit React dependencies. Since you are using Supabase + NestJS, we can likely remove several client-side libraries that are no longer needed once the backend handles the logic.
 
-Make a plan to complete the full backend implementation for this app. Refer to @product-overview.md for an overview of functionality that we're going for, Make sure that each plan is seperated into structures.
-
-All buttons, navigation links and functionality should be functional and ready for me to test in a browser.
-
-Ask me clarifying questions to dial in the details for your plan.
+Middleware: Add helmet for security and compression to the NestJS backend to keep it fast.
