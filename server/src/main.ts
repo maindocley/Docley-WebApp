@@ -16,16 +16,33 @@ async function bootstrap() {
   // Performance: Compress responses
   app.use(compression());
 
-  // Enable CORS for frontend
-  const allowedOrigins = process.env.CORS_ORIGINS
-    ? process.env.CORS_ORIGINS.split(',')
-    : ['http://localhost:5173', 'http://localhost:3000', 'https://docley.vercel.app'];
+  // Enable CORS for local-first development and production fallback
+  const allowedOrigins = [
+    'http://localhost:5173',  // Local Vite
+    'http://localhost:3000',  // Local NestJS (for internal testing)
+    'http://127.0.0.1:5173',
+    'https://docley.vercel.app' // Production Frontend
+  ];
+
+  // Also include any origins from environment variables
+  if (process.env.CORS_ORIGINS) {
+    allowedOrigins.push(...process.env.CORS_ORIGINS.split(','));
+  }
 
   app.enableCors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.vercel.app')) {
+        callback(null, true);
+      } else {
+        callback(null, false);
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Client-Info', 'Apikey'],
   });
 
   // Global validation pipe - auto-reject malformed JSON/data

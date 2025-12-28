@@ -47,18 +47,38 @@ async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.use((0, helmet_1.default)());
     app.use(compression());
+    const allowedOrigins = [
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'http://127.0.0.1:5173',
+        'https://docley.vercel.app'
+    ];
+    if (process.env.CORS_ORIGINS) {
+        allowedOrigins.push(...process.env.CORS_ORIGINS.split(','));
+    }
     app.enableCors({
-        origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+        origin: (origin, callback) => {
+            if (!origin)
+                return callback(null, true);
+            if (allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.vercel.app')) {
+                callback(null, true);
+            }
+            else {
+                callback(null, false);
+            }
+        },
         credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Client-Info', 'Apikey'],
     });
     app.useGlobalPipes(new common_1.ValidationPipe({
         whitelist: true,
         forbidNonWhitelisted: true,
         transform: true,
     }));
-    const port = process.env.PORT ?? 3000;
-    await app.listen(port);
-    console.log(`🚀 Server running on http://localhost:${port}`);
+    const port = process.env.PORT || 3000;
+    await app.listen(port, '0.0.0.0');
+    console.log(`🚀 Server is listening on port ${port}`);
 }
 bootstrap();
 //# sourceMappingURL=main.js.map

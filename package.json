@@ -1,0 +1,15 @@
+{
+  "name": "docley-webapp",
+  "version": "1.0.0",
+  "description": "Docley Academic Transformer",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "cd Docley && npm run dev",
+    "dev:backend": "cd server && npm start",
+    "dev:all": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "install:all": "npm install && cd Docley && npm install && cd ../server && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
