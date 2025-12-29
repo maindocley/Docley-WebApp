@@ -135,7 +135,7 @@ export default function AdminDashboard() {
                             <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Total Users</p>
                             <h3 className="text-2xl font-bold text-slate-900 mt-1">{stats.users?.toLocaleString() || 0}</h3>
                         </div>
-                        <div className="w-20 h-10">
+                        <div className="w-20 h-10" style={{ minWidth: '80px', minHeight: '40px' }}>
                             <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={mockSparkline}>
                                     <Line type="monotone" dataKey="v" stroke="#22c55e" strokeWidth={2} dot={false} />
@@ -161,7 +161,7 @@ export default function AdminDashboard() {
                 <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                     <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">AI Usage Today</p>
                     <div className="flex items-center justify-between mt-2">
-                        <div className="w-16 h-16">
+                        <div className="w-16 h-16" style={{ minWidth: '64px', minHeight: '64px' }}>
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie
@@ -216,7 +216,7 @@ export default function AdminDashboard() {
                         </div>
                         <Activity className="h-5 w-5 text-slate-400" />
                     </div>
-                    <div className="h-72">
+                    <div className="h-72" style={{ minHeight: '288px' }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={mockActivityData}>
                                 <defs>

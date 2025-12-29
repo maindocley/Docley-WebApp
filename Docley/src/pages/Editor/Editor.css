@@ -51,6 +51,16 @@
     list-style-type: lower-roman;
 }
 
+/* Hyphen/Dash list style */
+.ProseMirror ul[data-list-style-type="none"] {
+    list-style-type: none;
+}
+
+.ProseMirror ul[data-list-style-type="none"] li::before {
+    content: '—';
+    margin-right: 0.5em;
+}
+
 /* List Styling (MS Word Style) */
 .ProseMirror ul,
 .ProseMirror ol {

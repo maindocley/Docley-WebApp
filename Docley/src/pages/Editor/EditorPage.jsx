@@ -101,6 +101,7 @@ const LineHeight = Extension.create({
 // Import list extensions to extend them
 import BulletList from '@tiptap/extension-bullet-list';
 import OrderedList from '@tiptap/extension-ordered-list';
+import ListItem from '@tiptap/extension-list-item';
 
 const CustomBulletList = BulletList.extend({
     addAttributes() {
@@ -237,6 +238,7 @@ const MenuBar = memo(({ editor, zoom, setZoom, onImageUpload, onCitationClick, i
         { label: 'Default', value: 'disc', icon: '●' },
         { label: 'Hollow', value: 'circle', icon: '○' },
         { label: 'Square', value: 'square', icon: '■' },
+        { label: 'Dash', value: 'none', icon: '—' },
     ], []);
 
     const numberedStyles = useMemo(() => [
@@ -1024,6 +1026,7 @@ export default function EditorPage() {
             history: true,
             bulletList: false,
             orderedList: false,
+            listItem: false,
         }),
         Placeholder.configure({
             placeholder: 'Start writing or paste your assignment here...',
@@ -1040,6 +1043,7 @@ export default function EditorPage() {
         LineHeight,
         CustomBulletList,
         CustomOrderedList,
+        ListItem,
         Pagination.configure({
             pageWidth: EDITOR_CONFIG.PAGE_WIDTH,
             pageHeight: EDITOR_CONFIG.PAGE_HEIGHT,
