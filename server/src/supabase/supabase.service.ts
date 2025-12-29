@@ -18,40 +18,6 @@ export class SupabaseService implements OnModuleInit {
         }
 
         this.supabase = createClient(supabaseUrl, supabaseKey);
-        this.ensureBucketExists();
-    }
-
-    private async ensureBucketExists() {
-        const bucketName = 'documents';
-        try {
-            const { data: buckets, error: listError } = await this.supabase.storage.listBuckets();
-
-            if (listError) {
-                console.error(`Error listing buckets: ${listError.message}`);
-                return;
-            }
-
-            const bucketExists = buckets.some(b => b.name === bucketName);
-
-            if (!bucketExists) {
-                console.log(`Bucket '${bucketName}' not found. Creating it...`);
-                const { error: createError } = await this.supabase.storage.createBucket(bucketName, {
-                    public: true,
-                    allowedMimeTypes: ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'],
-                    fileSizeLimit: 20 * 1024 * 1024 // 20MB
-                });
-
-                if (createError) {
-                    console.error(`Failed to create bucket '${bucketName}': ${createError.message}`);
-                } else {
-                    console.log(`Bucket '${bucketName}' created successfully.`);
-                }
-            } else {
-                console.log(`Bucket '${bucketName}' already exists.`);
-            }
-        } catch (err) {
-            console.error('Unexpected error checking/creating bucket:', err.message);
-        }
     }
 
     getClient(): SupabaseClient {

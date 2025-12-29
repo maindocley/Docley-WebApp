@@ -26,7 +26,6 @@ import { useState, useEffect } from 'react';
 import { useToast } from '../../context/ToastContext';
 import { ContentIntakeModal } from '../../components/modals/ContentIntakeModal';
 import { IntakeModal } from '../../components/modals/IntakeModal';
-import { ShareModal } from '../../components/modals/ShareModal';
 import { getDocuments, deleteDocument, permanentlyDeleteDocument } from '../../services/documentsService';
 
 export default function DashboardDocuments() {
@@ -46,7 +45,6 @@ export default function DashboardDocuments() {
         academicLevel: '',
         type: 'all'
     });
-    const [shareTarget, setShareTarget] = useState(null);
     const { addToast } = useToast();
 
     // Load documents
@@ -379,18 +377,7 @@ export default function DashboardDocuments() {
                                                         <>
                                                             <div className="fixed inset-0 z-40" onClick={(e) => { e.preventDefault(); setActiveMenu(null); }} />
                                                             <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-lg shadow-xl border border-slate-200 py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                                                                <button
-                                                                    onClick={(e) => {
-                                                                        e.preventDefault();
-                                                                        e.stopPropagation();
-                                                                        setShareTarget(doc);
-                                                                        setActiveMenu(null);
-                                                                    }}
-                                                                    className="w-full px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2 font-medium"
-                                                                >
-                                                                    <Share2 className="h-4 w-4" />
-                                                                    Share Settings
-                                                                </button>
+
                                                                 <button
                                                                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDeleteConfirmDoc(doc); }}
                                                                     className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 font-medium"
@@ -528,13 +515,7 @@ export default function DashboardDocuments() {
                     </CardContent>
                 </Card>
             )}
-            {/* Share Modal */}
-            <ShareModal
-                isOpen={!!shareTarget}
-                onClose={() => setShareTarget(null)}
-                documentId={shareTarget?.id}
-                documentTitle={shareTarget?.title}
-            />
+
 
             {/* Delete Confirmation Modal */}
             {deleteConfirmDoc && (

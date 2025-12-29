@@ -37,7 +37,7 @@ export function IntakeModal({ isOpen, onClose, onBack, initialContent = null }) 
                 documentType: formData.type,
                 fileName: initialContent?.file?.name || null,
                 fileSize: initialContent?.file?.size || null,
-                fileUrl: initialContent?.fileUrl || null,
+                fileContent: initialContent?.fileContent || null,
             });
 
             addToast('Document created successfully', 'success');

@@ -133,8 +133,7 @@ import {
     ChevronDown,
     Eraser,
     Layout,
-    Image as ImageIcon,
-    Share2
+    ImageIcon,
 } from 'lucide-react';
 import { Link, useParams, useNavigate, useLocation } from 'react-router-dom';
 
@@ -150,7 +149,6 @@ import { getDocument, updateDocument, autoSaveDocument, deleteDocument, permanen
 import { upgradeDocument } from '../../services/aiService';
 import { DocumentSettingsModal } from '../../components/modals/DocumentSettingsModal';
 import { CitationModal } from '../../components/modals/CitationModal';
-import { ShareModal } from '../../components/modals/ShareModal';
 
 // Memoized MenuBar component to prevent unnecessary re-renders
 const MenuBar = memo(({ editor, zoom, setZoom, onImageUpload, onCitationClick, imageInputRef, editorStateToken }) => {
@@ -828,7 +826,6 @@ export default function EditorPage() {
     const [showSettings, setShowSettings] = useState(false);
     const [showDocSettings, setShowDocSettings] = useState(false);
     const [showCitationModal, setShowCitationModal] = useState(false);
-    const [showShareModal, setShowShareModal] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const { addToast } = useToast();
     const autoSaveTimeoutRef = useRef(null);
@@ -1104,6 +1101,14 @@ export default function EditorPage() {
         }
     }, [doc?.id, editor, addToast]);
 
+    const handleInsertCitation = useCallback((citationHtml) => {
+        if (editor) {
+            editor.chain().focus().insertContent(citationHtml).run();
+            setShowCitationModal(false);
+            addToast('Citation inserted', 'success');
+        }
+    }, [editor, addToast]);
+
     const handleDelete = useCallback(async () => {
         if (id === 'new') {
             setShowDeleteConfirm(false);
@@ -1114,14 +1119,6 @@ export default function EditorPage() {
         }
 
         if (!doc?.id) return;
-        const handleInsertCitation = useCallback((citationHtml) => {
-            if (editor) {
-                editor.chain().focus().insertContent(citationHtml).run();
-                setShowCitationModal(false);
-                addToast('Citation inserted', 'success');
-            }
-        }, [editor, addToast]);
-
         try {
             await permanentlyDeleteDocument(doc.id);
             addToast('Document deleted permanently', 'success');
@@ -1223,15 +1220,7 @@ export default function EditorPage() {
                     <div className="flex items-center gap-2 flex-shrink-0">
                         <div className="w-px h-6 bg-slate-200" />
 
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setShowShareModal(true)}
-                            className="bg-white border-slate-200 text-slate-600 hover:bg-slate-50 gap-2"
-                        >
-                            <Share2 className="h-4 w-4" />
-                            <span className="hidden sm:inline">Share</span>
-                        </Button>
+
 
                         <Button
                             variant="ghost"
@@ -1389,13 +1378,7 @@ export default function EditorPage() {
                 currentStyle={doc?.citation_style}
             />
 
-            {/* Share Modal */}
-            <ShareModal
-                isOpen={showShareModal}
-                onClose={() => setShowShareModal(false)}
-                documentId={doc?.id}
-                documentTitle={doc?.title}
-            />
+
 
             {/* Delete Confirmation Modal */}
             {showDeleteConfirm && (

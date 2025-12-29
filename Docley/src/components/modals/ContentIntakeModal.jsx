@@ -256,27 +256,16 @@ export function ContentIntakeModal({ isOpen, onClose, onContinue }) {
         setError('');
 
         try {
-            let fileUrl = null;
+            let fileContent = null;
 
             if (activeTab === 'upload' && file) {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (!user) throw new Error('User not authenticated');
-
-                const fileExt = file.name.split('.').pop();
-                const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
-                const filePath = `${user.id}/${fileName}`;
-
-                const { error: uploadError, data } = await supabase.storage
-                    .from('documents')
-                    .upload(filePath, file);
-
-                if (uploadError) throw uploadError;
-
-                const { data: { publicUrl } } = supabase.storage
-                    .from('documents')
-                    .getPublicUrl(filePath);
-
-                fileUrl = publicUrl;
+                // Read file as Base64 (DataURL) to store in database
+                fileContent = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
             }
 
             onContinue({
@@ -285,7 +274,7 @@ export function ContentIntakeModal({ isOpen, onClose, onContinue }) {
                     ? `<div style="font-size: 12pt;">${content.split('\n').filter(l => l.trim()).map(l => `<p>${l}</p>`).join('')}</div>`
                     : `<div style="font-size: 12pt;">${htmlContent}</div>`,
                 file: activeTab === 'upload' ? file : null,
-                fileUrl,
+                fileContent,
                 inputType: activeTab,
             });
         } catch (err) {

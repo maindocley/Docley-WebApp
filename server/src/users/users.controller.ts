@@ -9,7 +9,7 @@ export class UsersController {
     constructor(private readonly usersService: UsersService) { }
 
     @Patch('password')
-    async updatePassword(@Req() req, @Body() body: UpdatePasswordDto) {
-        return this.usersService.updatePassword(req.user.id, body.newPassword);
+    async updatePassword(@Req() req, @Body() dto: UpdatePasswordDto) {
+        return this.usersService.updatePassword(req.user.id, dto.newPassword);
     }
 }

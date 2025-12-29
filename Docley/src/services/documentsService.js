@@ -32,9 +32,9 @@ export async function createDocument(documentData) {
         academic_level: documentData.academicLevel || 'undergraduate',
         citation_style: documentData.citationStyle || 'APA 7th Edition',
         document_type: documentData.documentType || 'Essay',
-        file_url: documentData.fileUrl || null,
         file_name: documentData.fileName || null,
         file_size: documentData.fileSize || null,
+        file_content: documentData.fileContent || null, // Store Base64 directly
         status: 'draft',
     };
 
@@ -111,7 +111,7 @@ export async function updateDocument(id, updates) {
     if (updates.status !== undefined) updateData.status = updates.status;
     if (updates.margins !== undefined) updateData.margins = updates.margins;
     if (updates.headerText !== undefined) updateData.header_text = updates.headerText;
-    if (updates.fileUrl !== undefined) updateData.file_url = updates.fileUrl;
+    if (updates.fileContent !== undefined) updateData.file_content = updates.fileContent;
 
     const response = await fetch(`${API_URL}/${id}`, {
         method: 'PATCH',
@@ -160,37 +160,4 @@ export async function getDocumentCount() {
     return docs.length;
 }
 
-// Share a document with another user by email
-export async function shareDocument(id, email, permission = 'read') {
-    const headers = await getAuthHeaders();
 
-    const response = await fetch(`${API_URL}/${id}/share`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ email, permission })
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to share document');
-    }
-
-    return await response.json();
-}
-
-// Get all collaborators for a document
-export async function getDocumentShares(id) {
-    const headers = await getAuthHeaders();
-
-    const response = await fetch(`${API_URL}/${id}/shares`, {
-        method: 'GET',
-        headers
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch collaborator list');
-    }
-
-    return await response.json();
-}
