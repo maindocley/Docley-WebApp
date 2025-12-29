@@ -24,6 +24,8 @@ import {
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useToast } from '../../context/ToastContext';
+import { useTheme } from '../../context/ThemeContext';
+import { cn } from '../../lib/utils';
 import { ContentIntakeModal } from '../../components/modals/ContentIntakeModal';
 import { IntakeModal } from '../../components/modals/IntakeModal';
 import { getDocuments, deleteDocument, permanentlyDeleteDocument } from '../../services/documentsService';
@@ -46,6 +48,8 @@ export default function DashboardDocuments() {
         type: 'all'
     });
     const { addToast } = useToast();
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
 
     // Load documents
     useEffect(() => {
@@ -184,8 +188,16 @@ export default function DashboardDocuments() {
             <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-900 mb-2">My Documents</h1>
-                        <p className="text-sm text-slate-600">
+                        <h1 className={cn(
+                            "text-2xl md:text-3xl font-bold mb-2",
+                            isDark ? "text-white" : "text-slate-900"
+                        )}>
+                            My Documents
+                        </h1>
+                        <p className={cn(
+                            "text-sm",
+                            isDark ? "text-slate-400" : "text-slate-600"
+                        )}>
                             Manage and organize all your academic assignments in one place
                         </p>
                     </div>
@@ -200,11 +212,19 @@ export default function DashboardDocuments() {
                 {/* Search and Controls */}
                 <div className="flex flex-col sm:flex-row gap-3">
                     <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <Search className={cn(
+                            "absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4",
+                            isDark ? "text-slate-400" : "text-slate-400"
+                        )} />
                         <input
                             type="text"
                             placeholder="Search documents by title or content..."
-                            className="w-full pl-10 pr-4 h-11 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                            className={cn(
+                                "w-full pl-10 pr-4 h-11 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all",
+                                isDark
+                                    ? "border-white/10 bg-white/5 text-white placeholder-slate-500"
+                                    : "border-slate-200 bg-white text-slate-900 placeholder-slate-400"
+                            )}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -214,24 +234,44 @@ export default function DashboardDocuments() {
                             <select
                                 value={sortBy}
                                 onChange={(e) => setSortBy(e.target.value)}
-                                className="appearance-none pl-9 pr-4 h-11 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer"
+                                className={cn(
+                                    "appearance-none pl-9 pr-4 h-11 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent cursor-pointer",
+                                    isDark
+                                        ? "border-white/10 bg-white/5 text-white"
+                                        : "border-slate-200 bg-white text-slate-900"
+                                )}
                             >
                                 <option value="recent">Sort by Recent</option>
                                 <option value="name">Sort by Name</option>
                                 <option value="status">Sort by Status</option>
                             </select>
-                            <SortAsc className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                            <SortAsc className={cn(
+                                "absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 pointer-events-none",
+                                isDark ? "text-slate-400" : "text-slate-400"
+                            )} />
                         </div>
                         <div className="relative">
                             <Button
                                 variant="outline"
                                 onClick={() => setShowFilterPopover(!showFilterPopover)}
-                                className={`h-11 border-slate-200 gap-2 ${activeFilterCount > 0 ? 'bg-indigo-50 border-indigo-200 text-indigo-600' : ''}`}
+                                className={cn(
+                                    "h-11 gap-2",
+                                    isDark
+                                        ? activeFilterCount > 0
+                                            ? "bg-orange-500/20 border-orange-500/30 text-orange-400"
+                                            : "border-white/10 bg-white/5 text-slate-200"
+                                        : activeFilterCount > 0
+                                            ? "bg-orange-50 border-orange-200 text-orange-600"
+                                            : "border-slate-200"
+                                )}
                             >
                                 <Filter className="h-4 w-4" />
                                 <span className="hidden sm:inline">Filter</span>
                                 {activeFilterCount > 0 && (
-                                    <span className="flex items-center justify-center bg-indigo-600 text-white text-[10px] h-4 w-4 rounded-full">
+                                    <span className={cn(
+                                        "flex items-center justify-center text-white text-[10px] h-4 w-4 rounded-full",
+                                        isDark ? "bg-orange-500" : "bg-orange-600"
+                                    )}>
                                         {activeFilterCount}
                                     </span>
                                 )}
@@ -240,13 +280,28 @@ export default function DashboardDocuments() {
                             {showFilterPopover && (
                                 <>
                                     <div className="fixed inset-0 z-40" onClick={() => setShowFilterPopover(false)} />
-                                    <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl shadow-2xl border border-slate-200 p-5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                                    <div className={cn(
+                                        "absolute right-0 top-full mt-2 w-72 rounded-xl shadow-2xl border p-5 z-50 animate-in fade-in slide-in-from-top-2 duration-200",
+                                        isDark
+                                            ? "bg-slate-800 border-white/10"
+                                            : "bg-white border-slate-200"
+                                    )}>
                                         <div className="flex items-center justify-between mb-4">
-                                            <h4 className="font-bold text-slate-900">Filter Documents</h4>
+                                            <h4 className={cn(
+                                                "font-bold",
+                                                isDark ? "text-white" : "text-slate-900"
+                                            )}>
+                                                Filter Documents
+                                            </h4>
                                             {activeFilterCount > 0 && (
                                                 <button
                                                     onClick={clearFilters}
-                                                    className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+                                                    className={cn(
+                                                        "text-xs font-medium transition-colors",
+                                                        isDark
+                                                            ? "text-orange-400 hover:text-orange-300"
+                                                            : "text-orange-600 hover:text-orange-700"
+                                                    )}
                                                 >
                                                     Clear all
                                                 </button>
@@ -255,11 +310,21 @@ export default function DashboardDocuments() {
 
                                         <div className="space-y-4">
                                             <div className="space-y-1.5">
-                                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</label>
+                                                <label className={cn(
+                                                    "text-xs font-semibold uppercase tracking-wider",
+                                                    isDark ? "text-slate-400" : "text-slate-500"
+                                                )}>
+                                                    Status
+                                                </label>
                                                 <select
                                                     value={filters.status}
                                                     onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                                                    className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all bg-white"
+                                                    className={cn(
+                                                        "w-full h-10 px-3 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all",
+                                                        isDark
+                                                            ? "border-white/10 bg-white/5 text-white"
+                                                            : "border-slate-200 bg-white text-slate-900"
+                                                    )}
                                                 >
                                                     <option value="">All Statuses</option>
                                                     <option value="draft">Draft</option>
@@ -269,11 +334,21 @@ export default function DashboardDocuments() {
                                             </div>
 
                                             <div className="space-y-1.5">
-                                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Academic Level</label>
+                                                <label className={cn(
+                                                    "text-xs font-semibold uppercase tracking-wider",
+                                                    isDark ? "text-slate-400" : "text-slate-500"
+                                                )}>
+                                                    Academic Level
+                                                </label>
                                                 <select
                                                     value={filters.academicLevel}
                                                     onChange={(e) => setFilters({ ...filters, academicLevel: e.target.value })}
-                                                    className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all bg-white"
+                                                    className={cn(
+                                                        "w-full h-10 px-3 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all",
+                                                        isDark
+                                                            ? "border-white/10 bg-white/5 text-white"
+                                                            : "border-slate-200 bg-white text-slate-900"
+                                                    )}
                                                 >
                                                     <option value="">All Levels</option>
                                                     <option value="High School">High School</option>
@@ -284,11 +359,21 @@ export default function DashboardDocuments() {
                                             </div>
 
                                             <div className="space-y-1.5">
-                                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Workspace</label>
+                                                <label className={cn(
+                                                    "text-xs font-semibold uppercase tracking-wider",
+                                                    isDark ? "text-slate-400" : "text-slate-500"
+                                                )}>
+                                                    Workspace
+                                                </label>
                                                 <select
                                                     value={filters.type}
                                                     onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-                                                    className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all bg-white"
+                                                    className={cn(
+                                                        "w-full h-10 px-3 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all",
+                                                        isDark
+                                                            ? "border-white/10 bg-white/5 text-white"
+                                                            : "border-slate-200 bg-white text-slate-900"
+                                                    )}
                                                 >
                                                     <option value="all">All Documents</option>
                                                     <option value="owned">Owned by me</option>
@@ -297,9 +382,12 @@ export default function DashboardDocuments() {
                                             </div>
                                         </div>
 
-                                        <div className="mt-6 pt-4 border-t border-slate-100">
+                                        <div className={cn(
+                                            "mt-6 pt-4 border-t",
+                                            isDark ? "border-white/10" : "border-slate-100"
+                                        )}>
                                             <Button
-                                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/10"
+                                                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-md shadow-orange-500/20"
                                                 onClick={() => setShowFilterPopover(false)}
                                             >
                                                 Apply Filters
@@ -309,22 +397,38 @@ export default function DashboardDocuments() {
                                 </>
                             )}
                         </div>
-                        <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden h-11">
+                        <div className={cn(
+                            "flex items-center border rounded-lg overflow-hidden h-11",
+                            isDark ? "border-white/10" : "border-slate-200"
+                        )}>
                             <button
                                 onClick={() => setViewMode('grid')}
-                                className={`p-2.5 transition-colors ${viewMode === 'grid'
-                                    ? 'bg-indigo-50 text-indigo-600'
-                                    : 'bg-white text-slate-500 hover:bg-slate-50'
-                                    }`}
+                                className={cn(
+                                    "p-2.5 transition-colors",
+                                    viewMode === 'grid'
+                                        ? isDark
+                                            ? 'bg-orange-500/20 text-orange-400'
+                                            : 'bg-orange-50 text-orange-600'
+                                        : isDark
+                                            ? 'bg-white/5 text-slate-400 hover:bg-white/10'
+                                            : 'bg-white text-slate-500 hover:bg-slate-50'
+                                )}
                             >
                                 <Grid3x3 className="h-4 w-4" />
                             </button>
                             <button
                                 onClick={() => setViewMode('list')}
-                                className={`p-2.5 transition-colors border-l border-slate-200 ${viewMode === 'list'
-                                    ? 'bg-indigo-50 text-indigo-600'
-                                    : 'bg-white text-slate-500 hover:bg-slate-50'
-                                    }`}
+                                className={cn(
+                                    "p-2.5 transition-colors border-l",
+                                    isDark ? "border-white/10" : "border-slate-200",
+                                    viewMode === 'list'
+                                        ? isDark
+                                            ? 'bg-orange-500/20 text-orange-400'
+                                            : 'bg-orange-50 text-orange-600'
+                                        : isDark
+                                            ? 'bg-white/5 text-slate-400 hover:bg-white/10'
+                                            : 'bg-white text-slate-500 hover:bg-slate-50'
+                                )}
                             >
                                 <List className="h-4 w-4" />
                             </button>
@@ -349,7 +453,12 @@ export default function DashboardDocuments() {
                                 key={doc.id}
                                 className="group block h-full"
                             >
-                                <Card className="h-full border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all duration-300 bg-white">
+                                <Card className={cn(
+                                    "h-full hover:shadow-lg transition-all duration-300",
+                                    isDark
+                                        ? "bg-white/5 border-white/10 hover:border-orange-500/30"
+                                        : "border-slate-200 hover:border-orange-300 bg-white"
+                                )}>
                                     <CardContent className="p-6 flex flex-col h-full">
                                         <div className="flex items-start justify-between mb-4">
                                             <div
@@ -393,13 +502,24 @@ export default function DashboardDocuments() {
                                         </div>
 
                                         <div className="flex-1 space-y-2 mb-4">
-                                            <h3 className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-snug">
+                                            <h3 className={cn(
+                                                "text-base font-bold line-clamp-2 leading-snug transition-colors",
+                                                isDark
+                                                    ? "text-white group-hover:text-orange-400"
+                                                    : "text-slate-900 group-hover:text-orange-600"
+                                            )}>
                                                 {doc.title}
                                             </h3>
-                                            <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed">
+                                            <p className={cn(
+                                                "text-sm line-clamp-2 leading-relaxed",
+                                                isDark ? "text-slate-400" : "text-slate-500"
+                                            )}>
                                                 {doc.content?.substring(0, 100) || 'No content yet...'}
                                             </p>
-                                            <div className="flex items-center gap-3 text-xs text-slate-500 pt-2">
+                                            <div className={cn(
+                                                "flex items-center gap-3 text-xs pt-2",
+                                                isDark ? "text-slate-400" : "text-slate-500"
+                                            )}>
                                                 <span className="flex items-center gap-1">
                                                     <Clock className="h-3.5 w-3.5" />
                                                     {formatDate(doc.updated_at)}
@@ -409,11 +529,24 @@ export default function DashboardDocuments() {
                                             </div>
                                         </div>
 
-                                        <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                                            <span className="text-xs font-medium text-slate-500 group-hover:text-indigo-600 transition-colors">
+                                        <div className={cn(
+                                            "pt-4 border-t flex items-center justify-between",
+                                            isDark ? "border-white/10" : "border-slate-100"
+                                        )}>
+                                            <span className={cn(
+                                                "text-xs font-medium transition-colors",
+                                                isDark
+                                                    ? "text-slate-400 group-hover:text-orange-400"
+                                                    : "text-slate-500 group-hover:text-orange-600"
+                                            )}>
                                                 Open Document
                                             </span>
-                                            <ArrowUpRight className="h-4 w-4 text-slate-300 group-hover:text-indigo-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                                            <ArrowUpRight className={cn(
+                                                "h-4 w-4 transition-all",
+                                                isDark
+                                                    ? "text-slate-500 group-hover:text-orange-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                                                    : "text-slate-300 group-hover:text-orange-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                                            )} />
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -486,15 +619,29 @@ export default function DashboardDocuments() {
                     </div>
                 )
             ) : (
-                <Card className="border-slate-200 border-dashed bg-slate-50/50">
+                <Card className={cn(
+                    "border-dashed",
+                    isDark
+                        ? "border-white/10 bg-white/5"
+                        : "border-slate-200 bg-slate-50/50"
+                )}>
                     <CardContent className="p-12 text-center">
-                        <div className="mx-auto h-16 w-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 mb-4">
+                        <div className={cn(
+                            "mx-auto h-16 w-16 rounded-full flex items-center justify-center mb-4",
+                            isDark ? "bg-white/10 text-slate-400" : "bg-slate-100 text-slate-400"
+                        )}>
                             {searchTerm ? <Search className="h-8 w-8" /> : <FileText className="h-8 w-8" />}
                         </div>
-                        <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                        <h3 className={cn(
+                            "text-lg font-semibold mb-2",
+                            isDark ? "text-white" : "text-slate-900"
+                        )}>
                             {searchTerm ? 'No documents found' : 'No documents yet'}
                         </h3>
-                        <p className="text-sm text-slate-500 mb-6 max-w-md mx-auto">
+                        <p className={cn(
+                            "text-sm mb-6 max-w-md mx-auto",
+                            isDark ? "text-slate-400" : "text-slate-500"
+                        )}>
                             {searchTerm
                                 ? 'Try adjusting your search terms or create a new document.'
                                 : 'Get started by creating your first academic assignment upgrade.'}
@@ -520,14 +667,31 @@ export default function DashboardDocuments() {
             {/* Delete Confirmation Modal */}
             {deleteConfirmDoc && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-in zoom-in-95 duration-150">
+                    <div className={cn(
+                        "rounded-xl shadow-2xl w-full max-w-md p-6 animate-in zoom-in-95 duration-150",
+                        isDark ? "bg-slate-800 border border-white/10" : "bg-white"
+                    )}>
                         <div className="flex items-start gap-4 mb-6">
-                            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                                <Trash2 className="h-6 w-6 text-red-600" />
+                            <div className={cn(
+                                "w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0",
+                                isDark ? "bg-red-500/20" : "bg-red-100"
+                            )}>
+                                <Trash2 className={cn(
+                                    "h-6 w-6",
+                                    isDark ? "text-red-400" : "text-red-600"
+                                )} />
                             </div>
                             <div>
-                                <h3 className="text-lg font-bold text-slate-900">Delete Permanently?</h3>
-                                <p className="text-sm text-slate-600 mt-1">
+                                <h3 className={cn(
+                                    "text-lg font-bold",
+                                    isDark ? "text-white" : "text-slate-900"
+                                )}>
+                                    Delete Permanently?
+                                </h3>
+                                <p className={cn(
+                                    "text-sm mt-1",
+                                    isDark ? "text-slate-400" : "text-slate-600"
+                                )}>
                                     Are you sure you want to delete "{deleteConfirmDoc.title}"? This action cannot be undone.
                                 </p>
                             </div>

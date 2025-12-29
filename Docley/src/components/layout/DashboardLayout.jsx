@@ -11,6 +11,8 @@ import {
     LogOut,
     MessageSquare,
     Shield,
+    ChevronDown,
+    Zap,
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -27,6 +29,7 @@ export function DashboardLayout() {
     const [isHovered, setIsHovered] = useState(false);
     const [showOnboarding, setShowOnboarding] = useState(false);
     const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+    const [showUserMenu, setShowUserMenu] = useState(false);
     const navigate = useNavigate();
     const { addToast } = useToast();
     const { theme } = useTheme();
@@ -61,6 +64,32 @@ export function DashboardLayout() {
         } catch (error) {
             addToast('Failed to sign out', 'error');
         }
+    };
+
+    // Get user's display name
+    const getUserDisplayName = () => {
+        if (user?.user_metadata?.full_name) {
+            return user.user_metadata.full_name.split(' ')[0];
+        }
+        if (user?.email) {
+            return user.email.split('@')[0];
+        }
+        return 'User';
+    };
+
+    // Get user's initials
+    const getUserInitials = () => {
+        if (user?.user_metadata?.full_name) {
+            const names = user.user_metadata.full_name.split(' ');
+            if (names.length >= 2) {
+                return (names[0][0] + names[1][0]).toUpperCase();
+            }
+            return names[0][0].toUpperCase();
+        }
+        if (user?.email) {
+            return user.email[0].toUpperCase();
+        }
+        return 'U';
     };
 
     const handleOnboardingComplete = () => {
@@ -267,20 +296,278 @@ export function DashboardLayout() {
 
             {/* Main Content - Add left margin/padding to account for fixed sidebar */}
             <main className="flex-1 min-w-0 overflow-y-auto custom-scrollbar lg:ml-[70px]">
-                {/* Mobile Header */}
-                <div className={cn(
-                    "lg:hidden flex items-center h-16 px-4 sticky top-0 z-30 shadow-sm backdrop-blur-xl border-b",
-                    isDark
-                        ? "bg-white/5 border-white/10"
-                        : "bg-white/80 border-slate-200"
+                {/* Professional Header */}
+                <header className={cn(
+                    "sticky top-0 z-20 flex items-center gap-4 px-4 lg:px-6 xl:px-8 py-3 md:py-4 backdrop-blur-xl border-b",
+                    isDark ? "bg-slate-900/70 border-white/5" : "bg-white/80 border-slate-200"
                 )}>
-                    <span className={cn(
-                        "ml-12 font-bold text-lg",
-                        isDark ? "text-white" : "text-slate-900"
-                    )}>
-                        Dashboard
-                    </span>
-                </div>
+                    {/* Mobile Menu Button */}
+                    <button
+                        onClick={() => setIsMobileMenuOpen(true)}
+                        className={cn(
+                            "lg:hidden p-2 rounded-lg border transition-colors",
+                            isDark
+                                ? "border-white/10 text-slate-200 hover:bg-white/10"
+                                : "border-slate-200 text-slate-700 hover:bg-slate-100"
+                        )}
+                    >
+                        <Menu className="h-5 w-5" />
+                    </button>
+
+                    {/* Logo and Title Section */}
+                    <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+                        <div className="flex-shrink-0">
+                            <DocleyLogo size="sm" />
+                        </div>
+                        <div className="flex-1 min-w-0 md:border-l md:pl-4 lg:pl-6">
+                            <p className={cn(
+                                "text-[10px] md:text-xs font-semibold uppercase tracking-wider mb-0.5",
+                                isDark ? "text-slate-400" : "text-slate-500"
+                            )}>
+                                Workspace
+                            </p>
+                            <h1 className={cn(
+                                "text-lg md:text-xl lg:text-2xl font-bold leading-tight",
+                                isDark ? "text-white" : "text-slate-900"
+                            )}>
+                                {location.pathname === '/dashboard' ? 'Dashboard' :
+                                 location.pathname.includes('/documents') ? 'My Documents' :
+                                 location.pathname.includes('/settings') ? 'Settings' :
+                                 'Dashboard'}
+                            </h1>
+                        </div>
+                    </div>
+
+                    {/* Right Side Actions */}
+                    <div className="hidden md:flex items-center gap-3">
+                        {/* Live Badge */}
+                        <div className={cn(
+                            "px-3 py-2 rounded-lg border flex items-center gap-2 text-sm font-medium transition-all",
+                            isDark
+                                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                                : "border-emerald-200 bg-emerald-50 text-emerald-700"
+                        )}>
+                            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                            <span className="hidden lg:inline">Live</span>
+                        </div>
+
+                        {/* Usage Indicator (if free tier) */}
+                        {user && (
+                            <div className={cn(
+                                "px-3 py-2 rounded-lg border flex items-center gap-2 text-sm transition-all",
+                                isDark
+                                    ? "border-white/10 bg-white/5 text-slate-200"
+                                    : "border-slate-200 bg-white text-slate-700"
+                            )}>
+                                <Zap className="h-4 w-4 text-orange-500" />
+                                <span className="hidden xl:inline">Active</span>
+                            </div>
+                        )}
+
+                        {/* Theme Toggle */}
+                        <ThemeToggle />
+
+                        {/* User Profile Dropdown */}
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowUserMenu(!showUserMenu)}
+                                className={cn(
+                                    "flex items-center gap-2 px-3 py-2 rounded-lg border transition-all",
+                                    isDark
+                                        ? "border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"
+                                        : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-sm"
+                                )}
+                            >
+                                <div className={cn(
+                                    "h-8 w-8 rounded-full flex items-center justify-center text-sm font-semibold",
+                                    isDark
+                                        ? "bg-gradient-to-br from-orange-500 to-blue-500 text-white"
+                                        : "bg-gradient-to-br from-orange-500 to-blue-500 text-white"
+                                )}>
+                                    {getUserInitials()}
+                                </div>
+                                <div className="hidden lg:block text-left min-w-0">
+                                    <p className={cn(
+                                        "text-sm font-medium truncate",
+                                        isDark ? "text-white" : "text-slate-900"
+                                    )}>
+                                        {getUserDisplayName()}
+                                    </p>
+                                    <p className={cn(
+                                        "text-xs truncate",
+                                        isDark ? "text-slate-400" : "text-slate-500"
+                                    )}>
+                                        {user?.email}
+                                    </p>
+                                </div>
+                                <ChevronDown className={cn(
+                                    "h-4 w-4 transition-transform hidden lg:block",
+                                    showUserMenu && "rotate-180",
+                                    isDark ? "text-slate-400" : "text-slate-500"
+                                )} />
+                            </button>
+
+                            {showUserMenu && (
+                                <>
+                                    <div
+                                        className="fixed inset-0 z-40"
+                                        onClick={() => setShowUserMenu(false)}
+                                    />
+                                    <div className={cn(
+                                        "absolute right-0 top-full mt-2 w-64 rounded-xl shadow-2xl border z-50 animate-in fade-in slide-in-from-top-2 duration-200",
+                                        isDark
+                                            ? "bg-slate-800 border-white/10"
+                                            : "bg-white border-slate-200"
+                                    )}>
+                                        <div className={cn(
+                                            "p-4 border-b",
+                                            isDark ? "border-white/10" : "border-slate-100"
+                                        )}>
+                                            <div className="flex items-center gap-3">
+                                                <div className={cn(
+                                                    "h-12 w-12 rounded-full flex items-center justify-center text-base font-semibold",
+                                                    "bg-gradient-to-br from-orange-500 to-blue-500 text-white"
+                                                )}>
+                                                    {getUserInitials()}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className={cn(
+                                                        "text-sm font-semibold truncate",
+                                                        isDark ? "text-white" : "text-slate-900"
+                                                    )}>
+                                                        {user?.user_metadata?.full_name || getUserDisplayName()}
+                                                    </p>
+                                                    <p className={cn(
+                                                        "text-xs truncate",
+                                                        isDark ? "text-slate-400" : "text-slate-500"
+                                                    )}>
+                                                        {user?.email}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="p-2">
+                                            <Link
+                                                to="/dashboard/settings"
+                                                onClick={() => setShowUserMenu(false)}
+                                                className={cn(
+                                                    "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors",
+                                                    isDark
+                                                        ? "text-slate-300 hover:bg-white/10 hover:text-white"
+                                                        : "text-slate-700 hover:bg-slate-50"
+                                                )}
+                                            >
+                                                <Settings className="h-4 w-4" />
+                                                <span className="text-sm font-medium">Settings</span>
+                                            </Link>
+                                            <button
+                                                onClick={() => {
+                                                    setShowUserMenu(false);
+                                                    handleSignOut();
+                                                }}
+                                                className={cn(
+                                                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors",
+                                                    isDark
+                                                        ? "text-red-400 hover:bg-red-500/20"
+                                                        : "text-red-600 hover:bg-red-50"
+                                                )}
+                                            >
+                                                <LogOut className="h-4 w-4" />
+                                                <span className="text-sm font-medium">Sign Out</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Mobile Right Actions */}
+                    <div className="md:hidden flex items-center gap-2">
+                        <ThemeToggle />
+                        <button
+                            onClick={() => setShowUserMenu(!showUserMenu)}
+                            className={cn(
+                                "h-10 w-10 rounded-full flex items-center justify-center text-sm font-semibold",
+                                "bg-gradient-to-br from-orange-500 to-blue-500 text-white"
+                            )}
+                        >
+                            {getUserInitials()}
+                        </button>
+                        {showUserMenu && (
+                            <>
+                                <div
+                                    className="fixed inset-0 z-40"
+                                    onClick={() => setShowUserMenu(false)}
+                                />
+                                <div className={cn(
+                                    "fixed right-4 top-16 w-64 rounded-xl shadow-2xl border z-50 animate-in fade-in slide-in-from-top-2 duration-200",
+                                    isDark
+                                        ? "bg-slate-800 border-white/10"
+                                        : "bg-white border-slate-200"
+                                )}>
+                                    <div className={cn(
+                                        "p-4 border-b",
+                                        isDark ? "border-white/10" : "border-slate-100"
+                                    )}>
+                                        <div className="flex items-center gap-3">
+                                            <div className={cn(
+                                                "h-12 w-12 rounded-full flex items-center justify-center text-base font-semibold",
+                                                "bg-gradient-to-br from-orange-500 to-blue-500 text-white"
+                                            )}>
+                                                {getUserInitials()}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className={cn(
+                                                    "text-sm font-semibold truncate",
+                                                    isDark ? "text-white" : "text-slate-900"
+                                                )}>
+                                                    {user?.user_metadata?.full_name || getUserDisplayName()}
+                                                </p>
+                                                <p className={cn(
+                                                    "text-xs truncate",
+                                                    isDark ? "text-slate-400" : "text-slate-500"
+                                                )}>
+                                                    {user?.email}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="p-2">
+                                        <Link
+                                            to="/dashboard/settings"
+                                            onClick={() => setShowUserMenu(false)}
+                                            className={cn(
+                                                "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors",
+                                                isDark
+                                                    ? "text-slate-300 hover:bg-white/10 hover:text-white"
+                                                    : "text-slate-700 hover:bg-slate-50"
+                                            )}
+                                        >
+                                            <Settings className="h-4 w-4" />
+                                            <span className="text-sm font-medium">Settings</span>
+                                        </Link>
+                                        <button
+                                            onClick={() => {
+                                                setShowUserMenu(false);
+                                                handleSignOut();
+                                            }}
+                                            className={cn(
+                                                "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors",
+                                                isDark
+                                                    ? "text-red-400 hover:bg-red-500/20"
+                                                    : "text-red-600 hover:bg-red-50"
+                                            )}
+                                        >
+                                            <LogOut className="h-4 w-4" />
+                                            <span className="text-sm font-medium">Sign Out</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </header>
 
                 <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
                     <Outlet />
