@@ -11,5 +11,8 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "@tiptap/extension-image": "^3.14.0"
   }
 }

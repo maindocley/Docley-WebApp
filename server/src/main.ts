@@ -18,12 +18,14 @@ async function bootstrap() {
   app.use(compression());
 
   // Enable CORS for local-first development and production fallback
-  const allowedOrigins = [
-    'http://localhost:5173',  // Local Vite
-    'http://localhost:3000',  // Local NestJS (for internal testing)
-    'http://127.0.0.1:5173',
-    'https://docley.vercel.app' // Production Frontend
-  ];
+ const allowedOrigins = [
+  'http://localhost:5173',  // Local Vite
+  'http://localhost:5174',  // Add this line - your actual frontend port
+  'http://localhost:3000',  // Local NestJS (for internal testing)
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5174',  // Add this too
+  'https://docley.vercel.app' // Production Frontend
+];
 
   // Also include any origins from environment variables
   if (process.env.CORS_ORIGINS) {
