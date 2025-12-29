@@ -28,6 +28,7 @@ const BlogManager = lazy(() => import('./pages/Admin/BlogManager'));
 const BlogPostEditor = lazy(() => import('./pages/Admin/BlogPostEditor'));
 const UsersManager = lazy(() => import('./pages/Admin/UsersManager'));
 const AdminSettings = lazy(() => import('./pages/Admin/AdminSettings'));
+const FeedbackManager = lazy(() => import('./pages/Admin/FeedbackManager'));
 
 // Loading fallback for lazy-loaded components
 function LoadingFallback() {
@@ -123,6 +124,11 @@ function App() {
                 <Route path="blog/edit/:id" element={
                   <Suspense fallback={<LoadingFallback />}>
                     <BlogPostEditor />
+                  </Suspense>
+                } />
+                <Route path="feedback" element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <FeedbackManager />
                   </Suspense>
                 } />
                 <Route path="settings" element={

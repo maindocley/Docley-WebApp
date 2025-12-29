@@ -9,7 +9,6 @@ import {
     Menu,
     X,
     LogOut,
-    Sparkles,
     MessageSquare,
     Shield,
 } from 'lucide-react';
@@ -17,6 +16,7 @@ import { useToast } from '../../context/ToastContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { ThemeToggle } from '../ui/ThemeToggle';
+import { DocleyLogo } from '../ui/DocleyLogo';
 import { OnboardingFlow, isOnboardingCompleted } from '../onboarding/OnboardingFlow';
 import { submitFeedback } from '../../services/feedbackService';
 import { isAdminEmail } from '../ProtectedRoute';
@@ -136,24 +136,12 @@ export function DashboardLayout() {
                     )}
                 >
                     <Link to="/" className="flex items-center gap-3 overflow-hidden">
-                        <div className="bg-gradient-to-br from-orange-500 to-blue-500 text-white p-2 rounded-lg flex-shrink-0 shadow-lg shadow-orange-500/25">
-                            <Sparkles className="h-5 w-5" />
-                        </div>
-                        {!isCollapsed && (
-                            <div className="flex flex-col animate-in fade-in duration-200">
-                                <span className={cn(
-                                    "font-bold tracking-tight whitespace-nowrap text-lg",
-                                    isDark ? "text-white" : "text-slate-900"
-                                )}>
-                                    Docley
-                                </span>
-                                <span className={cn(
-                                    "text-[10px] uppercase tracking-wider",
-                                    isDark ? "text-slate-400" : "text-slate-500"
-                                )}>
-                                    Academic Transformer
-                                </span>
+                        {isCollapsed ? (
+                            <div className="bg-gradient-to-br from-orange-500 to-blue-500 text-white p-2 rounded-lg flex-shrink-0 shadow-lg shadow-orange-500/25">
+                                <span className="text-lg font-bold">D</span>
                             </div>
+                        ) : (
+                            <DocleyLogo size="default" showTagline={true} />
                         )}
                     </Link>
                 </div>

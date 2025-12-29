@@ -9,6 +9,7 @@ import { DocumentsModule } from './documents/documents.module';
 import { SupabaseModule } from './supabase/supabase.module';
 import { AdminModule } from './admin/admin.module';
 import { PostsModule } from './posts/posts.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { PostsModule } from './posts/posts.module';
     SupabaseModule,
     AdminModule,
     PostsModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [

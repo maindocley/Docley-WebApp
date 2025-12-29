@@ -1,9 +1,13 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class DocumentsService {
-    constructor(private readonly supabaseService: SupabaseService) { }
+    constructor(
+        private readonly supabaseService: SupabaseService,
+        private readonly notificationsService: NotificationsService
+    ) { }
 
     private get client() {
         return this.supabaseService.getClient();
@@ -78,6 +82,9 @@ export class DocumentsService {
     }
 
     async update(id: string, updates: any, userId: string) {
+        // Get current document to check status changes
+        const currentDoc = await this.findOne(id, userId);
+        
         const { data, error } = await this.client
             .from('documents')
             .update(updates)
@@ -89,6 +96,31 @@ export class DocumentsService {
         if (error) {
             throw new InternalServerErrorException(error.message);
         }
+
+        // Create notifications for status changes
+        if (updates.status && updates.status !== currentDoc.status) {
+            try {
+                if (updates.status === 'upgraded') {
+                    await this.notificationsService.create({
+                        type: 'document_upgraded',
+                        title: 'Document Upgraded',
+                        message: `User upgraded document: ${data.title}`,
+                        metadata: { user_id: userId, document_id: id, title: data.title }
+                    });
+                } else if (updates.status === 'exported') {
+                    await this.notificationsService.create({
+                        type: 'document_exported',
+                        title: 'Document Exported',
+                        message: `User exported document: ${data.title}`,
+                        metadata: { user_id: userId, document_id: id, title: data.title }
+                    });
+                }
+            } catch (notifError) {
+                // Don't fail the update if notification creation fails
+                console.error('Failed to create notification:', notifError);
+            }
+        }
+
         return data;
     }
 

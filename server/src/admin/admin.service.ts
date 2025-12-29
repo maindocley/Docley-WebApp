@@ -1,9 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class AdminService {
-    constructor(private readonly supabaseService: SupabaseService) { }
+    constructor(
+        private readonly supabaseService: SupabaseService,
+        private readonly notificationsService: NotificationsService
+    ) { }
 
     private get supabase() {
         return this.supabaseService.getClient();
@@ -32,6 +36,19 @@ export class AdminService {
         if (error) {
             throw new Error(`Failed to update user status: ${error.message}`);
         }
+
+        // Create notification for user status change
+        try {
+            await this.notificationsService.create({
+                type: status === 'banned' ? 'user_banned' : 'user_unbanned',
+                title: status === 'banned' ? 'User Banned' : 'User Unbanned',
+                message: `User ${data.user.email} has been ${status === 'banned' ? 'banned' : 'unbanned'}`,
+                metadata: { user_id: id, email: data.user.email, status }
+            });
+        } catch (notifError) {
+            console.error('Failed to create notification:', notifError);
+        }
+
         return data.user;
     }
 

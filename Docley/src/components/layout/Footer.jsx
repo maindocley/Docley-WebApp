@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
-import { Sparkles, Github, Twitter, Linkedin } from 'lucide-react';
+import { Github, Twitter, Linkedin } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { DocleyLogo } from '../ui/DocleyLogo';
 import { cn } from '../../lib/utils';
 
 export function Footer() {
@@ -18,15 +19,7 @@ export function Footer() {
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
                     {/* Brand */}
                     <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-orange-500 to-blue-500 shadow-lg">
-                                <Sparkles className="h-3.5 w-3.5 text-white" />
-                            </div>
-                            <span className={cn(
-                                "font-bold",
-                                isDark ? "text-white" : "text-slate-900"
-                            )}>Docley</span>
-                        </div>
+                        <DocleyLogo size="default" />
                         <p className={cn(
                             "text-sm max-w-xs",
                             isDark ? "text-slate-400" : "text-slate-600"

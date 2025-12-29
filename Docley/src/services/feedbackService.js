@@ -33,3 +33,21 @@ export async function submitFeedback(rating, message) {
 
     return data;
 }
+
+/**
+ * Get all feedback (Admin only)
+ * @returns {Promise<Array>} - Array of feedback records
+ */
+export async function getAllFeedback() {
+    const { data, error } = await supabase
+        .from('feedback')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error('Error fetching feedback:', error);
+        throw error;
+    }
+
+    return data || [];
+}

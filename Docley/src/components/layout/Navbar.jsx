@@ -1,10 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '../ui/Button';
-import { Sparkles, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { useTheme } from '../../context/ThemeContext';
+import { DocleyLogo } from '../ui/DocleyLogo';
 
 export function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -30,16 +31,8 @@ export function Navbar() {
             <div className="container mx-auto px-4 md:px-6">
                 <div className="flex h-16 items-center justify-between">
                     {/* Logo */}
-                    <Link to="/" className="flex items-center gap-2">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 to-blue-500 shadow-lg shadow-orange-500/30">
-                            <Sparkles className="h-5 w-5 text-white" />
-                        </div>
-                        <span className={cn(
-                            "text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-blue-500",
-                            isDark && "from-orange-400 to-blue-400"
-                        )}>
-                            Docley
-                        </span>
+                    <Link to="/">
+                        <DocleyLogo size="default" />
                     </Link>
 
                     {/* Desktop Nav */}
