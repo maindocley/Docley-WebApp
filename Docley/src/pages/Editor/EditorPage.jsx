@@ -24,10 +24,12 @@ const FontSize = Extension.create({
                 attributes: {
                     fontSize: {
                         default: '12',
-                        parseHTML: element => element.style.fontSize.replace('pt', ''),
+                        parseHTML: element => element.style.fontSize.replace('pt', '') || '12',
                         renderHTML: attributes => {
-                            if (!attributes.fontSize) {
-                                return {};
+                            if (!attributes.fontSize || attributes.fontSize === '12') {
+                                return {
+                                    style: 'font-size: 12pt',
+                                };
                             }
                             return {
                                 style: `font-size: ${attributes.fontSize}pt`,
@@ -96,6 +98,42 @@ const LineHeight = Extension.create({
     },
 });
 
+// Import list extensions to extend them
+import BulletList from '@tiptap/extension-bullet-list';
+import OrderedList from '@tiptap/extension-ordered-list';
+
+const CustomBulletList = BulletList.extend({
+    addAttributes() {
+        return {
+            ...this.parent?.(),
+            listStyleType: {
+                default: 'disc',
+                parseHTML: element => element.getAttribute('data-list-style-type'),
+                renderHTML: attributes => ({
+                    'data-list-style-type': attributes.listStyleType,
+                    style: `list-style-type: ${attributes.listStyleType}`,
+                }),
+            },
+        };
+    },
+});
+
+const CustomOrderedList = OrderedList.extend({
+    addAttributes() {
+        return {
+            ...this.parent?.(),
+            listStyleType: {
+                default: 'decimal',
+                parseHTML: element => element.getAttribute('data-list-style-type'),
+                renderHTML: attributes => ({
+                    'data-list-style-type': attributes.listStyleType,
+                    style: `list-style-type: ${attributes.listStyleType}`,
+                }),
+            },
+        };
+    },
+});
+
 import { Button } from '../../components/ui/Button';
 import {
     ArrowLeft,
@@ -159,6 +197,8 @@ const MenuBar = memo(({ editor, zoom, setZoom, onImageUpload, onCitationClick, i
     const [showTextColor, setShowTextColor] = useState(false);
     const [showHighlightColor, setShowHighlightColor] = useState(false);
     const [showImageOptions, setShowImageOptions] = useState(false);
+    const [showBulletDropdown, setShowBulletDropdown] = useState(false);
+    const [showOrderedDropdown, setShowOrderedDropdown] = useState(false);
 
     // Memoize static data
     const lineHeights = useMemo(() => [
@@ -191,6 +231,18 @@ const MenuBar = memo(({ editor, zoom, setZoom, onImageUpload, onCitationClick, i
         { label: 'Heading 1', level: 1 },
         { label: 'Heading 2', level: 2 },
         { label: 'Heading 3', level: 3 },
+    ], []);
+
+    const bulletStyles = useMemo(() => [
+        { label: 'Default', value: 'disc', icon: '●' },
+        { label: 'Hollow', value: 'circle', icon: '○' },
+        { label: 'Square', value: 'square', icon: '■' },
+    ], []);
+
+    const numberedStyles = useMemo(() => [
+        { label: '1. 2. 3.', value: 'decimal', icon: '1.' },
+        { label: 'a. b. c.', value: 'lower-alpha', icon: 'a.' },
+        { label: 'i. ii. iii.', value: 'lower-roman', icon: 'i.' },
     ], []);
 
     // Helper for Font Size Clamping
@@ -324,6 +376,18 @@ const MenuBar = memo(({ editor, zoom, setZoom, onImageUpload, onCitationClick, i
     const activeFontFamily = fonts.find(f => editor.isActive('textStyle', { fontFamily: f.value }))?.value || '';
     const activeLineHeight = editor.getAttributes('paragraph').lineHeight || '1.5';
     const textAlign = editor.getAttributes('textAlign') || 'left';
+
+    const handleBulletStyle = useCallback((style) => {
+        if (!editor) return;
+        editor.chain().focus().toggleBulletList().updateAttributes('bulletList', { listStyleType: style }).run();
+        setShowBulletDropdown(false);
+    }, [editor]);
+
+    const handleOrderedStyle = useCallback((style) => {
+        if (!editor) return;
+        editor.chain().focus().toggleOrderedList().updateAttributes('orderedList', { listStyleType: style }).run();
+        setShowOrderedDropdown(false);
+    }, [editor]);
 
     return (
         <div className="flex flex-wrap items-center gap-0.5 px-3 py-1.5 bg-slate-50 border-b border-slate-200 sticky top-0 z-30">
@@ -582,26 +646,95 @@ const MenuBar = memo(({ editor, zoom, setZoom, onImageUpload, onCitationClick, i
 
             {/* Lists */}
             <div className="flex items-center gap-0.5">
-                <button
-                    onClick={handleBulletList}
-                    className={cn(
-                        "p-1.5 rounded hover:bg-slate-200 text-slate-600 transition-colors",
-                        editor.isActive('bulletList') && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                {/* Bullet List Dropdown */}
+                <div className="relative group">
+                    <div className="flex items-center">
+                        <button
+                            onClick={handleBulletList}
+                            className={cn(
+                                "p-1.5 rounded-l hover:bg-slate-200 text-slate-600 transition-colors border-r border-slate-200",
+                                editor.isActive('bulletList') && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                            )}
+                            title="Bullet List"
+                        >
+                            <List className="h-4 w-4" />
+                        </button>
+                        <button
+                            onClick={() => setShowBulletDropdown(!showBulletDropdown)}
+                            className={cn(
+                                "p-1.5 px-1 rounded-r hover:bg-slate-200 text-slate-600 transition-colors",
+                                editor.isActive('bulletList') && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                            )}
+                        >
+                            <ChevronDown className="h-3 w-3" />
+                        </button>
+                    </div>
+                    {showBulletDropdown && (
+                        <>
+                            <div className="fixed inset-0 z-39" onClick={() => setShowBulletDropdown(false)} />
+                            <div className="absolute top-full left-0 mt-1 w-32 bg-white shadow-lg border border-slate-200 rounded-md py-1 z-40">
+                                {bulletStyles.map(s => (
+                                    <button
+                                        key={s.value}
+                                        onClick={() => handleBulletStyle(s.value)}
+                                        className={cn(
+                                            "w-full px-3 py-1.5 text-left text-sm hover:bg-slate-100 flex items-center gap-2 transition-colors",
+                                            editor.isActive('bulletList', { listStyleType: s.value }) && "text-indigo-600 bg-indigo-50 font-medium"
+                                        )}
+                                    >
+                                        <span className="text-lg leading-none">{s.icon}</span>
+                                        {s.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </>
                     )}
-                    title="Bullet List"
-                >
-                    <List className="h-4 w-4" />
-                </button>
-                <button
-                    onClick={handleOrderedList}
-                    className={cn(
-                        "p-1.5 rounded hover:bg-slate-200 text-slate-600 transition-colors",
-                        editor.isActive('orderedList') && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                </div>
+
+                {/* Ordered List Dropdown */}
+                <div className="relative group ml-0.5">
+                    <div className="flex items-center">
+                        <button
+                            onClick={handleOrderedList}
+                            className={cn(
+                                "p-1.5 rounded-l hover:bg-slate-200 text-slate-600 transition-colors border-r border-slate-200",
+                                editor.isActive('orderedList') && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                            )}
+                            title="Numbered List"
+                        >
+                            <ListOrdered className="h-4 w-4" />
+                        </button>
+                        <button
+                            onClick={() => setShowOrderedDropdown(!showOrderedDropdown)}
+                            className={cn(
+                                "p-1.5 px-1 rounded-r hover:bg-slate-200 text-slate-600 transition-colors",
+                                editor.isActive('orderedList') && "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                            )}
+                        >
+                            <ChevronDown className="h-3 w-3" />
+                        </button>
+                    </div>
+                    {showOrderedDropdown && (
+                        <>
+                            <div className="fixed inset-0 z-39" onClick={() => setShowOrderedDropdown(false)} />
+                            <div className="absolute top-full left-0 mt-1 w-32 bg-white shadow-lg border border-slate-200 rounded-md py-1 z-40">
+                                {numberedStyles.map(s => (
+                                    <button
+                                        key={s.value}
+                                        onClick={() => handleOrderedStyle(s.value)}
+                                        className={cn(
+                                            "w-full px-3 py-1.5 text-left text-sm hover:bg-slate-100 flex items-center gap-2 transition-colors",
+                                            editor.isActive('orderedList', { listStyleType: s.value }) && "text-indigo-600 bg-indigo-50 font-medium"
+                                        )}
+                                    >
+                                        <span className="text-sm font-bold min-w-[20px]">{s.icon}</span>
+                                        {s.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </>
                     )}
-                    title="Numbered List"
-                >
-                    <ListOrdered className="h-4 w-4" />
-                </button>
+                </div>
             </div>
 
             <div className="w-px h-6 bg-slate-200 mx-1" />
@@ -889,6 +1022,8 @@ export default function EditorPage() {
     const editorExtensions = useMemo(() => [
         StarterKit.configure({
             history: true,
+            bulletList: false,
+            orderedList: false,
         }),
         Placeholder.configure({
             placeholder: 'Start writing or paste your assignment here...',
@@ -903,6 +1038,8 @@ export default function EditorPage() {
         ResizableImage,
         FontSize,
         LineHeight,
+        CustomBulletList,
+        CustomOrderedList,
         Pagination.configure({
             pageWidth: EDITOR_CONFIG.PAGE_WIDTH,
             pageHeight: EDITOR_CONFIG.PAGE_HEIGHT,
