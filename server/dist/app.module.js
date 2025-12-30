@@ -18,6 +18,7 @@ const documents_module_1 = require("./documents/documents.module");
 const supabase_module_1 = require("./supabase/supabase.module");
 const admin_module_1 = require("./admin/admin.module");
 const posts_module_1 = require("./posts/posts.module");
+const notifications_module_1 = require("./notifications/notifications.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -34,6 +35,7 @@ exports.AppModule = AppModule = __decorate([
             supabase_module_1.SupabaseModule,
             admin_module_1.AdminModule,
             posts_module_1.PostsModule,
+            notifications_module_1.NotificationsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [

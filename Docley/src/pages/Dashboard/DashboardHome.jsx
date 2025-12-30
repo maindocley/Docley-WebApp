@@ -14,6 +14,16 @@ import {
     Zap,
     CheckCircle2,
     BarChart3,
+    Activity,
+    Target,
+    Award,
+    Rocket,
+    BookOpen,
+    Lightbulb,
+    TrendingDown,
+    Crown,
+    Gauge,
+    Flame,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { ContentIntakeModal } from '../../components/modals/ContentIntakeModal';
@@ -32,6 +42,12 @@ export default function DashboardHome() {
     const [intakeContent, setIntakeContent] = useState(null);
     const [documents, setDocuments] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [stats, setStats] = useState({
+        totalDocuments: 0,
+        totalWords: 0,
+        upgradedCount: 0,
+        recentActivity: []
+    });
 
     // Load recent documents
     useEffect(() => {
@@ -42,6 +58,23 @@ export default function DashboardHome() {
         try {
             const docs = await getDocuments({ limit: 6 });
             setDocuments(docs);
+            
+            // Calculate stats
+            const allDocs = await getDocuments();
+            const totalWords = allDocs.reduce((sum, doc) => sum + (doc.word_count || 0), 0);
+            const upgradedCount = allDocs.filter(doc => doc.status === 'upgraded').length;
+            
+            // Get recent activity (last 5 documents)
+            const recentActivity = allDocs
+                .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
+                .slice(0, 5);
+            
+            setStats({
+                totalDocuments: allDocs.length,
+                totalWords,
+                upgradedCount,
+                recentActivity
+            });
         } catch (error) {
             console.error('Error loading documents:', error);
         } finally {
@@ -108,97 +141,581 @@ export default function DashboardHome() {
                 initialContent={intakeContent}
             />
 
-            {/* Welcome Message */}
-            <div className={cn(
-                "rounded-2xl border p-6 backdrop-blur-xl",
-                isDark 
-                    ? "bg-white/5 border-white/10" 
-                    : "bg-gradient-to-br from-indigo-50 via-white to-orange-50/30 border-indigo-100/50"
-            )}>
-                <h1 className={cn(
-                    "text-3xl md:text-4xl font-bold mb-2",
-                    isDark ? "text-white" : "text-slate-900"
+            {/* Welcome Message with Quick Stats */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Welcome Card */}
+                <div className={cn(
+                    "lg:col-span-2 rounded-2xl border p-6 backdrop-blur-xl",
+                    isDark 
+                        ? "bg-white/5 border-white/10" 
+                        : "bg-gradient-to-br from-indigo-50 via-white to-orange-50/30 border-indigo-100/50"
                 )}>
-                    Welcome back, {getUserDisplayName()}! 👋
-                </h1>
-                <p className={cn(
-                    "text-base md:text-lg",
-                    isDark ? "text-slate-300" : "text-slate-600"
-                )}>
-                    Ready to transform your next assignment into submission-ready work?
-                </p>
-            </div>
-
-            {/* Hero Section */}
-            <div className={cn(
-                "relative overflow-hidden rounded-2xl border p-8 md:p-10 backdrop-blur-xl",
-                isDark 
-                    ? "bg-white/5 border-white/10" 
-                    : "bg-gradient-to-br from-indigo-50 via-white to-orange-50/30 border-indigo-100/50"
-            )}>
-                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div className="space-y-4 flex-1">
+                    <h1 className={cn(
+                        "text-3xl md:text-4xl font-bold mb-2",
+                        isDark ? "text-white" : "text-slate-900"
+                    )}>
+                        Welcome back, {getUserDisplayName()}! 👋
+                    </h1>
+                    <p className={cn(
+                        "text-base md:text-lg mb-4",
+                        isDark ? "text-slate-300" : "text-slate-600"
+                    )}>
+                        Ready to transform your next assignment into submission-ready work?
+                    </p>
+                    
+                    {/* Quick Stats Row */}
+                    <div className="flex flex-wrap gap-4 mt-4">
                         <div className={cn(
-                            "inline-flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-sm border w-fit",
-                            isDark
-                                ? "bg-white/10 border-white/20"
-                                : "bg-white/80 border-indigo-100"
+                            "flex items-center gap-2 px-3 py-1.5 rounded-lg",
+                            isDark ? "bg-white/5" : "bg-white/60"
                         )}>
-                            <Sparkles className={cn(
-                                "h-3.5 w-3.5",
-                                isDark ? "text-orange-400" : "text-indigo-600"
+                            <FileText className={cn(
+                                "h-4 w-4",
+                                isDark ? "text-orange-400" : "text-orange-600"
                             )} />
                             <span className={cn(
-                                "text-xs font-semibold uppercase tracking-wide",
-                                isDark ? "text-white/90" : "text-indigo-700"
+                                "text-sm font-semibold",
+                                isDark ? "text-white" : "text-slate-900"
                             )}>
-                                Academic Transformer
+                                {stats.totalDocuments} {stats.totalDocuments === 1 ? 'Document' : 'Documents'}
                             </span>
                         </div>
-                        <h1 className={cn(
-                            "text-3xl md:text-4xl lg:text-5xl font-bold leading-tight",
+                        <div className={cn(
+                            "flex items-center gap-2 px-3 py-1.5 rounded-lg",
+                            isDark ? "bg-white/5" : "bg-white/60"
+                        )}>
+                            <BookOpen className={cn(
+                                "h-4 w-4",
+                                isDark ? "text-blue-400" : "text-blue-600"
+                            )} />
+                            <span className={cn(
+                                "text-sm font-semibold",
+                                isDark ? "text-white" : "text-slate-900"
+                            )}>
+                                {stats.totalWords.toLocaleString()} words
+                            </span>
+                        </div>
+                        {stats.upgradedCount > 0 && (
+                            <div className={cn(
+                                "flex items-center gap-2 px-3 py-1.5 rounded-lg",
+                                isDark ? "bg-white/5" : "bg-white/60"
+                            )}>
+                                <Rocket className={cn(
+                                    "h-4 w-4",
+                                    isDark ? "text-green-400" : "text-green-600"
+                                )} />
+                                <span className={cn(
+                                    "text-sm font-semibold",
+                                    isDark ? "text-white" : "text-slate-900"
+                                )}>
+                                    {stats.upgradedCount} Upgraded
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Usage Progress Card */}
+                <div className={cn(
+                    "rounded-2xl border p-6 backdrop-blur-xl",
+                    isDark 
+                        ? "bg-white/5 border-white/10" 
+                        : "bg-gradient-to-br from-white via-orange-50/30 to-white border-orange-100/50"
+                )}>
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <Gauge className={cn(
+                                "h-5 w-5",
+                                isDark ? "text-orange-400" : "text-orange-600"
+                            )} />
+                            <h3 className={cn(
+                                "text-sm font-semibold",
+                                isDark ? "text-white" : "text-slate-900"
+                            )}>
+                                Usage
+                            </h3>
+                        </div>
+                        <span className={cn(
+                            "text-xs font-medium px-2 py-1 rounded-full",
+                            isDark 
+                                ? "bg-orange-500/20 text-orange-400"
+                                : "bg-orange-100 text-orange-700"
+                        )}>
+                            Free
+                        </span>
+                    </div>
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs">
+                            <span className={cn(isDark ? "text-slate-400" : "text-slate-600")}>
+                                Documents this month
+                            </span>
+                            <span className={cn(
+                                "font-semibold",
+                                isDark ? "text-white" : "text-slate-900"
+                            )}>
+                                {stats.totalDocuments} / 3
+                            </span>
+                        </div>
+                        <div className={cn(
+                            "h-2 rounded-full overflow-hidden",
+                            isDark ? "bg-white/10" : "bg-slate-200"
+                        )}>
+                            <div 
+                                className={cn(
+                                    "h-full rounded-full transition-all duration-500",
+                                    stats.totalDocuments >= 3
+                                        ? "bg-red-500"
+                                        : stats.totalDocuments >= 2
+                                            ? "bg-orange-500"
+                                            : "bg-green-500"
+                                )}
+                                style={{ width: `${Math.min((stats.totalDocuments / 3) * 100, 100)}%` }}
+                            />
+                        </div>
+                        {stats.totalDocuments >= 3 && (
+                            <p className={cn(
+                                "text-xs flex items-center gap-1",
+                                isDark ? "text-red-400" : "text-red-600"
+                            )}>
+                                <AlertCircle className="h-3 w-3" />
+                                Limit reached. Upgrade to Pro for unlimited access.
+                            </p>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Compact Hero Section */}
+            <div className={cn(
+                "rounded-xl border p-4 md:p-5 backdrop-blur-xl",
+                isDark 
+                    ? "bg-white/5 border-white/10" 
+                    : "bg-gradient-to-r from-indigo-50/50 to-orange-50/30 border-indigo-100/50"
+            )}>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className={cn(
+                                "inline-flex items-center gap-1.5 px-2 py-1 rounded-full border",
+                                isDark
+                                    ? "bg-white/10 border-white/20"
+                                    : "bg-white/80 border-indigo-100"
+                            )}>
+                                <Sparkles className={cn(
+                                    "h-3 w-3",
+                                    isDark ? "text-orange-400" : "text-orange-600"
+                                )} />
+                                <span className={cn(
+                                    "text-[10px] font-semibold uppercase tracking-wide",
+                                    isDark ? "text-white/90" : "text-indigo-700"
+                                )}>
+                                    Academic Transformer
+                                </span>
+                            </div>
+                        </div>
+                        <h2 className={cn(
+                            "text-lg md:text-xl font-bold leading-tight mb-1",
                             isDark ? "text-white" : "text-slate-900"
                         )}>
-                            Transform your rough draft into{' '}
+                            Transform drafts into{' '}
                             <span className="bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
                                 submission-ready
                             </span>{' '}
                             work
-                        </h1>
+                        </h2>
                         <p className={cn(
-                            "text-base md:text-lg max-w-2xl leading-relaxed",
-                            isDark ? "text-slate-300" : "text-slate-600"
+                            "text-xs md:text-sm leading-relaxed line-clamp-2",
+                            isDark ? "text-slate-400" : "text-slate-600"
                         )}>
-                            Start with your own work, run diagnostics, then transform it into clear, structured, and
-                            academically safe writing—before you submit.
+                            Run diagnostics, then transform into clear, structured, and academically safe writing.
                         </p>
-                        <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                            <Button
-                                onClick={() => setShowContentModal(true)}
-                                className="w-full sm:w-auto shadow-xl shadow-orange-500/25 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 border-none text-white text-base px-6 py-3 h-auto"
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-2 flex-shrink-0">
+                        <Button
+                            onClick={() => setShowContentModal(true)}
+                            className="shadow-lg shadow-orange-500/20 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 border-none text-white text-sm px-4 py-2 h-auto whitespace-nowrap"
+                        >
+                            <Plus className="mr-1.5 h-4 w-4" /> New Assignment
+                        </Button>
+                        <Link to="/dashboard/documents">
+                            <Button 
+                                variant="outline" 
+                                className={cn(
+                                    "text-sm px-4 py-2 h-auto whitespace-nowrap",
+                                    isDark
+                                        ? "border-white/20 bg-white/5 text-white hover:bg-white/10"
+                                        : "border-slate-300 hover:bg-slate-50"
+                                )}
                             >
-                                <Plus className="mr-2 h-5 w-5" /> Upgrade New Assignment
+                                View All
+                                <ChevronRight className="ml-1.5 h-3.5 w-3.5" />
                             </Button>
-                            <Link to="/dashboard/documents">
-                                <Button 
-                                    variant="outline" 
-                                    className={cn(
-                                        "w-full sm:w-auto text-base px-6 py-3 h-auto",
-                                        isDark
-                                            ? "border-white/20 bg-white/5 text-white hover:bg-white/10"
-                                            : "border-slate-300 hover:bg-slate-50"
-                                    )}
-                                >
-                                    View All Documents
-                                    <ChevronRight className="ml-2 h-4 w-4" />
-                                </Button>
-                            </Link>
-                        </div>
+                        </Link>
                     </div>
                 </div>
-                {/* Decorative gradient blob */}
-                <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-orange-200/20 to-indigo-200/20 rounded-full blur-3xl -z-0"></div>
             </div>
+
+            {/* Quick Actions & Recent Activity */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Quick Actions */}
+                <Card className={cn(
+                    "lg:col-span-1 hover:shadow-lg transition-all duration-300",
+                    isDark
+                        ? "bg-white/5 border-white/10"
+                        : "border-slate-200 bg-gradient-to-br from-white via-purple-50/30 to-white"
+                )}>
+                    <CardContent className="p-6">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Zap className={cn(
+                                "h-5 w-5",
+                                isDark ? "text-purple-400" : "text-purple-600"
+                            )} />
+                            <h3 className={cn(
+                                "text-lg font-bold",
+                                isDark ? "text-white" : "text-slate-900"
+                            )}>
+                                Quick Actions
+                            </h3>
+                        </div>
+                        <div className="space-y-2">
+                            <button
+                                onClick={() => setShowContentModal(true)}
+                                className={cn(
+                                    "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all hover:scale-[1.02]",
+                                    isDark
+                                        ? "bg-white/5 hover:bg-white/10 text-white border border-white/10"
+                                        : "bg-white hover:bg-purple-50 text-slate-900 border border-slate-200 shadow-sm"
+                                )}
+                            >
+                                <div className={cn(
+                                    "h-10 w-10 rounded-lg flex items-center justify-center",
+                                    isDark ? "bg-orange-500/20" : "bg-orange-100"
+                                )}>
+                                    <Plus className={cn(
+                                        "h-5 w-5",
+                                        isDark ? "text-orange-400" : "text-orange-600"
+                                    )} />
+                                </div>
+                                <div className="text-left flex-1">
+                                    <p className={cn(
+                                        "text-sm font-semibold",
+                                        isDark ? "text-white" : "text-slate-900"
+                                    )}>
+                                        New Document
+                                    </p>
+                                    <p className={cn(
+                                        "text-xs",
+                                        isDark ? "text-slate-400" : "text-slate-500"
+                                    )}>
+                                        Start a new assignment
+                                    </p>
+                                </div>
+                            </button>
+                            <Link
+                                to="/dashboard/documents"
+                                className={cn(
+                                    "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all hover:scale-[1.02]",
+                                    isDark
+                                        ? "bg-white/5 hover:bg-white/10 text-white border border-white/10"
+                                        : "bg-white hover:bg-purple-50 text-slate-900 border border-slate-200 shadow-sm"
+                                )}
+                            >
+                                <div className={cn(
+                                    "h-10 w-10 rounded-lg flex items-center justify-center",
+                                    isDark ? "bg-blue-500/20" : "bg-blue-100"
+                                )}>
+                                    <FileText className={cn(
+                                        "h-5 w-5",
+                                        isDark ? "text-blue-400" : "text-blue-600"
+                                    )} />
+                                </div>
+                                <div className="text-left flex-1">
+                                    <p className={cn(
+                                        "text-sm font-semibold",
+                                        isDark ? "text-white" : "text-slate-900"
+                                    )}>
+                                        View All Documents
+                                    </p>
+                                    <p className={cn(
+                                        "text-xs",
+                                        isDark ? "text-slate-400" : "text-slate-500"
+                                    )}>
+                                        Manage your work
+                                    </p>
+                                </div>
+                            </Link>
+                            <Link
+                                to="/dashboard/settings"
+                                className={cn(
+                                    "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all hover:scale-[1.02]",
+                                    isDark
+                                        ? "bg-white/5 hover:bg-white/10 text-white border border-white/10"
+                                        : "bg-white hover:bg-purple-50 text-slate-900 border border-slate-200 shadow-sm"
+                                )}
+                            >
+                                <div className={cn(
+                                    "h-10 w-10 rounded-lg flex items-center justify-center",
+                                    isDark ? "bg-indigo-500/20" : "bg-indigo-100"
+                                )}>
+                                    <Sparkles className={cn(
+                                        "h-5 w-5",
+                                        isDark ? "text-indigo-400" : "text-indigo-600"
+                                    )} />
+                                </div>
+                                <div className="text-left flex-1">
+                                    <p className={cn(
+                                        "text-sm font-semibold",
+                                        isDark ? "text-white" : "text-slate-900"
+                                    )}>
+                                        Settings
+                                    </p>
+                                    <p className={cn(
+                                        "text-xs",
+                                        isDark ? "text-slate-400" : "text-slate-500"
+                                    )}>
+                                        Customize preferences
+                                    </p>
+                                </div>
+                            </Link>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Recent Activity */}
+                <Card className={cn(
+                    "lg:col-span-2 hover:shadow-lg transition-all duration-300",
+                    isDark
+                        ? "bg-white/5 border-white/10"
+                        : "border-slate-200 bg-gradient-to-br from-white via-blue-50/30 to-white"
+                )}>
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                                <Activity className={cn(
+                                    "h-5 w-5",
+                                    isDark ? "text-blue-400" : "text-blue-600"
+                                )} />
+                                <h3 className={cn(
+                                    "text-lg font-bold",
+                                    isDark ? "text-white" : "text-slate-900"
+                                )}>
+                                    Recent Activity
+                                </h3>
+                            </div>
+                            <Link
+                                to="/dashboard/documents"
+                                className={cn(
+                                    "text-xs font-medium transition-colors",
+                                    isDark
+                                        ? "text-blue-400 hover:text-blue-300"
+                                        : "text-blue-600 hover:text-blue-700"
+                                )}
+                            >
+                                View All
+                            </Link>
+                        </div>
+                        <div className="space-y-3">
+                            {stats.recentActivity.length === 0 ? (
+                                <div className={cn(
+                                    "text-center py-8",
+                                    isDark ? "text-slate-400" : "text-slate-500"
+                                )}>
+                                    <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                    <p className="text-sm">No activity yet</p>
+                                    <p className="text-xs mt-1">Create your first document to get started</p>
+                                </div>
+                            ) : (
+                                stats.recentActivity.slice(0, 4).map((doc, index) => (
+                                    <Link
+                                        key={doc.id}
+                                        to={`/dashboard/editor/${doc.id}`}
+                                        className={cn(
+                                            "flex items-center gap-3 p-3 rounded-lg transition-all hover:scale-[1.01]",
+                                            isDark
+                                                ? "hover:bg-white/5 border border-white/5"
+                                                : "hover:bg-white border border-slate-100"
+                                        )}
+                                    >
+                                        <div className={cn(
+                                            "h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0",
+                                            doc.status === 'upgraded'
+                                                ? isDark ? "bg-green-500/20" : "bg-green-100"
+                                                : isDark ? "bg-slate-700" : "bg-slate-100"
+                                        )}>
+                                            {doc.status === 'upgraded' ? (
+                                                <CheckCircle2 className={cn(
+                                                    "h-5 w-5",
+                                                    isDark ? "text-green-400" : "text-green-600"
+                                                )} />
+                                            ) : (
+                                                <FileText className={cn(
+                                                    "h-5 w-5",
+                                                    isDark ? "text-slate-400" : "text-slate-500"
+                                                )} />
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className={cn(
+                                                "text-sm font-semibold truncate",
+                                                isDark ? "text-white" : "text-slate-900"
+                                            )}>
+                                                {doc.title}
+                                            </p>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <span className={cn(
+                                                    "text-xs",
+                                                    isDark ? "text-slate-400" : "text-slate-500"
+                                                )}>
+                                                    {formatDate(doc.updated_at)}
+                                                </span>
+                                                <span className={cn(
+                                                    "text-xs",
+                                                    isDark ? "text-slate-500" : "text-slate-400"
+                                                )}>
+                                                    •
+                                                </span>
+                                                <span className={cn(
+                                                    "text-xs",
+                                                    isDark ? "text-slate-400" : "text-slate-500"
+                                                )}>
+                                                    {doc.word_count?.toLocaleString() || 0} words
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <ChevronRight className={cn(
+                                            "h-4 w-4 flex-shrink-0",
+                                            isDark ? "text-slate-500" : "text-slate-400"
+                                        )} />
+                                    </Link>
+                                ))
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Achievement Badges */}
+            {stats.totalDocuments > 0 && (
+                <Card className={cn(
+                    "hover:shadow-lg transition-all duration-300",
+                    isDark
+                        ? "bg-white/5 border-white/10"
+                        : "border-slate-200 bg-gradient-to-br from-white via-amber-50/30 to-white"
+                )}>
+                    <CardContent className="p-6">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Award className={cn(
+                                "h-5 w-5",
+                                isDark ? "text-amber-400" : "text-amber-600"
+                            )} />
+                            <h3 className={cn(
+                                "text-lg font-bold",
+                                isDark ? "text-white" : "text-slate-900"
+                            )}>
+                                Achievements
+                            </h3>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            {stats.totalDocuments >= 1 && (
+                                <div className={cn(
+                                    "flex flex-col items-center p-4 rounded-xl border",
+                                    isDark
+                                        ? "bg-white/5 border-white/10"
+                                        : "bg-white border-slate-200"
+                                )}>
+                                    <div className={cn(
+                                        "h-12 w-12 rounded-full flex items-center justify-center mb-2",
+                                        isDark ? "bg-green-500/20" : "bg-green-100"
+                                    )}>
+                                        <Target className={cn(
+                                            "h-6 w-6",
+                                            isDark ? "text-green-400" : "text-green-600"
+                                        )} />
+                                    </div>
+                                    <p className={cn(
+                                        "text-xs font-semibold text-center",
+                                        isDark ? "text-white" : "text-slate-900"
+                                    )}>
+                                        First Document
+                                    </p>
+                                </div>
+                            )}
+                            {stats.totalDocuments >= 5 && (
+                                <div className={cn(
+                                    "flex flex-col items-center p-4 rounded-xl border",
+                                    isDark
+                                        ? "bg-white/5 border-white/10"
+                                        : "bg-white border-slate-200"
+                                )}>
+                                    <div className={cn(
+                                        "h-12 w-12 rounded-full flex items-center justify-center mb-2",
+                                        isDark ? "bg-blue-500/20" : "bg-blue-100"
+                                    )}>
+                                        <Flame className={cn(
+                                            "h-6 w-6",
+                                            isDark ? "text-blue-400" : "text-blue-600"
+                                        )} />
+                                    </div>
+                                    <p className={cn(
+                                        "text-xs font-semibold text-center",
+                                        isDark ? "text-white" : "text-slate-900"
+                                    )}>
+                                        Getting Started
+                                    </p>
+                                </div>
+                            )}
+                            {stats.upgradedCount >= 1 && (
+                                <div className={cn(
+                                    "flex flex-col items-center p-4 rounded-xl border",
+                                    isDark
+                                        ? "bg-white/5 border-white/10"
+                                        : "bg-white border-slate-200"
+                                )}>
+                                    <div className={cn(
+                                        "h-12 w-12 rounded-full flex items-center justify-center mb-2",
+                                        isDark ? "bg-purple-500/20" : "bg-purple-100"
+                                    )}>
+                                        <Rocket className={cn(
+                                            "h-6 w-6",
+                                            isDark ? "text-purple-400" : "text-purple-600"
+                                        )} />
+                                    </div>
+                                    <p className={cn(
+                                        "text-xs font-semibold text-center",
+                                        isDark ? "text-white" : "text-slate-900"
+                                    )}>
+                                        First Upgrade
+                                    </p>
+                                </div>
+                            )}
+                            {stats.totalWords >= 10000 && (
+                                <div className={cn(
+                                    "flex flex-col items-center p-4 rounded-xl border",
+                                    isDark
+                                        ? "bg-white/5 border-white/10"
+                                        : "bg-white border-slate-200"
+                                )}>
+                                    <div className={cn(
+                                        "h-12 w-12 rounded-full flex items-center justify-center mb-2",
+                                        isDark ? "bg-orange-500/20" : "bg-orange-100"
+                                    )}>
+                                        <Crown className={cn(
+                                            "h-6 w-6",
+                                            isDark ? "text-orange-400" : "text-orange-600"
+                                        )} />
+                                    </div>
+                                    <p className={cn(
+                                        "text-xs font-semibold text-center",
+                                        isDark ? "text-white" : "text-slate-900"
+                                    )}>
+                                        10K Words
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
             {/* Quick Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
@@ -359,6 +876,179 @@ export default function DashboardHome() {
                 </Card>
             </div>
 
+
+            {/* Productivity Insights & Tips */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Productivity Insights */}
+                <Card className={cn(
+                    "hover:shadow-lg transition-all duration-300",
+                    isDark
+                        ? "bg-white/5 border-white/10"
+                        : "border-slate-200 bg-gradient-to-br from-white via-emerald-50/30 to-white"
+                )}>
+                    <CardContent className="p-6">
+                        <div className="flex items-center gap-2 mb-4">
+                            <TrendingUp className={cn(
+                                "h-5 w-5",
+                                isDark ? "text-emerald-400" : "text-emerald-600"
+                            )} />
+                            <h3 className={cn(
+                                "text-lg font-bold",
+                                isDark ? "text-white" : "text-slate-900"
+                            )}>
+                                Productivity Insights
+                            </h3>
+                        </div>
+                        <div className="space-y-4">
+                            <div className={cn(
+                                "p-4 rounded-lg border",
+                                isDark ? "bg-white/5 border-white/10" : "bg-white border-slate-100"
+                            )}>
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className={cn(
+                                        "text-sm font-medium",
+                                        isDark ? "text-slate-300" : "text-slate-700"
+                                    )}>
+                                        Total Words Written
+                                    </span>
+                                    <span className={cn(
+                                        "text-lg font-bold",
+                                        isDark ? "text-emerald-400" : "text-emerald-600"
+                                    )}>
+                                        {stats.totalWords.toLocaleString()}
+                                    </span>
+                                </div>
+                                <div className={cn(
+                                    "h-2 rounded-full overflow-hidden",
+                                    isDark ? "bg-white/10" : "bg-slate-200"
+                                )}>
+                                    <div 
+                                        className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                                        style={{ width: `${Math.min((stats.totalWords / 50000) * 100, 100)}%` }}
+                                    />
+                                </div>
+                                <p className={cn(
+                                    "text-xs mt-2",
+                                    isDark ? "text-slate-400" : "text-slate-500"
+                                )}>
+                                    {stats.totalWords >= 50000 
+                                        ? "🎉 Amazing progress! You've written over 50K words!"
+                                        : `${(50000 - stats.totalWords).toLocaleString()} words until 50K milestone`}
+                                </p>
+                            </div>
+                            <div className={cn(
+                                "p-4 rounded-lg border",
+                                isDark ? "bg-white/5 border-white/10" : "bg-white border-slate-100"
+                            )}>
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className={cn(
+                                        "text-sm font-medium",
+                                        isDark ? "text-slate-300" : "text-slate-700"
+                                    )}>
+                                        Upgrade Rate
+                                    </span>
+                                    <span className={cn(
+                                        "text-lg font-bold",
+                                        isDark ? "text-blue-400" : "text-blue-600"
+                                    )}>
+                                        {stats.totalDocuments > 0 
+                                            ? `${Math.round((stats.upgradedCount / stats.totalDocuments) * 100)}%`
+                                            : '0%'}
+                                    </span>
+                                </div>
+                                <p className={cn(
+                                    "text-xs",
+                                    isDark ? "text-slate-400" : "text-slate-500"
+                                )}>
+                                    {stats.upgradedCount} of {stats.totalDocuments} documents upgraded
+                                </p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Quick Tips */}
+                <Card className={cn(
+                    "hover:shadow-lg transition-all duration-300",
+                    isDark
+                        ? "bg-white/5 border-white/10"
+                        : "border-slate-200 bg-gradient-to-br from-white via-amber-50/30 to-white"
+                )}>
+                    <CardContent className="p-6">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Lightbulb className={cn(
+                                "h-5 w-5",
+                                isDark ? "text-amber-400" : "text-amber-600"
+                            )} />
+                            <h3 className={cn(
+                                "text-lg font-bold",
+                                isDark ? "text-white" : "text-slate-900"
+                            )}>
+                                Quick Tips
+                            </h3>
+                        </div>
+                        <div className="space-y-3">
+                            <div className={cn(
+                                "p-3 rounded-lg border-l-4",
+                                isDark 
+                                    ? "bg-white/5 border-orange-500/50" 
+                                    : "bg-white border-orange-500"
+                            )}>
+                                <p className={cn(
+                                    "text-sm font-medium mb-1",
+                                    isDark ? "text-white" : "text-slate-900"
+                                )}>
+                                    💡 Start with Diagnostics
+                                </p>
+                                <p className={cn(
+                                    "text-xs",
+                                    isDark ? "text-slate-400" : "text-slate-600"
+                                )}>
+                                    Run diagnostics first to identify areas for improvement before upgrading.
+                                </p>
+                            </div>
+                            <div className={cn(
+                                "p-3 rounded-lg border-l-4",
+                                isDark 
+                                    ? "bg-white/5 border-blue-500/50" 
+                                    : "bg-white border-blue-500"
+                            )}>
+                                <p className={cn(
+                                    "text-sm font-medium mb-1",
+                                    isDark ? "text-white" : "text-slate-900"
+                                )}>
+                                    📝 Review Before Submitting
+                                </p>
+                                <p className={cn(
+                                    "text-xs",
+                                    isDark ? "text-slate-400" : "text-slate-600"
+                                )}>
+                                    Always review the upgraded content and make final adjustments to match your voice.
+                                </p>
+                            </div>
+                            <div className={cn(
+                                "p-3 rounded-lg border-l-4",
+                                isDark 
+                                    ? "bg-white/5 border-green-500/50" 
+                                    : "bg-white border-green-500"
+                            )}>
+                                <p className={cn(
+                                    "text-sm font-medium mb-1",
+                                    isDark ? "text-white" : "text-slate-900"
+                                )}>
+                                    🎯 Use Citations
+                                </p>
+                                <p className={cn(
+                                    "text-xs",
+                                    isDark ? "text-slate-400" : "text-slate-600"
+                                )}>
+                                    Add citations to strengthen your arguments and avoid plagiarism concerns.
+                                </p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
 
             {/* Recent Documents */}
             <div>
