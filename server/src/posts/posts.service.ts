@@ -94,4 +94,40 @@ export class PostsService {
         }
         return { message: 'Post deleted successfully', id };
     }
+
+    // ========== Public Methods (no auth required) ==========
+
+    /**
+     * Find all published posts for public viewing
+     */
+    async findPublished() {
+        const { data, error } = await this.supabase
+            .from('posts')
+            .select('id, title, slug, content, cover_image, tags, created_at')
+            .eq('published', true)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            throw new Error(`Failed to fetch published posts: ${error.message}`);
+        }
+        return data;
+    }
+
+    /**
+     * Find a single post by its URL slug
+     */
+    async findBySlug(slug: string) {
+        const { data, error } = await this.supabase
+            .from('posts')
+            .select('*')
+            .eq('slug', slug)
+            .eq('published', true)
+            .single();
+
+        if (error) {
+            // Return null instead of throwing for 404 handling
+            return null;
+        }
+        return data;
+    }
 }

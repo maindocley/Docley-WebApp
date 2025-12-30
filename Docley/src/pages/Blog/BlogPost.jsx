@@ -1,15 +1,75 @@
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Navbar } from '../../components/layout/Navbar';
 import { Footer } from '../../components/layout/Footer';
-import { blogPosts } from '../../data/blogData';
-import { Calendar, User, Clock, ArrowLeft } from 'lucide-react';
+import { getPostBySlug, getPostById } from '../../services/blogService';
+import { Calendar, Clock, ArrowLeft, Loader2 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 
 export default function BlogPost() {
-    const { id } = useParams();
-    const post = blogPosts.find(p => p.id === parseInt(id));
+    const { id } = useParams(); // Can be slug or UUID
+    const [post, setPost] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [notFound, setNotFound] = useState(false);
 
-    if (!post) {
+    useEffect(() => {
+        loadPost();
+    }, [id]);
+
+    const loadPost = async () => {
+        setIsLoading(true);
+        setNotFound(false);
+        try {
+            // Try fetching by slug first, then by ID
+            let data = await getPostBySlug(id);
+            if (!data) {
+                data = await getPostById(id);
+            }
+
+            if (data) {
+                setPost(data);
+            } else {
+                setNotFound(true);
+            }
+        } catch (error) {
+            console.error('Error loading post:', error);
+            setNotFound(true);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Helper to estimate read time from content
+    const getReadTime = (content) => {
+        if (!content) return '2 min read';
+        const wordCount = content.replace(/<[^>]*>/g, '').split(/\s+/).length;
+        const minutes = Math.max(1, Math.ceil(wordCount / 200));
+        return `${minutes} min read`;
+    };
+
+    // Helper to format date
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        return new Date(dateString).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-white font-sans">
+                <Navbar />
+                <div className="flex items-center justify-center h-96">
+                    <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+                </div>
+                <Footer />
+            </div>
+        );
+    }
+
+    if (notFound || !post) {
         return (
             <div className="min-h-screen bg-slate-50 flex items-center justify-center">
                 <div className="text-center">
@@ -31,33 +91,31 @@ export default function BlogPost() {
                         <ArrowLeft className="h-4 w-4 mr-2" /> Back to Articles
                     </Link>
                     <div className="flex items-center justify-center gap-4 text-sm text-slate-500 mb-6">
-                        <span className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full font-medium">{post.category}</span>
-                        <span className="flex items-center"><Calendar className="h-4 w-4 mr-1" /> {post.date}</span>
-                        <span className="flex items-center"><Clock className="h-4 w-4 mr-1" /> {post.readTime}</span>
+                        {post.tags && (
+                            <span className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full font-medium">
+                                {post.tags.split(',')[0]}
+                            </span>
+                        )}
+                        <span className="flex items-center">
+                            <Calendar className="h-4 w-4 mr-1" /> {formatDate(post.created_at)}
+                        </span>
+                        <span className="flex items-center">
+                            <Clock className="h-4 w-4 mr-1" /> {getReadTime(post.content)}
+                        </span>
                     </div>
                     <h1 className="text-3xl md:text-5xl font-bold text-slate-900 leading-tight mb-8">
                         {post.title}
                     </h1>
-                    <div className="flex items-center justify-center gap-3">
-                        <div className="h-10 w-10 bg-slate-200 rounded-full overflow-hidden">
-                            {/* Placeholder avatar */}
-                            <span className="h-full w-full flex items-center justify-center bg-indigo-100 text-indigo-600 font-bold">
-                                {post.author.charAt(0)}
-                            </span>
-                        </div>
-                        <div className="text-left">
-                            <p className="text-sm font-semibold text-slate-900">{post.author}</p>
-                            <p className="text-xs text-slate-500">Academic Contributor</p>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Hero Image */}
-                <div className="container mx-auto px-4 md:px-6 max-w-4xl mb-16">
-                    <div className="aspect-video rounded-2xl overflow-hidden shadow-2xl">
-                        <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+                {post.cover_image && (
+                    <div className="container mx-auto px-4 md:px-6 max-w-4xl mb-16">
+                        <div className="aspect-video rounded-2xl overflow-hidden shadow-2xl">
+                            <img src={post.cover_image} alt={post.title} className="w-full h-full object-cover" />
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* Content */}
                 <div className="container mx-auto px-4 md:px-6 max-w-3xl">
@@ -83,3 +141,4 @@ export default function BlogPost() {
         </div>
     );
 }
+
