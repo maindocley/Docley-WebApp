@@ -45,6 +45,7 @@ export function IntakeModal({ isOpen, onClose, onBack, initialContent = null }) 
                 state: {
                     ...formData,
                     content: initialContent?.content || '',
+                    contentHtml: initialContent?.contentHtml || '',
                     isNew: true,
                 }
             });

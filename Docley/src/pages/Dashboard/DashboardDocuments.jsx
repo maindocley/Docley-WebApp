@@ -28,12 +28,14 @@ import { useTheme } from '../../context/ThemeContext';
 import { cn } from '../../lib/utils';
 import { ContentIntakeModal } from '../../components/modals/ContentIntakeModal';
 import { IntakeModal } from '../../components/modals/IntakeModal';
+import { TemplateSelectionModal } from '../../components/modals/TemplateSelectionModal.jsx';
 import { getDocuments, deleteDocument, permanentlyDeleteDocument } from '../../services/documentsService';
 
 export default function DashboardDocuments() {
     const [searchTerm, setSearchTerm] = useState('');
     const [showContentModal, setShowContentModal] = useState(false);
     const [showIntakeModal, setShowIntakeModal] = useState(false);
+    const [showTemplateSelectionModal, setShowTemplateSelectionModal] = useState(false);
     const [intakeContent, setIntakeContent] = useState(null);
     const [viewMode, setViewMode] = useState('grid');
     const [sortBy, setSortBy] = useState('recent');
@@ -73,6 +75,25 @@ export default function DashboardDocuments() {
         setIntakeContent(content);
         setShowContentModal(false);
         setShowIntakeModal(true);
+    };
+
+    const handleTemplateSelection = (selectedTemplateContent) => {
+        setShowTemplateSelectionModal(false);
+        if (selectedTemplateContent) {
+            // Format template content for IntakeModal
+            const formattedContent = {
+                content: selectedTemplateContent,
+                // Add basic HTML formatting for the editor
+                contentHtml: `<div style="font-size: 12pt;">${selectedTemplateContent.split('\n').map(line => line.trim() ? `<p>${line}</p>` : '<p><br></p>').join('')}</div>`,
+                inputType: 'template'
+            };
+            setIntakeContent(formattedContent);
+            setShowIntakeModal(true);
+        } else {
+            // User chose "Start from Scratch" (default way)
+            setIntakeContent(null);
+            setShowContentModal(true);
+        }
     };
 
     const handleIntakeClose = () => {
@@ -172,6 +193,11 @@ export default function DashboardDocuments() {
     return (
         <div className="space-y-6">
             {/* Modals */}
+            <TemplateSelectionModal
+                isOpen={showTemplateSelectionModal}
+                onClose={() => setShowTemplateSelectionModal(false)}
+                onTemplateSelect={handleTemplateSelection}
+            />
             <ContentIntakeModal
                 isOpen={showContentModal}
                 onClose={() => setShowContentModal(false)}
@@ -202,7 +228,7 @@ export default function DashboardDocuments() {
                         </p>
                     </div>
                     <Button
-                        onClick={() => setShowContentModal(true)}
+                        onClick={() => setShowTemplateSelectionModal(true)}
                         className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 border-none shadow-lg shadow-orange-500/20 text-white"
                     >
                         <Plus className="mr-2 h-4 w-4" /> New Document

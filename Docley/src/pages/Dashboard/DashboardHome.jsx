@@ -33,12 +33,14 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { cn } from '../../lib/utils';
 import { supabase } from '../../lib/supabase';
+import { TemplateSelectionModal } from '../../components/modals/TemplateSelectionModal.jsx';
 
 export default function DashboardHome() {
     const { user } = useAuth();
     const { theme } = useTheme();
     const isDark = theme === 'dark';
     const [showContentModal, setShowContentModal] = useState(false);
+    const [showTemplateSelectionModal, setShowTemplateSelectionModal] = useState(false);
     const [showIntakeModal, setShowIntakeModal] = useState(false);
     const [intakeContent, setIntakeContent] = useState(null);
     const [documents, setDocuments] = useState([]);
@@ -125,6 +127,23 @@ export default function DashboardHome() {
         setShowContentModal(true);
     };
 
+    const handleTemplateSelection = (selectedTemplateContent) => {
+        setShowTemplateSelectionModal(false);
+        if (selectedTemplateContent) {
+            // Format template content for IntakeModal
+            const formattedContent = {
+                content: selectedTemplateContent,
+                contentHtml: `<div style="font-size: 12pt;">${selectedTemplateContent.split('\n').map(l => l.trim() ? `<p>${l}</p>` : '<p><br></p>').join('')}</div>`,
+                inputType: 'template'
+            };
+            setIntakeContent(formattedContent);
+            setShowIntakeModal(true); // Skip ContentIntakeModal
+        } else {
+            setIntakeContent(null); // Start with blank document
+            setShowContentModal(true); // Go to default workflow
+        }
+    };
+
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         const now = new Date();
@@ -164,6 +183,12 @@ export default function DashboardHome() {
                 onClose={handleIntakeClose}
                 onBack={handleIntakeBack}
                 initialContent={intakeContent}
+            />
+
+            <TemplateSelectionModal
+                isOpen={showTemplateSelectionModal}
+                onClose={() => setShowTemplateSelectionModal(false)}
+                onTemplateSelect={handleTemplateSelection}
             />
 
             {/* Welcome Message with Quick Stats */}
@@ -357,7 +382,7 @@ export default function DashboardHome() {
                     </div>
                     <div className="flex flex-col sm:flex-row gap-2 flex-shrink-0">
                         <Button
-                            onClick={() => setShowContentModal(true)}
+                            onClick={() => setShowTemplateSelectionModal(true)}
                             className="shadow-lg shadow-orange-500/20 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 border-none text-white text-sm px-4 py-2 h-auto whitespace-nowrap"
                         >
                             <Plus className="mr-1.5 h-4 w-4" /> New Assignment
@@ -404,7 +429,7 @@ export default function DashboardHome() {
                         </div>
                         <div className="space-y-2">
                             <button
-                                onClick={() => setShowContentModal(true)}
+                                onClick={() => setShowTemplateSelectionModal(true)}
                                 className={cn(
                                     "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all hover:scale-[1.02]",
                                     isDark
