@@ -1,9 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-// Hardcoded admin email - must match backend AdminGuard
-const ADMIN_EMAIL = 'maindocley@gmail.com';
-
 export function ProtectedRoute({ children }) {
     const { user, loading } = useAuth();
     const location = useLocation();
@@ -43,7 +40,7 @@ export function PublicRoute({ children }) {
 
 // Admin-only route - restricts access to specific database role
 export function AdminOnlyRoute({ children }) {
-    const { user, isAdmin, isInitializing } = useAuth();
+    const { user, profile, isInitializing } = useAuth();
 
     // 1. Initial boot loading
     if (isInitializing) {
@@ -55,8 +52,8 @@ export function AdminOnlyRoute({ children }) {
         return <Navigate to="/login" replace />;
     }
 
-    // 3. Strict admin check (respects DB role + fallback)
-    if (!isAdmin) {
+    // 3. Strict admin check (database role)
+    if (profile?.role !== 'admin') {
         console.warn('[Security] Access denied: Required Admin role');
         return <Navigate to="/dashboard" replace />;
     }
@@ -76,7 +73,3 @@ function AuthLoadingScreen() {
         </div>
     );
 }
-
-// Export admin email check helper for use in sidebars
-export const isAdminEmail = (email) => email === 'maindocley@gmail.com';
-

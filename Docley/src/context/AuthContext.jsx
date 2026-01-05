@@ -53,10 +53,12 @@ export function AuthProvider({ children }) {
             const cached = sessionStorage.getItem(`profile_${userId}`);
             if (cached) {
                 const parsed = JSON.parse(cached);
-                setProfile(parsed);
-                setProfileLoading(false);
-                setLoading(false);
-                return parsed;
+                if (parsed && Object.prototype.hasOwnProperty.call(parsed, 'role')) {
+                    setProfile(parsed);
+                    setProfileLoading(false);
+                    setLoading(false);
+                    return parsed;
+                }
             }
 
             // 2. Fetch from DB
@@ -124,14 +126,8 @@ export function AuthProvider({ children }) {
     // 2. Computed values using useMemo
     const isAdmin = useMemo(() => {
         // High-confidence role from DB table takes precedence
-        if (profile?.role === 'admin') return true;
-
-        // Secondary fallback to app_metadata (for immediate access while DB loads)
-        const metadataRole = user?.app_metadata?.role || user?.user_metadata?.role;
-        if (metadataRole === 'admin') return true;
-
-        return false;
-    }, [profile, user]);
+        return profile?.role === 'admin';
+    }, [profile]);
 
     const isPremium = useMemo(() => {
         return profile?.is_premium === true;
@@ -294,10 +290,6 @@ export function AuthProvider({ children }) {
             if (error) throw error;
             return data;
         },
-        isAuthenticated: !!user,
-        isAdmin,
-        isPremium,
-        isEmailVerified,
         refreshProfile: () => fetchProfile(user?.id)
     };
 

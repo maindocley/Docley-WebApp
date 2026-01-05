@@ -1,8 +1,5 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
-
-// Hardcoded admin email - only this user can access admin endpoints
-const ADMIN_EMAIL = 'maindocley@gmail.com';
 
 @Injectable()
 export class AdminGuard implements CanActivate {
@@ -26,13 +23,24 @@ export class AdminGuard implements CanActivate {
             throw new UnauthorizedException('Invalid token');
         }
 
-        // Check if user email matches the hardcoded admin email
-        if (user.email !== ADMIN_EMAIL) {
-            throw new ForbiddenException('Access denied. You are not authorized to access admin resources.');
+        // Backend source of truth: check admin role from public.users
+        const { data: profile, error: profileError } = await supabase
+            .from('users')
+            .select('role')
+            .eq('id', user.id)
+            .maybeSingle();
+
+        if (profileError) {
+            throw new InternalServerErrorException('Failed to load user role');
+        }
+
+        if (!profile || profile.role !== 'admin') {
+            throw new ForbiddenException('Access denied. Admin role required.');
         }
 
         // Attach user to request for downstream use
         request.user = user;
+        request.profile = profile;
         return true;
     }
 }

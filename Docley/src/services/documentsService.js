@@ -20,6 +20,31 @@ const getAuthHeaders = async () => {
     };
 };
 
+export async function uploadDocumentFile(file, documentId) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        throw new Error('User not authenticated');
+    }
+
+    const fileExt = file.name.includes('.') ? file.name.split('.').pop() : '';
+    const safeExt = fileExt ? `.${fileExt}` : '';
+    const uniqueName = `${Date.now()}-${Math.random().toString(36).substring(2)}${safeExt}`;
+    const filePath = `${user.id}/${documentId}/${uniqueName}`;
+
+    const { error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(filePath, file, {
+            contentType: file.type,
+            upsert: false,
+        });
+
+    if (uploadError) {
+        throw uploadError;
+    }
+
+    return filePath;
+}
+
 // Create a new document
 export async function createDocument(documentData) {
     const headers = await getAuthHeaders();
@@ -34,7 +59,7 @@ export async function createDocument(documentData) {
         document_type: documentData.documentType || 'Essay',
         file_name: documentData.fileName || null,
         file_size: documentData.fileSize || null,
-        file_content: documentData.fileContent || null, // Store Base64 directly
+        file_url: documentData.fileUrl || null,
         status: 'draft',
     };
 
@@ -111,7 +136,9 @@ export async function updateDocument(id, updates) {
     if (updates.status !== undefined) updateData.status = updates.status;
     if (updates.margins !== undefined) updateData.margins = updates.margins;
     if (updates.headerText !== undefined) updateData.header_text = updates.headerText;
-    if (updates.fileContent !== undefined) updateData.file_content = updates.fileContent;
+    if (updates.fileUrl !== undefined) updateData.file_url = updates.fileUrl;
+    if (updates.fileName !== undefined) updateData.file_name = updates.fileName;
+    if (updates.fileSize !== undefined) updateData.file_size = updates.fileSize;
 
     const response = await fetch(`${API_URL}/${id}`, {
         method: 'PATCH',

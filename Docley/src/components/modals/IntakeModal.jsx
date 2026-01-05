@@ -3,7 +3,7 @@ import { X, FileText, ChevronRight, GraduationCap, Quote, Type, Sparkles, ArrowL
 import { Button } from '../ui/Button';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../../context/ToastContext';
-import { createDocument } from '../../services/documentsService';
+import { createDocument, updateDocument, uploadDocumentFile } from '../../services/documentsService';
 
 export function IntakeModal({ isOpen, onClose, onBack, initialContent = null }) {
     const navigate = useNavigate();
@@ -37,8 +37,16 @@ export function IntakeModal({ isOpen, onClose, onBack, initialContent = null }) 
                 documentType: formData.type,
                 fileName: initialContent?.file?.name || null,
                 fileSize: initialContent?.file?.size || null,
-                fileContent: initialContent?.fileContent || null,
             });
+
+            if (initialContent?.file) {
+                const filePath = await uploadDocumentFile(initialContent.file, document.id);
+                await updateDocument(document.id, {
+                    fileUrl: filePath,
+                    fileName: initialContent.file.name,
+                    fileSize: initialContent.file.size,
+                });
+            }
 
             addToast('Document created successfully', 'success');
             navigate(`/dashboard/editor/${document.id}`, {

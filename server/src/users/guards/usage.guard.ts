@@ -20,19 +20,44 @@ export class UsageGuard implements CanActivate {
 
         const usage = await this.usersService.getOrCreateUsage(user.id);
 
-        // If user is Pro, bypass all limits
-        if (usage.subscription_tier === 'pro') {
+        // Admin exemption: unlimited usage
+        if (usage?.role === 'admin') {
             return true;
         }
 
-        // Limit for Free users is 3 documents
-        if (usage.document_count >= 3) {
-            throw new ForbiddenException({
-                error: 'Limit Reached',
-                message: 'You have reached the free limit of 3 documents. Please upgrade to Pro for unlimited access.',
-                limit: 3,
-                current: usage.document_count,
-            });
+        // Paid users bypass limits (prefer users.is_premium; fallback to legacy usage.subscription_tier)
+        if (usage?.is_premium === true || usage?.subscription_tier === 'pro') {
+            return true;
+        }
+
+        const path: string = request.route?.path || request.path || '';
+
+        try {
+            // Documents create: consume a document slot
+            if (path === '/documents' && request.method === 'POST') {
+                await this.usersService.consumeDocument(user.id);
+                return true;
+            }
+
+            // AI endpoint: decide based on mode
+            if (path === '/ai/transform' && request.method === 'POST') {
+                const mode = request.body?.mode;
+                if (mode === 'diagnostic' || mode === 'analysis') {
+                    await this.usersService.consumeAiDiagnostic(user.id);
+                } else if (mode === 'upgrade' || mode === 'transform') {
+                    await this.usersService.consumeAiUpgrade(user.id);
+                }
+                return true;
+            }
+        } catch (e: any) {
+            const message = e?.message || '';
+            if (message.toLowerCase().includes('limit')) {
+                throw new ForbiddenException({
+                    error: 'Limit Reached',
+                    message: 'You have reached your free lifetime limit. Please upgrade to Pro for unlimited access.',
+                });
+            }
+            throw e;
         }
 
         return true;

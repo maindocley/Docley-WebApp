@@ -19,8 +19,15 @@ const getAuthHeaders = async () => {
 export async function checkIsAdmin() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return false;
-    const role = user.user_metadata?.role || user.app_metadata?.role;
-    return role === 'admin';
+
+    const { data, error } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle();
+
+    if (error) return false;
+    return data?.role === 'admin';
 }
 
 // Get Dashboard Stats from NestJS Backend

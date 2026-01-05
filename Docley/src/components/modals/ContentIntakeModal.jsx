@@ -256,25 +256,12 @@ export function ContentIntakeModal({ isOpen, onClose, onContinue }) {
         setError('');
 
         try {
-            let fileContent = null;
-
-            if (activeTab === 'upload' && file) {
-                // Read file as Base64 (DataURL) to store in database
-                fileContent = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                });
-            }
-
             onContinue({
                 content: activeTab === 'paste' ? content : content,
                 contentHtml: activeTab === 'paste'
                     ? `<div style="font-size: 12pt;">${content.split('\n').filter(l => l.trim()).map(l => `<p>${l}</p>`).join('')}</div>`
                     : `<div style="font-size: 12pt;">${htmlContent}</div>`,
                 file: activeTab === 'upload' ? file : null,
-                fileContent,
                 inputType: activeTab,
             });
         } catch (err) {

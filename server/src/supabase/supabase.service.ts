@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import * as dotenv from 'dotenv';
 
@@ -6,7 +6,7 @@ dotenv.config();
 
 @Injectable()
 export class SupabaseService {
-    private supabase: SupabaseClient;
+    private supabase?: SupabaseClient;
 
     constructor() {
         this.initializeClient();
@@ -14,20 +14,19 @@ export class SupabaseService {
 
     private initializeClient() {
         const supabaseUrl = process.env.SUPABASE_URL;
-        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 
         if (!supabaseUrl || !supabaseKey) {
-            console.error('Supabase credentials missing in .env');
-            // We don't throw here to avoid crashing the whole app on startup if env is missing,
-            // but methods will fail. Ideally we should throw if critical.
-            // For now, let's log error.
-            return;
+            throw new Error('Supabase credentials missing: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_ANON_KEY) are required');
         }
 
         this.supabase = createClient(supabaseUrl, supabaseKey);
     }
 
     getClient(): SupabaseClient {
+        if (!this.supabase) {
+            throw new InternalServerErrorException('Supabase client is not initialized');
+        }
         return this.supabase;
     }
 }

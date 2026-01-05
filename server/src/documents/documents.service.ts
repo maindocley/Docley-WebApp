@@ -27,7 +27,6 @@ export class DocumentsService {
                 file_name: data.file_name || null,
                 file_size: data.file_size || null,
                 file_url: data.file_url || null,
-                file_content: data.file_content || null, // Store Base64 directly in DB
                 margins: data.margins || { top: 96, bottom: 96, left: 96, right: 96 },
                 header_text: data.header_text || '',
                 status: data.status || 'draft',
