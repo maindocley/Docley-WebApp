@@ -195,73 +195,77 @@ export default function DashboardHome() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Welcome Card */}
                 <div className={cn(
-                    "lg:col-span-2 rounded-2xl border p-6 backdrop-blur-xl",
+                    "lg:col-span-2 rounded-2xl border p-8 backdrop-blur-xl relative overflow-hidden group transition-all duration-300",
                     isDark
                         ? "bg-white/5 border-white/10"
-                        : "bg-gradient-to-br from-indigo-50 via-white to-orange-50/30 border-indigo-100/50"
+                        : "bg-white border-slate-200 shadow-sm hover:shadow-md"
                 )}>
-                    <h1 className={cn(
-                        "text-3xl md:text-4xl font-bold mb-2",
-                        isDark ? "text-white" : "text-slate-900"
-                    )}>
-                        Welcome back, {getUserDisplayName()}! 👋
-                    </h1>
-                    <p className={cn(
-                        "text-base md:text-lg mb-4",
-                        isDark ? "text-slate-300" : "text-slate-600"
-                    )}>
-                        Ready to transform your next assignment into submission-ready work?
-                    </p>
+                    {/* Decorative Background Elements */}
+                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-orange-500/10 blur-3xl rounded-full group-hover:bg-orange-500/20 transition-colors duration-700" />
+                    <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-blue-500/10 blur-3xl rounded-full group-hover:bg-blue-500/20 transition-colors duration-700" />
 
-                    {/* Quick Stats Row */}
-                    <div className="flex flex-wrap gap-4 mt-4">
-                        <div className={cn(
-                            "flex items-center gap-2 px-3 py-1.5 rounded-lg",
-                            isDark ? "bg-white/5" : "bg-white/60"
-                        )}>
-                            <FileText className={cn(
-                                "h-4 w-4",
-                                isDark ? "text-orange-400" : "text-orange-600"
-                            )} />
-                            <span className={cn(
-                                "text-sm font-semibold",
-                                isDark ? "text-white" : "text-slate-900"
-                            )}>
-                                {stats.totalDocuments} {stats.totalDocuments === 1 ? 'Document' : 'Documents'}
-                            </span>
+                    <div className="relative z-10">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-bold uppercase tracking-wider mb-4">
+                            <Sparkles className="h-3 w-3" />
+                            Welcome Back
                         </div>
-                        <div className={cn(
-                            "flex items-center gap-2 px-3 py-1.5 rounded-lg",
-                            isDark ? "bg-white/5" : "bg-white/60"
+                        <h1 className={cn(
+                            "text-3xl md:text-5xl font-black mb-4 tracking-tight",
+                            isDark ? "text-white" : "text-slate-900"
                         )}>
-                            <BookOpen className={cn(
-                                "h-4 w-4",
-                                isDark ? "text-blue-400" : "text-blue-600"
-                            )} />
-                            <span className={cn(
-                                "text-sm font-semibold",
-                                isDark ? "text-white" : "text-slate-900"
-                            )}>
-                                {stats.totalWords.toLocaleString()} words
-                            </span>
-                        </div>
-                        {stats.upgradedCount > 0 && (
+                            Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}, <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">{getUserDisplayName()}!</span>
+                        </h1>
+                        <p className={cn(
+                            "text-lg mb-8 leading-relaxed max-w-2xl",
+                            isDark ? "text-slate-400" : "text-slate-600"
+                        )}>
+                            Ready to transform your academic journey? Create a new document or pick up where you left off.
+                        </p>
+
+                        {/* Quick Stats Row */}
+                        <div className="flex flex-wrap gap-4 mt-4">
                             <div className={cn(
-                                "flex items-center gap-2 px-3 py-1.5 rounded-lg",
-                                isDark ? "bg-white/5" : "bg-white/60"
+                                "flex items-center gap-2 px-4 py-2 rounded-xl transition-all",
+                                isDark ? "bg-white/5 hover:bg-white/10" : "bg-slate-50 hover:bg-slate-100"
                             )}>
-                                <Rocket className={cn(
+                                <FileText className={cn(
                                     "h-4 w-4",
-                                    isDark ? "text-green-400" : "text-green-600"
+                                    isDark ? "text-orange-400" : "text-orange-600"
                                 )} />
                                 <span className={cn(
                                     "text-sm font-semibold",
                                     isDark ? "text-white" : "text-slate-900"
                                 )}>
-                                    {stats.upgradedCount} Upgraded
+                                    {stats.totalDocuments} {stats.totalDocuments === 1 ? 'Document' : 'Documents'}
                                 </span>
                             </div>
-                        )}
+                            <div className={cn(
+                                "flex items-center gap-2 px-4 py-2 rounded-xl transition-all",
+                                isDark ? "bg-white/5 hover:bg-white/10" : "bg-slate-50 hover:bg-slate-100"
+                            )}>
+                                <BookOpen className={cn(
+                                    "h-4 w-4",
+                                    isDark ? "text-blue-400" : "text-blue-600"
+                                )} />
+                                <span className={cn(
+                                    "text-sm font-semibold",
+                                    isDark ? "text-white" : "text-slate-900"
+                                )}>
+                                    {stats.totalWords.toLocaleString()} words
+                                </span>
+                            </div>
+                            <div className="flex-1" />
+                            <div className="flex items-center gap-3">
+                                <Button 
+                                    size="lg"
+                                    onClick={() => setShowTemplateSelectionModal(true)}
+                                    className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white border-none shadow-lg shadow-orange-500/25 px-8 rounded-xl h-12"
+                                >
+                                    <Plus className="h-5 w-5 mr-2" />
+                                    New Document
+                                </Button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

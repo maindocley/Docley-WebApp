@@ -233,7 +233,7 @@ export default function AdminDashboard() {
                             </p>
                             <h3 className="text-2xl font-bold mt-1">{stats.users?.toLocaleString() || 0}</h3>
                         </div>
-                        <div className="w-20 h-10">
+                        <div className="w-20 h-10 min-h-[40px]">
                             {chartsReady && (
                                 <ResponsiveContainer width="100%" height="100%">
                                     <LineChart data={mockSparkline}>
@@ -275,7 +275,7 @@ export default function AdminDashboard() {
                         Total AI Credits Used
                     </p>
                     <div className="flex items-center justify-between mt-2">
-                        <div className="w-16 h-16">
+                        <div className="w-16 h-16 min-h-[64px]">
                             {chartsReady && (
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>

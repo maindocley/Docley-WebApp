@@ -20,6 +20,7 @@ import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ProtectedRoute, PublicRoute, AdminOnlyRoute } from './components/ProtectedRoute';
 import { FloatingDocuments } from './components/ui/FloatingDocuments';
+import { PWAInstallPrompt } from './components/ui/PWAInstallPrompt';
 import { Loader2 } from 'lucide-react';
 import MaintenancePage from './pages/MaintenancePage';
 import { useState, useEffect } from 'react';
@@ -126,6 +127,7 @@ function App() {
       <AuthProvider>
         <ToastProvider>
           <FloatingDocuments />
+          <PWAInstallPrompt delaySeconds={30} />
           <MaintenanceGuard>
             <Router>
               <Routes>

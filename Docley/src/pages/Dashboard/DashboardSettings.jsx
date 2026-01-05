@@ -1,8 +1,8 @@
 import { Button } from '../../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/Card';
-import { 
-    User, Bell, CreditCard, Shield, Mail, Save, Key, Trash2, 
-    AlertTriangle, Eye, EyeOff, CheckCircle2, Moon, Sun, 
+import {
+    User, Bell, CreditCard, Shield, Mail, Save, Key, Trash2,
+    AlertTriangle, Eye, EyeOff, CheckCircle2, Moon, Sun,
     Monitor, Globe, Clock, ChevronRight, LogOut
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
@@ -18,7 +18,7 @@ export default function DashboardSettings() {
     const { theme, setTheme } = useTheme();
     const [activeTab, setActiveTab] = useState('general');
     const [isSaving, setIsSaving] = useState(false);
-    
+
     // Form Data
     const [formData, setFormData] = useState({
         fullName: '',
@@ -213,8 +213,8 @@ export default function DashboardSettings() {
                         </Card>
 
                         <div className="flex justify-end pt-2">
-                            <Button 
-                                onClick={handleSave} 
+                            <Button
+                                onClick={handleSave}
                                 isLoading={isSaving}
                                 className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 px-8"
                             >
@@ -223,7 +223,7 @@ export default function DashboardSettings() {
                         </div>
                     </div>
                 );
-            
+
             case 'appearance':
                 return (
                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
@@ -238,8 +238,8 @@ export default function DashboardSettings() {
                                         onClick={() => setTheme('light')}
                                         className={cn(
                                             "group relative flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all duration-200",
-                                            theme === 'light' 
-                                                ? "border-indigo-600 bg-indigo-50/50 dark:bg-indigo-900/10 ring-1 ring-indigo-600/20" 
+                                            theme === 'light'
+                                                ? "border-indigo-600 bg-indigo-50/50 dark:bg-indigo-900/10 ring-1 ring-indigo-600/20"
                                                 : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
                                         )}
                                     >
@@ -252,13 +252,13 @@ export default function DashboardSettings() {
                                             {theme === 'light' && <CheckCircle2 className="h-4 w-4 text-indigo-600" />}
                                         </div>
                                     </button>
-                                    
+
                                     <button
                                         onClick={() => setTheme('dark')}
                                         className={cn(
                                             "group relative flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all duration-200",
-                                            theme === 'dark' 
-                                                ? "border-indigo-600 bg-indigo-50/50 dark:bg-indigo-900/10 ring-1 ring-indigo-600/20" 
+                                            theme === 'dark'
+                                                ? "border-indigo-600 bg-indigo-50/50 dark:bg-indigo-900/10 ring-1 ring-indigo-600/20"
                                                 : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
                                         )}
                                     >
@@ -373,14 +373,14 @@ export default function DashboardSettings() {
                                             <div className="text-sm text-slate-500 dark:text-slate-400">per month</div>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="mt-8 pt-8 border-t border-indigo-100 dark:border-indigo-900/30">
                                         <div className="flex flex-col sm:flex-row gap-4">
                                             <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20">
                                                 Upgrade to Pro
                                             </Button>
-                                            <Button 
-                                                variant="outline" 
+                                            <Button
+                                                variant="outline"
                                                 className="flex-1 border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
                                                 onClick={() => addToast('Billing portal not available', 'info')}
                                             >
@@ -438,8 +438,8 @@ export default function DashboardSettings() {
                                         </div>
                                     </div>
                                     <div className="pt-2">
-                                        <Button 
-                                            type="submit" 
+                                        <Button
+                                            type="submit"
                                             isLoading={isUpdatingPassword}
                                             className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20"
                                         >
@@ -459,7 +459,7 @@ export default function DashboardSettings() {
                                     </div>
                                     <div className={cn(
                                         "px-2.5 py-0.5 rounded-full text-xs font-semibold border",
-                                        formData.twoFactor 
+                                        formData.twoFactor
                                             ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/50"
                                             : "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
                                     )}>
@@ -505,7 +505,7 @@ export default function DashboardSettings() {
                                         <p className="font-medium text-slate-900 dark:text-white">Delete Account</p>
                                         <p className="text-sm text-slate-500 dark:text-slate-400">Permanently remove your account and all data.</p>
                                     </div>
-                                    <Button 
+                                    <Button
                                         variant="destructive"
                                         onClick={() => addToast('Account deletion is disabled for safety.', 'error')}
                                         className="bg-red-600 hover:bg-red-700 text-white shadow-md shadow-red-600/20"
@@ -542,15 +542,15 @@ export default function DashboardSettings() {
                                 onClick={() => setActiveTab(tab.id)}
                                 className={cn(
                                     "group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-left transition-all duration-200 border",
-                                    isActive 
-                                        ? "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm" 
+                                    isActive
+                                        ? "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm"
                                         : "bg-transparent border-transparent hover:bg-slate-100 dark:hover:bg-slate-800/50"
                                 )}
                             >
                                 <div className={cn(
                                     "p-2 rounded-lg transition-colors",
-                                    isActive 
-                                        ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400" 
+                                    isActive
+                                        ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400"
                                         : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-300"
                                 )}>
                                     <Icon className="h-5 w-5" />
@@ -570,7 +570,7 @@ export default function DashboardSettings() {
                             </button>
                         );
                     })}
-                    
+
                     <div className="pt-6 mt-6 border-t border-slate-200 dark:border-slate-800">
                         <button
                             onClick={() => signOut()}

@@ -11,6 +11,7 @@ import {
     Shield,
     MessageSquare,
     Activity,
+    Search,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -74,9 +75,7 @@ export function AdminLayout() {
                     isDark ? "border-white/5" : "border-slate-200"
                 )}>
                     <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-orange-500 to-blue-500 flex items-center justify-center shadow-lg shadow-orange-500/30">
-                            <span className="text-xl font-bold text-white">D</span>
-                        </div>
+                        <DocleyLogo size="sm" iconOnly={true} />
                         <div>
                             <p className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>Docley Admin</p>
                             <p className={cn("text-xs uppercase tracking-wide", isDark ? "text-slate-400" : "text-slate-500")}>Control Room</p>
@@ -92,33 +91,33 @@ export function AdminLayout() {
 
                 <div className="flex flex-col h-[calc(100vh-80px)] px-3 py-4">
                     <div className="flex-1 space-y-2 overflow-y-auto custom-scrollbar">
-                    <div className={cn(
-                        "rounded-2xl p-3 border",
-                        isDark ? "border-white/5 bg-white/5" : "border-slate-200 bg-white/70"
-                    )}>
-                        <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-orange-500 to-blue-500 flex items-center justify-center text-white font-semibold">
-                                {user?.email?.[0]?.toUpperCase()}
+                        <div className={cn(
+                            "rounded-2xl p-3 border",
+                            isDark ? "border-white/5 bg-white/5" : "border-slate-200 bg-white/70"
+                        )}>
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-orange-500 to-blue-500 flex items-center justify-center text-white font-semibold">
+                                    {user?.email?.[0]?.toUpperCase()}
+                                </div>
+                                <div className="min-w-0">
+                                    <p className={cn("text-sm font-semibold truncate", isDark ? "text-white" : "text-slate-900")}>{user?.email}</p>
+                                    <p className={cn("text-xs", isDark ? "text-slate-400" : "text-slate-500")}>Administrator</p>
+                                </div>
                             </div>
-                            <div className="min-w-0">
-                                <p className={cn("text-sm font-semibold truncate", isDark ? "text-white" : "text-slate-900")}>{user?.email}</p>
-                                <p className={cn("text-xs", isDark ? "text-slate-400" : "text-slate-500")}>Administrator</p>
+                            <div className="mt-3 flex items-center justify-between text-xs">
+                                <div className={cn("flex items-center gap-2 px-2 py-1 rounded-full",
+                                    isDark ? "bg-white/5 text-slate-300" : "bg-slate-100 text-slate-700"
+                                )}>
+                                    <Shield className="h-4 w-4 text-orange-500" />
+                                    Secure mode
+                                </div>
+                                <div className={cn("px-2 py-1 rounded-full",
+                                    isDark ? "bg-orange-500/20 text-orange-200" : "bg-orange-50 text-orange-600"
+                                )}>
+                                    Live
+                                </div>
                             </div>
                         </div>
-                        <div className="mt-3 flex items-center justify-between text-xs">
-                            <div className={cn("flex items-center gap-2 px-2 py-1 rounded-full",
-                                isDark ? "bg-white/5 text-slate-300" : "bg-slate-100 text-slate-700"
-                            )}>
-                                <Shield className="h-4 w-4 text-orange-500" />
-                                Secure mode
-                            </div>
-                            <div className={cn("px-2 py-1 rounded-full",
-                                isDark ? "bg-orange-500/20 text-orange-200" : "bg-orange-50 text-orange-600"
-                            )}>
-                                Live
-                            </div>
-                        </div>
-                    </div>
 
                         <nav className="space-y-1">
                             {navItems.map((item) => (
@@ -186,21 +185,8 @@ export function AdminLayout() {
                         </div>
                     </div>
 
-                    {/* Bottom section - THEME and Sign Out */}
+                    {/* Bottom section - Sign Out */}
                     <div className="mt-auto pt-4 space-y-2 border-t" style={{ borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.1)' }}>
-                        <div className={cn(
-                            "rounded-2xl p-3 border flex items-center justify-between",
-                            isDark ? "border-white/5 bg-white/5" : "border-slate-200 bg-white/70"
-                        )}>
-                            <div className="space-y-1">
-                                <p className={cn("text-xs font-semibold uppercase tracking-wide", isDark ? "text-slate-300" : "text-slate-600")}>Theme</p>
-                                <p className={cn("text-[11px]", isDark ? "text-slate-500" : "text-slate-500")}>
-                                    Match the main Docley dashboard
-                                </p>
-                            </div>
-                            <ThemeToggle />
-                        </div>
-
                         <button
                             onClick={handleSignOut}
                             className={cn(
@@ -231,22 +217,36 @@ export function AdminLayout() {
                         <Menu className="h-5 w-5" />
                     </button>
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-orange-500 to-blue-500 flex items-center justify-center shadow-md shadow-orange-500/20">
-                            <span className="text-xl font-bold text-white">D</span>
-                        </div>
-                        <div className="min-w-0">
+
+                        <div className="hidden sm:block min-w-0">
                             <p className={cn("text-sm font-semibold uppercase tracking-wide", isDark ? "text-slate-300" : "text-slate-500")}>Admin Console</p>
                             <h1 className={cn("text-xl font-bold truncate", isDark ? "text-white" : "text-slate-900")}>Governance & Insights</h1>
                         </div>
                     </div>
-                    <div className="hidden md:flex items-center gap-3">
-                        <div className={cn(
-                            "px-3 py-2 rounded-lg border flex items-center gap-2 text-sm",
-                            isDark ? "border-white/10 bg-white/5 text-slate-200" : "border-slate-200 bg-white text-slate-700"
-                        )}>
-                            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                            Live
+
+                    {/* Search Bar */}
+                    <div className="hidden md:flex flex-[2] max-w-xl mx-4">
+                        <div className="relative w-full group">
+                            <div className={cn(
+                                "absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors",
+                                isDark ? "text-slate-500 group-focus-within:text-orange-400" : "text-slate-400 group-focus-within:text-orange-500"
+                            )}>
+                                <Search className="h-4 w-4" />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Search admin console..."
+                                className={cn(
+                                    "block w-full pl-10 pr-3 py-2 text-sm rounded-xl border transition-all duration-200 outline-none",
+                                    isDark
+                                        ? "bg-white/5 border-white/10 text-white placeholder-slate-500 focus:bg-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-500/10"
+                                        : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 shadow-sm"
+                                )}
+                            />
                         </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
                         <NotificationBell />
                         <ThemeToggle />
                     </div>

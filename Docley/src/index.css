@@ -1,15 +1,25 @@
 @import "tailwindcss";
 
+@theme {
+  --color-scheme: dark light;
+}
+
+@variant dark (&:where(.dark, .dark *));
+
+
 /* --- Small global utilities used across pages --- */
 
 @keyframes blob {
+
   0%,
   100% {
     transform: translate3d(0, 0, 0) scale(1);
   }
+
   33% {
     transform: translate3d(30px, -40px, 0) scale(1.1);
   }
+
   66% {
     transform: translate3d(-20px, 30px, 0) scale(0.95);
   }
@@ -20,9 +30,12 @@
 }
 
 @keyframes gradient {
-  0%, 100% {
+
+  0%,
+  100% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
@@ -34,15 +47,20 @@
 }
 
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px) rotate(0deg);
   }
+
   25% {
     transform: translateY(-20px) rotate(5deg);
   }
+
   50% {
     transform: translateY(-10px) rotate(-5deg);
   }
+
   75% {
     transform: translateY(-15px) rotate(3deg);
   }
@@ -52,14 +70,16 @@
   animation: float 8s ease-in-out infinite;
 }
 
-/* Dark mode styles */
-.dark {
-  color-scheme: dark;
-}
-
 @keyframes slideIn {
-  from { opacity: 0; transform: translateX(10px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .animate-slide-in {
@@ -78,20 +98,25 @@
 .custom-scrollbar::-webkit-scrollbar {
   width: 10px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.45); /* slate-400 */
+  background: rgba(148, 163, 184, 0.45);
+  /* slate-400 */
   border-radius: 9999px;
   border: 2px solid transparent;
   background-clip: padding-box;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.65);
   border: 2px solid transparent;
   background-clip: padding-box;
 }
+
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(148, 163, 184, 0.55) transparent;

@@ -162,7 +162,7 @@ export default function AdminSettings() {
                                 </CardHeader>
                                 <CardContent className="p-6">
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div 
+                                        <div
                                             onClick={() => handleChange('aiModel', 'gemini-1.5-flash')}
                                             className={cn(
                                                 "cursor-pointer relative p-5 rounded-xl border-2 transition-all duration-200 flex flex-col gap-3",
@@ -182,7 +182,7 @@ export default function AdminSettings() {
                                                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Low latency, cost-effective.</p>
                                             </div>
                                         </div>
-                                        <div 
+                                        <div
                                             onClick={() => handleChange('aiModel', 'gemini-1.5-pro')}
                                             className={cn(
                                                 "cursor-pointer relative p-5 rounded-xl border-2 transition-all duration-200 flex flex-col gap-3",
@@ -244,7 +244,7 @@ export default function AdminSettings() {
             case 'security':
                 return (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                         <Card className="md:col-span-3 border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900">
+                        <Card className="md:col-span-3 border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900">
                             <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
                                 <CardTitle className="text-lg text-slate-900 dark:text-white">Access Control Policies</CardTitle>
                                 <CardDescription className="text-slate-500 dark:text-slate-400">Global security settings for all users.</CardDescription>
@@ -256,9 +256,9 @@ export default function AdminSettings() {
                                             <div className="font-medium text-slate-900 dark:text-white">Public Registration</div>
                                             <div className="text-sm text-slate-500 dark:text-slate-400">Allow new users to sign up without an invitation.</div>
                                         </div>
-                                        <Switch 
-                                            checked={settings.allowSignups} 
-                                            onChange={(checked) => handleChange('allowSignups', checked)} 
+                                        <Switch
+                                            checked={settings.allowSignups}
+                                            onChange={(checked) => handleChange('allowSignups', checked)}
                                         />
                                     </div>
                                     <div className="flex items-center justify-between p-6 hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors">
@@ -266,9 +266,9 @@ export default function AdminSettings() {
                                             <div className="font-medium text-slate-900 dark:text-white">Mandatory Email Verification</div>
                                             <div className="text-sm text-slate-500 dark:text-slate-400">Users must verify their email before accessing the dashboard.</div>
                                         </div>
-                                        <Switch 
-                                            checked={settings.requireEmailVerification} 
-                                            onChange={(checked) => handleChange('requireEmailVerification', checked)} 
+                                        <Switch
+                                            checked={settings.requireEmailVerification}
+                                            onChange={(checked) => handleChange('requireEmailVerification', checked)}
                                         />
                                     </div>
                                     <div className="p-6 hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors">
@@ -296,18 +296,18 @@ export default function AdminSettings() {
             case 'database':
                 return (
                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <Card className="border-slate-200 dark:border-slate-800 shadow-sm bg-slate-900 text-white">
-                            <CardHeader className="border-b border-slate-800 bg-slate-950/30">
-                                <CardTitle className="text-lg text-white">Connection String</CardTitle>
-                                <CardDescription className="text-slate-400">PostgreSQL connection details.</CardDescription>
+                        <Card className="border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900">
+                            <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                                <CardTitle className="text-lg text-slate-900 dark:text-white">Connection String</CardTitle>
+                                <CardDescription className="text-slate-500 dark:text-slate-400">PostgreSQL connection details.</CardDescription>
                             </CardHeader>
                             <CardContent className="p-6">
                                 <div className="flex gap-2">
                                     <code className="flex-1 p-4 rounded-lg bg-black/50 font-mono text-sm text-green-400 overflow-x-auto border border-slate-800">
                                         {settings.databaseUrl}
                                     </code>
-                                    <Button 
-                                        variant="outline" 
+                                    <Button
+                                        variant="outline"
                                         onClick={() => addToast('Copied to clipboard', 'success')}
                                         className="h-auto border-slate-700 hover:bg-slate-800 text-slate-300 hover:text-white"
                                     >
@@ -317,14 +317,14 @@ export default function AdminSettings() {
                             </CardContent>
                         </Card>
 
-                         <Card className="border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900">
+                        <Card className="border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900">
                             <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
                                 <CardTitle className="text-lg text-slate-900 dark:text-white">Backup Configuration</CardTitle>
                             </CardHeader>
                             <CardContent className="p-6">
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     {['hourly', 'daily', 'weekly'].map((freq) => (
-                                        <div 
+                                        <div
                                             key={freq}
                                             onClick={() => handleChange('backupFrequency', freq)}
                                             className={cn(
@@ -358,10 +358,10 @@ export default function AdminSettings() {
                     </h1>
                     <p className="text-slate-500 dark:text-slate-400 mt-1">Configure global parameters, AI models, and security policies.</p>
                 </div>
-                <Button 
-                    onClick={handleSave} 
+                <Button
+                    onClick={handleSave}
                     isLoading={isSaving}
-                    className="bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 shadow-lg px-6"
+                    className="bg-orange-600 hover:bg-orange-700 text-white shadow-lg shadow-orange-500/20 px-6"
                 >
                     <Save className="mr-2 h-4 w-4" /> Save Configuration
                 </Button>

@@ -14,6 +14,7 @@ import {
     Shield,
     ChevronDown,
     Zap,
+    Search,
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -176,13 +177,7 @@ export function DashboardLayout() {
                     )}
                 >
                     <Link to="/" className="flex items-center gap-3 overflow-hidden">
-                        {isCollapsed ? (
-                            <div className="bg-gradient-to-br from-orange-500 to-blue-500 text-white p-2 rounded-lg flex-shrink-0 shadow-lg shadow-orange-500/25">
-                                <span className="text-lg font-bold">D</span>
-                            </div>
-                        ) : (
-                            <DocleyLogo size="default" showTagline={true} />
-                        )}
+                        <DocleyLogo size={isCollapsed ? "sm" : "default"} iconOnly={isCollapsed} />
                     </Link>
                 </div>
 
@@ -265,22 +260,6 @@ export function DashboardLayout() {
                         {!isCollapsed && <span className="animate-in fade-in duration-200 font-semibold">Send Feedback</span>}
                     </button>
 
-                    {/* Theme Toggle */}
-                    <div className={cn(
-                        "flex items-center w-full",
-                        isCollapsed ? 'justify-center' : 'px-3'
-                    )}>
-                        {!isCollapsed && (
-                            <span className={cn(
-                                "text-sm font-medium mr-3",
-                                isDark ? "text-slate-300" : "text-slate-600"
-                            )}>
-                                Theme
-                            </span>
-                        )}
-                        <ThemeToggle className={isCollapsed ? "w-full" : ""} />
-                    </div>
-
                     {/* Sign Out */}
                     <button
                         onClick={handleSignOut}
@@ -327,10 +306,7 @@ export function DashboardLayout() {
 
                     {/* Logo and Title Section */}
                     <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-                        <div className="flex-shrink-0">
-                            <DocleyLogo size="sm" />
-                        </div>
-                        <div className="flex-1 min-w-0 md:border-l md:pl-4 lg:pl-6">
+                        <div className="hidden sm:block min-w-0">
                             <p className={cn(
                                 "text-[10px] md:text-xs font-semibold uppercase tracking-wider mb-0.5",
                                 isDark ? "text-slate-400" : "text-slate-500"
@@ -338,7 +314,7 @@ export function DashboardLayout() {
                                 Workspace
                             </p>
                             <h1 className={cn(
-                                "text-lg md:text-xl lg:text-2xl font-bold leading-tight",
+                                "text-lg md:text-xl lg:text-2xl font-bold leading-tight truncate",
                                 isDark ? "text-white" : "text-slate-900"
                             )}>
                                 {location.pathname === '/dashboard' ? 'Dashboard' :
@@ -350,35 +326,41 @@ export function DashboardLayout() {
                         </div>
                     </div>
 
-                    {/* Right Side Actions */}
-                    <div className="hidden md:flex items-center gap-3">
-                        {/* Live Badge */}
-                        <div className={cn(
-                            "px-3 py-2 rounded-lg border flex items-center gap-2 text-sm font-medium transition-all",
-                            isDark
-                                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                                : "border-emerald-200 bg-emerald-50 text-emerald-700"
-                        )}>
-                            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                            <span className="hidden lg:inline">Live</span>
-                        </div>
-
-                        {/* Usage Indicator (if free tier) */}
-                        {user && (
+                    {/* Search Bar */}
+                    <div className="hidden md:flex flex-[2] max-w-xl mx-4">
+                        <div className="relative w-full group">
                             <div className={cn(
-                                "px-3 py-2 rounded-lg border flex items-center gap-2 text-sm transition-all",
-                                isDark
-                                    ? "border-white/10 bg-white/5 text-slate-200"
-                                    : "border-slate-200 bg-white text-slate-700"
+                                "absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors",
+                                isDark ? "text-slate-500 group-focus-within:text-orange-400" : "text-slate-400 group-focus-within:text-orange-500"
                             )}>
-                                <Zap className="h-4 w-4 text-orange-500" />
-                                <span className="hidden xl:inline">Active</span>
+                                <Search className="h-4 w-4" />
                             </div>
-                        )}
+                            <input
+                                type="text"
+                                placeholder="Search docs..."
+                                className={cn(
+                                    "block w-full pl-10 pr-12 py-2 text-sm rounded-xl border transition-all duration-200 outline-none",
+                                    isDark
+                                        ? "bg-white/5 border-white/10 text-white placeholder-slate-500 focus:bg-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-500/10"
+                                        : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 shadow-sm"
+                                )}
+                            />
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <kbd className={cn(
+                                    "hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded border text-[10px] font-medium transition-colors",
+                                    isDark
+                                        ? "bg-white/5 border-white/10 text-slate-500"
+                                        : "bg-white border-slate-200 text-slate-400"
+                                )}>
+                                    <span className="text-xs">⌘</span>K
+                                </kbd>
+                            </div>
+                        </div>
+                    </div>
 
-                        {/* Theme Toggle */}
+                    {/* Right Side Actions */}
+                    <div className="flex items-center gap-3">
                         <ThemeToggle />
-
                         {/* User Profile Dropdown */}
                         <div className="relative">
                             <button
