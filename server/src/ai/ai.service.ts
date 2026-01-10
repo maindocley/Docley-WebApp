@@ -14,12 +14,10 @@ export class AiService {
     constructor() {
         const apiKey = process.env.GOOGLE_API_KEY;
         if (!apiKey) {
-            console.error('CRITICAL ERROR: GOOGLE_API_KEY is missing in server environment variables.');
-        } else {
-            console.log('AiService Initialized: GOOGLE_API_KEY is present.');
+            throw new Error('CRITICAL CONFIG ERROR: GOOGLE_API_KEY is missing. AI features will not function. Please add it to your server .env file.');
         }
 
-        this.genAI = new GoogleGenerativeAI(apiKey || '');
+        this.genAI = new GoogleGenerativeAI(apiKey);
         this.model = this.genAI.getGenerativeModel({
             model: 'gemini-2.5-flash',
             generationConfig: { responseMimeType: 'application/json' }

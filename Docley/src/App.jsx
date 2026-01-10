@@ -27,6 +27,7 @@ import MaintenancePage from './pages/MaintenancePage';
 import { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
 import { useAuth } from './context/AuthContext';
+import apiClient from './api/client';
 
 // Lazy-loaded Admin components (code splitting)
 const AdminLayout = lazy(() => import('./layouts/AdminLayout').then(m => ({ default: m.AdminLayout })));
@@ -60,24 +61,21 @@ function MaintenanceGuard({ children }) {
   useEffect(() => {
     const checkMaintenance = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/maintenance`);
-        if (response.ok) {
-          const data = await response.json();
-          setIsMaintenance(data.maintenance_active);
-          setConnectivityError(false);
-        } else {
-          // If 401 or 500, show connectivity error
-          if (response.status === 401 || response.status >= 500) {
-            setConnectivityError(true);
-          }
-        }
+        const response = await apiClient.get('/maintenance');
+        setIsMaintenance(response.data.maintenance_active);
+        setConnectivityError(false);
       } catch (err) {
         console.error('Error checking maintenance mode:', err);
-        setConnectivityError(true);
+        // Only show connectivity error for actual network failures or 500s
+        // (401 is handled by client.js interceptor)
+        if (!err.response || err.response.status >= 500) {
+          setConnectivityError(true);
+        }
       } finally {
         setIsSettingsLoading(false);
       }
     };
+
     checkMaintenance();
 
     // Re-check every 5 minutes if not in real-time

@@ -1,12 +1,12 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { PaymentsController } from './payments.controller';
 import { PaymentsService } from './payments.service';
 import { SupabaseModule } from '../supabase/supabase.module';
-import { UsersModule } from '../users/users.module';
+import { WebhooksController } from './webhooks.controller';
 
 @Module({
-    imports: [SupabaseModule, forwardRef(() => UsersModule)],
-    controllers: [PaymentsController],
+    imports: [SupabaseModule], // Import SupabaseModule if needed for auth constraints, though Guard usually needs it globally or imported
+    controllers: [PaymentsController, WebhooksController],
     providers: [PaymentsService],
     exports: [PaymentsService],
 })

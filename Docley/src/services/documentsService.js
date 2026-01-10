@@ -1,6 +1,4 @@
-import { API_BASE_URL, getAuthHeaders } from '../api/client';
-
-const API_URL = `${API_BASE_URL}/documents`;
+import apiClient from '../api/client';
 
 /**
  * Documents Service
@@ -8,31 +6,20 @@ const API_URL = `${API_BASE_URL}/documents`;
  */
 
 export async function uploadDocumentFile(file, documentId) {
-    const headers = await getAuthHeaders();
-    delete headers['Content-Type'];
-
     const formData = new FormData();
     formData.append('file', file);
     formData.append('documentId', documentId);
 
-    const response = await fetch(`${API_URL}/upload`, {
-        method: 'POST',
-        headers,
-        body: formData,
+    const response = await apiClient.post('/documents/upload', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
     });
 
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to upload document');
-    }
-
-    const { filePath } = await response.json();
-    return filePath;
+    return response.data.filePath;
 }
 
 export async function createDocument(documentData) {
-    const headers = await getAuthHeaders();
-
     const payload = {
         title: documentData.title,
         content: documentData.content || '',
@@ -46,64 +33,38 @@ export async function createDocument(documentData) {
         status: 'draft',
     };
 
-    const response = await fetch(API_URL, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to create document');
-    }
-
-    return await response.json();
+    const response = await apiClient.post('/documents', payload);
+    return response.data;
 }
 
 export async function getDocuments(filters = {}) {
-    const headers = await getAuthHeaders();
+    try {
+        const response = await apiClient.get('/documents', {
+            params: {
+                status: filters.status,
+                academic_level: filters.academicLevel,
+                type: filters.type,
+            }
+        });
 
-    const params = new URLSearchParams();
-    if (filters.status) params.append('status', filters.status);
-    if (filters.academicLevel) params.append('academic_level', filters.academicLevel);
-    if (filters.type) params.append('type', filters.type);
-
-    const queryString = params.toString() ? `?${params.toString()}` : '';
-    const response = await fetch(`${API_URL}${queryString}`, {
-        method: 'GET',
-        headers
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch documents');
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching documents:', error);
+        return [];
     }
-
-    return await response.json();
 }
 
 export async function getDocument(id) {
-    const headers = await getAuthHeaders();
-
-    const response = await fetch(`${API_URL}/${id}`, {
-        method: 'GET',
-        headers
-    });
-
-    if (!response.ok) {
-        if (response.status === 404) {
-            throw new Error('Document not found');
-        }
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch document');
+    try {
+        const response = await apiClient.get(`/documents/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching document ${id}:`, error);
+        return null;
     }
-
-    return await response.json();
 }
 
 export async function updateDocument(id, updates) {
-    const headers = await getAuthHeaders();
-
     const updateData = {};
     if (updates.title !== undefined) updateData.title = updates.title;
     if (updates.content !== undefined) updateData.content = updates.content;
@@ -119,18 +80,8 @@ export async function updateDocument(id, updates) {
     if (updates.fileName !== undefined) updateData.file_name = updates.fileName;
     if (updates.fileSize !== undefined) updateData.file_size = updates.fileSize;
 
-    const response = await fetch(`${API_URL}/${id}`, {
-        method: 'PATCH',
-        headers,
-        body: JSON.stringify(updateData)
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to update document');
-    }
-
-    return await response.json();
+    const response = await apiClient.patch(`/documents/${id}`, updateData);
+    return response.data;
 }
 
 export async function deleteDocument(id) {
@@ -138,18 +89,7 @@ export async function deleteDocument(id) {
 }
 
 export async function permanentlyDeleteDocument(id) {
-    const headers = await getAuthHeaders();
-
-    const response = await fetch(`${API_URL}/${id}`, {
-        method: 'DELETE',
-        headers
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to permanently delete document');
-    }
-
+    await apiClient.delete(`/documents/${id}`);
     return true;
 }
 

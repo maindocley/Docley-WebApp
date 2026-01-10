@@ -1,9 +1,9 @@
+import apiClient from '../api/client';
+
 /**
  * Blog Service - Public API for blog posts
  * No authentication required - for visitors to read published posts
  */
-
-import { API_BASE_URL } from '../api/client';
 
 /**
  * Fetch all published blog posts
@@ -11,13 +11,8 @@ import { API_BASE_URL } from '../api/client';
  */
 export async function getPublishedPosts() {
     try {
-        const response = await fetch(`${API_BASE_URL}/posts`);
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch posts');
-        }
-
-        return await response.json();
+        const response = await apiClient.get('/posts');
+        return response.data;
     } catch (error) {
         console.error('Error fetching published posts:', error);
         return [];
@@ -31,17 +26,12 @@ export async function getPublishedPosts() {
  */
 export async function getPostBySlug(slug) {
     try {
-        const response = await fetch(`${API_BASE_URL}/posts/${slug}`);
-
-        if (!response.ok) {
-            if (response.status === 404) {
-                return null;
-            }
-            throw new Error('Failed to fetch post');
-        }
-
-        return await response.json();
+        const response = await apiClient.get(`/posts/${slug}`);
+        return response.data;
     } catch (error) {
+        if (error.response?.status === 404) {
+            return null;
+        }
         console.error('Error fetching post:', error);
         return null;
     }

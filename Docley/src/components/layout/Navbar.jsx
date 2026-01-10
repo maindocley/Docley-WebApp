@@ -66,7 +66,7 @@ export function Navbar() {
                                 <Button variant="ghost" size="sm" className={isDark ? "text-slate-300 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900"}>Log in</Button>
                             </Link>
                             <Link to="/signup">
-                                <Button size="sm" className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white border-0 shadow-lg shadow-orange-500/30">Get Started</Button>
+                                <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white border-0 shadow-sm">Get Started</Button>
                             </Link>
                         </div>
                     </div>
@@ -120,7 +120,7 @@ export function Navbar() {
                                 )}>Log in</Button>
                             </Link>
                             <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
-                                <Button className="w-full justify-center bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white border-0">Get Started</Button>
+                                <Button className="w-full justify-center bg-indigo-600 hover:bg-indigo-700 text-white border-0 shadow-sm">Get Started</Button>
                             </Link>
                         </div>
                     </div>

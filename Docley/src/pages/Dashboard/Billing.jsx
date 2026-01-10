@@ -1,80 +1,14 @@
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Button } from '../../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/Card';
-import { CreditCard, CheckCircle2, AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
-import { useToast } from '../../context/ToastContext';
+import { CreditCard, CheckCircle2, ArrowLeft, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { supabase } from '../../lib/supabase';
 import { cn } from '../../lib/utils';
-import { API_BASE_URL } from '../../api/client';
+import { useState } from 'react';
+import { Button } from '../../components/ui/Button';
 import BillingUpgradeModal from '../../components/modals/BillingUpgradeModal';
 
 export default function Billing() {
-    const { user, isPremium, refreshProfile } = useAuth();
-    const { addToast } = useToast();
-    const [searchParams] = useSearchParams();
-    const [isLoading, setIsLoading] = useState(false); // No longer needed for specific fetch
-    const [isCreatingSession, setIsCreatingSession] = useState(false);
-    const [showCheckout, setShowCheckout] = useState(false);
-    const [sessionId, setSessionId] = useState(null);
-
-    const status = searchParams.get('status');
-
-    // Show success notification if redirected back after payment
-    useEffect(() => {
-        if (status === 'success') {
-            addToast('Payment successful! You are now a Pro user.', 'success');
-            // Clear the query param
-            window.history.replaceState({}, '', '/settings/billing');
-        }
-    }, [status, addToast]);
-
-    const handleUpgradeClick = async () => {
-        if (!API_BASE_URL) {
-            addToast('Configuration Error: API_BASE_URL is missing.', 'error');
-            return;
-        }
-        setIsCreatingSession(true);
-        try {
-            const response = await fetch(`${API_BASE_URL}/payments/create-session`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${await supabase.auth.getSession().then(s => s.data.session?.access_token)}`,
-                },
-            });
-            if (!response.ok) throw new Error('Failed to create checkout session');
-            const { sessionId, purchase_url } = await response.json();
-            setSessionId(sessionId);
-            setShowCheckout(true);
-        } catch (err) {
-            addToast('Failed to start checkout: ' + err.message, 'error');
-        } finally {
-            setIsCreatingSession(false);
-        }
-    };
-
-    const handleCheckoutComplete = () => {
-        setShowCheckout(false);
-        addToast('Payment successful! You are now a Pro user.', 'success');
-        setIsPremium(true);
-        // Redirect to billing page with success flag
-        window.location.href = '/settings/billing?status=success';
-    };
-
-    const handleCheckoutClose = () => {
-        setShowCheckout(false);
-        setSessionId(null);
-    };
-
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
-            </div>
-        );
-    }
+    const { isPremium } = useAuth();
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
@@ -91,108 +25,72 @@ export default function Billing() {
             <Card className="border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden bg-white dark:bg-slate-900">
                 <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
                     <CardTitle className="text-lg text-slate-900 dark:text-white">Current Plan</CardTitle>
-                    <CardDescription className="text-slate-500 dark:text-slate-400">Manage your billing and subscription.</CardDescription>
+                    <CardDescription className="text-slate-500 dark:text-slate-400">View your subscription status.</CardDescription>
                 </CardHeader>
                 <CardContent className="p-6">
                     <div className={cn(
                         "relative overflow-hidden rounded-xl border p-8",
-                        isPremium
-                            ? "border-emerald-100 dark:border-emerald-900/50 bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-900/20 dark:to-slate-900"
-                            : "border-indigo-100 dark:border-indigo-900/50 bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-900/20 dark:to-slate-900"
+                        "border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900"
                     )}>
                         <div className="absolute top-0 right-0 p-4 opacity-10">
-                            <CreditCard className="h-32 w-32 text-indigo-600" />
+                            <CreditCard className="h-32 w-32 text-slate-600" />
                         </div>
                         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                             <div>
                                 <div className="flex items-center gap-3 mb-2">
                                     <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
-                                        {isPremium ? 'Pro Plan' : 'Free Plan'}
+                                        Free Plan
                                     </h3>
-                                    <span className={cn(
-                                        "px-3 py-1 rounded-full text-xs font-bold border",
-                                        isPremium
-                                            ? "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
-                                            : "bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800"
-                                    )}>
+                                    <span className="px-3 py-1 rounded-full text-xs font-bold border bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800">
                                         ACTIVE
                                     </span>
                                 </div>
                                 <p className="text-slate-600 dark:text-slate-400 max-w-md">
-                                    {isPremium
-                                        ? 'You are on the Pro plan with unlimited document processing and premium features.'
-                                        : 'You are currently on the free tier. Upgrade to unlock more document processing power and premium features.'}
+                                    You are currently on the free tier. Upgrade to unlock all premium features.
                                 </p>
+                                <div className="mt-4">
+                                    <Button
+                                        onClick={() => setShowUpgradeModal(true)}
+                                        className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                                    >
+                                        Upgrade to Pro
+                                    </Button>
+                                </div>
                             </div>
                             <div className="text-left md:text-right">
                                 <div className="text-3xl font-bold text-slate-900 dark:text-white">
-                                    {isPremium ? '$9' : '$0'}
+                                    $0
                                 </div>
                                 <div className="text-sm text-slate-500 dark:text-slate-400">per month</div>
                             </div>
-                        </div>
-
-                        <div className="mt-8 pt-8 border-t border-indigo-100 dark:border-indigo-900/30">
-                            {!isPremium ? (
-                                <Button
-                                    onClick={handleUpgradeClick}
-                                    isLoading={isCreatingSession}
-                                    className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20"
-                                >
-                                    Upgrade to Pro
-                                </Button>
-                            ) : (
-                                <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
-                                    <CheckCircle2 className="h-5 w-5" />
-                                    <span className="font-medium">You have full access to all Pro features</span>
-                                </div>
-                            )}
                         </div>
                     </div>
                 </CardContent>
             </Card>
 
-            {/* Features Comparison */}
+            {/* Features Info */}
             <Card className="border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden bg-white dark:bg-slate-900">
                 <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
                     <CardTitle className="text-lg text-slate-900 dark:text-white">Plan Features</CardTitle>
-                    <CardDescription className="text-slate-500 dark:text-slate-400">Compare Free vs Pro plans.</CardDescription>
                 </CardHeader>
                 <CardContent className="p-6">
                     <div className="space-y-4">
                         {[
-                            { feature: 'Documents', free: '2 per lifetime', pro: 'Unlimited' },
-                            { feature: 'AI Diagnostics', free: '2 per lifetime', pro: 'Unlimited' },
-                            { feature: 'AI Upgrades', free: '2 per lifetime', pro: 'Unlimited' },
-                            { feature: 'Export Formats', free: 'PDF & DOCX', pro: 'All formats' },
-                            { feature: 'Priority Support', free: 'Community', pro: 'Priority' },
+                            { feature: 'Documents', value: '2 per lifetime' },
+                            { feature: 'AI Diagnostics', value: '2 per lifetime' },
+                            { feature: 'AI Upgrades', value: '2 per lifetime' },
+                            { feature: 'Export Formats', value: 'PDF & DOCX' },
+                            { feature: 'Support', value: 'Community' },
                         ].map((item) => (
                             <div key={item.feature} className="flex items-center justify-between py-3 border-b border-slate-100 dark:border-slate-800 last:border-0">
                                 <span className="font-medium text-slate-900 dark:text-white">{item.feature}</span>
-                                <div className="flex items-center gap-6 text-sm">
-                                    <span className={cn(
-                                        isPremium ? "text-slate-400 line-through" : "text-slate-600 dark:text-slate-400"
-                                    )}>
-                                        {item.free}
-                                    </span>
-                                    <span className={cn(
-                                        "font-medium",
-                                        isPremium ? "text-emerald-600 dark:text-emerald-400" : "text-indigo-600 dark:text-indigo-400"
-                                    )}>
-                                        {item.pro}
-                                    </span>
-                                </div>
+                                <span className="text-slate-600 dark:text-slate-400">{item.value}</span>
                             </div>
                         ))}
                     </div>
                 </CardContent>
             </Card>
-
-            {/* Checkout Modal */}
-            <BillingUpgradeModal
-                isOpen={showCheckout}
-                onClose={handleCheckoutClose}
-            />
+            <BillingUpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
         </div>
     );
 }

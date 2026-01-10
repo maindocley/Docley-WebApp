@@ -1,28 +1,15 @@
-import { supabase } from '../lib/supabase';
-import { API_BASE_URL } from '../api/client';
+import apiClient from '../api/client';
 
-const API_URL = API_BASE_URL;
-
-// Helper to get auth headers
-const getAuthHeaders = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.access_token) {
-        throw new Error('User not authenticated');
-    }
-    return {
-        'Authorization': `Bearer ${session.access_token}`,
-        'Content-Type': 'application/json',
-    };
-};
+/**
+ * Admin Service
+ * Handles admin-specific operations via NestJS Backend
+ */
 
 // Check if current user is admin via NestJS Backend
 export async function checkIsAdmin() {
     try {
-        const headers = await getAuthHeaders();
-        const response = await fetch(`${API_URL}/users/check-admin`, { headers });
-        if (!response.ok) return false;
-        const { isAdmin } = await response.json();
-        return isAdmin;
+        const response = await apiClient.get('/users/check-admin');
+        return response.data.isAdmin;
     } catch (error) {
         console.error('Error checking admin status:', error);
         return false;
@@ -32,15 +19,8 @@ export async function checkIsAdmin() {
 // Get Dashboard Stats from NestJS Backend
 export async function getDashboardStats() {
     try {
-        const headers = await getAuthHeaders();
-        const response = await fetch(`${API_URL}/admin/stats`, { headers });
-
-        if (!response.ok) {
-            if (response.status === 403) throw new Error('Admin access required');
-            throw new Error('Failed to fetch stats');
-        }
-
-        return await response.json();
+        const response = await apiClient.get('/admin/stats');
+        return response.data;
     } catch (error) {
         console.error('Error fetching admin stats:', error);
         return { users: 0, documents: 0, aiTokens: 0 };
@@ -50,14 +30,8 @@ export async function getDashboardStats() {
 // Get Recent Admin Activity
 export async function getAdminActivity() {
     try {
-        const headers = await getAuthHeaders();
-        const response = await fetch(`${API_URL}/admin/activity`, { headers });
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch activity');
-        }
-
-        return await response.json();
+        const response = await apiClient.get('/admin/activity');
+        return response.data;
     } catch (error) {
         console.error('Error fetching admin activity:', error);
         return [];
@@ -67,16 +41,8 @@ export async function getAdminActivity() {
 // Get All Users from NestJS Backend
 export async function getAdminUsers() {
     try {
-        const headers = await getAuthHeaders();
-        const response = await fetch(`${API_URL}/admin/users`, { headers });
-
-        if (!response.ok) {
-            if (response.status === 403) throw new Error('Admin access required');
-            throw new Error('Failed to fetch users');
-        }
-
-        const data = await response.json();
-        return data.users || [];
+        const response = await apiClient.get('/admin/users');
+        return response.data.users || [];
     } catch (error) {
         console.error('Error fetching users:', error);
         return [];
@@ -85,43 +51,14 @@ export async function getAdminUsers() {
 
 // Update User Status (Ban/Unban)
 export async function updateUserStatus(userId, status) {
-    try {
-        const headers = await getAuthHeaders();
-        const response = await fetch(`${API_URL}/admin/users/${userId}/status`, {
-            method: 'PATCH',
-            headers,
-            body: JSON.stringify({ status }),
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to update user status');
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error('Error updating user status:', error);
-        throw error;
-    }
+    const response = await apiClient.patch(`/admin/users/${userId}/status`, { status });
+    return response.data;
 }
 
 // Delete User
 export async function deleteUser(userId) {
-    try {
-        const headers = await getAuthHeaders();
-        const response = await fetch(`${API_URL}/admin/users/${userId}`, {
-            method: 'DELETE',
-            headers,
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to delete user');
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error('Error deleting user:', error);
-        throw error;
-    }
+    const response = await apiClient.delete(`/admin/users/${userId}`);
+    return response.data;
 }
 
 // Get User Growth Data (Chart) - Mock for now
@@ -147,14 +84,8 @@ export async function getRevenueData() {
 
 export async function getBlogPosts() {
     try {
-        const headers = await getAuthHeaders();
-        const response = await fetch(`${API_URL}/admin/posts`, { headers });
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch posts');
-        }
-
-        return await response.json();
+        const response = await apiClient.get('/admin/posts');
+        return response.data;
     } catch (error) {
         console.error('Error fetching posts:', error);
         return [];
@@ -162,116 +93,45 @@ export async function getBlogPosts() {
 }
 
 export async function getBlogPost(id) {
-    try {
-        const headers = await getAuthHeaders();
-        const response = await fetch(`${API_URL}/admin/posts/${id}`, { headers });
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch post');
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error('Error fetching post:', error);
-        throw error;
-    }
+    const response = await apiClient.get(`/admin/posts/${id}`);
+    return response.data;
 }
 
 export async function createBlogPost(postData) {
-    try {
-        const headers = await getAuthHeaders();
-        const response = await fetch(`${API_URL}/admin/posts`, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(postData),
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to create post');
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error('Error creating post:', error);
-        throw error;
-    }
+    const response = await apiClient.post('/admin/posts', postData);
+    return response.data;
 }
 
 export async function updateBlogPost(id, updates) {
-    try {
-        const headers = await getAuthHeaders();
-        const response = await fetch(`${API_URL}/admin/posts/${id}`, {
-            method: 'PATCH',
-            headers,
-            body: JSON.stringify(updates),
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to update post');
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error('Error updating post:', error);
-        throw error;
-    }
+    const response = await apiClient.patch(`/admin/posts/${id}`, updates);
+    return response.data;
 }
 
 export async function deleteBlogPost(id) {
-    try {
-        const headers = await getAuthHeaders();
-        const response = await fetch(`${API_URL}/admin/posts/${id}`, {
-            method: 'DELETE',
-            headers,
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to delete post');
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error('Error deleting post:', error);
-        throw error;
-    }
+    const response = await apiClient.delete(`/admin/posts/${id}`);
+    return response.data;
 }
-
 
 // Upload Image to Supabase Storage via NestJS Backend Proxy
 export async function uploadBlogImage(file) {
-    try {
-        const headers = await getAuthHeaders();
-        // Remove Content-Type to let fetch set it with boundary for FormData
-        delete headers['Content-Type'];
+    const formData = new FormData();
+    formData.append('file', file);
 
-        const formData = new FormData();
-        formData.append('file', file);
+    const response = await apiClient.post('/admin/upload-image', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
 
-        const response = await fetch(`${API_URL}/admin/upload-image`, {
-            method: 'POST',
-            headers,
-            body: formData,
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to upload image');
-        }
-
-        const { publicUrl } = await response.json();
-        return publicUrl;
-    } catch (error) {
-        console.error('Error uploading image:', error);
-        throw error;
-    }
+    return response.data.publicUrl;
 }
+
 // --- System Settings via NestJS API ---
 
 export async function getGlobalSettings() {
     try {
-        const headers = await getAuthHeaders();
-        const response = await fetch(`${API_URL}/admin/settings`, { headers });
-        if (!response.ok) throw new Error('Failed to fetch settings');
-        return await response.json();
+        const response = await apiClient.get('/admin/settings');
+        return response.data;
     } catch (error) {
         console.error('Error fetching settings:', error);
         return { maintenance_active: false };
@@ -279,17 +139,6 @@ export async function getGlobalSettings() {
 }
 
 export async function updateGlobalSettings(settings) {
-    try {
-        const headers = await getAuthHeaders();
-        const response = await fetch(`${API_URL}/admin/settings`, {
-            method: 'PATCH',
-            headers,
-            body: JSON.stringify(settings),
-        });
-        if (!response.ok) throw new Error('Failed to update settings');
-        return await response.json();
-    } catch (error) {
-        console.error('Error updating settings:', error);
-        throw error;
-    }
+    const response = await apiClient.patch('/admin/settings', settings);
+    return response.data;
 }

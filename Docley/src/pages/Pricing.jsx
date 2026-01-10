@@ -10,7 +10,7 @@ import { cn } from '../lib/utils';
 export default function Pricing() {
     const { theme } = useTheme();
     const isDark = theme === 'dark';
-    
+
     return (
         <div className={cn(
             "min-h-screen font-sans transition-colors duration-300",
@@ -22,9 +22,9 @@ export default function Pricing() {
                 <div className="container mx-auto max-w-5xl">
                     <div className="text-center mb-16">
                         <h1 className={cn(
-                            "text-4xl font-bold bg-clip-text text-transparent mb-4",
-                            isDark 
-                                ? "bg-gradient-to-r from-orange-400 to-blue-400" 
+                            "text-4xl font-semibold bg-clip-text text-transparent mb-4",
+                            isDark
+                                ? "bg-gradient-to-r from-orange-400 to-blue-400"
                                 : "bg-gradient-to-r from-blue-600 to-violet-600"
                         )}>
                             Invest in your Grades
@@ -50,7 +50,7 @@ export default function Pricing() {
                                 </CardDescription>
                                 <div className="mt-4">
                                     <span className={cn(
-                                        "text-4xl font-bold",
+                                        "text-4xl font-semibold",
                                         isDark ? "text-white" : "text-slate-900"
                                     )}>
                                         $0
@@ -104,14 +104,14 @@ export default function Pricing() {
                             </CardContent>
                             <CardFooter className="pt-4 pb-8">
                                 <Link to="/signup" className="w-full">
-                                    <Button 
-                                        variant="outline" 
+                                    <Button
+                                        variant="outline"
                                         className={cn(
                                             "w-full",
-                                            isDark 
-                                                ? "border-white/10 bg-white/5 text-white hover:bg-white/10" 
+                                            isDark
+                                                ? "border-white/10 bg-white/5 text-white hover:bg-white/10"
                                                 : "border-slate-300 hover:border-orange-300 hover:bg-orange-50 hover:text-orange-600"
-                                        )} 
+                                        )}
                                         size="lg"
                                     >
                                         Get Started Free
@@ -123,12 +123,12 @@ export default function Pricing() {
                         {/* Pro Plan */}
                         <Card className={cn(
                             "relative shadow-xl scale-105 z-10 border",
-                            isDark 
-                                ? "bg-white/5 border-orange-500/30 shadow-orange-500/10" 
+                            isDark
+                                ? "bg-white/5 border-orange-500/30 shadow-orange-500/10"
                                 : "border-orange-200 shadow-orange-500/10"
                         )}>
                             <div className="absolute top-0 right-0 transform translate-x-2 -translate-y-2">
-                                <span className="inline-flex items-center rounded-full bg-gradient-to-r from-orange-500 to-orange-600 px-3 py-1 text-xs font-bold text-white shadow-lg">
+                                <span className="inline-flex items-center rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white shadow-lg">
                                     Most Popular
                                 </span>
                             </div>
@@ -143,7 +143,7 @@ export default function Pricing() {
                                 </CardDescription>
                                 <div className="mt-4">
                                     <span className={cn(
-                                        "text-4xl font-bold",
+                                        "text-4xl font-semibold",
                                         isDark ? "text-white" : "text-slate-900"
                                     )}>
                                         $12
@@ -162,42 +162,42 @@ export default function Pricing() {
                                         "flex items-center font-medium",
                                         isDark ? "text-slate-300" : "text-slate-800"
                                     )}>
-                                        <Check className="h-5 w-5 text-orange-500 mr-3 flex-shrink-0" />
+                                        <Check className="h-5 w-5 text-indigo-500 mr-3 flex-shrink-0" />
                                         <span>Unlimited Transformations</span>
                                     </li>
                                     <li className={cn(
                                         "flex items-center font-medium",
                                         isDark ? "text-slate-300" : "text-slate-800"
                                     )}>
-                                        <Check className="h-5 w-5 text-orange-500 mr-3 flex-shrink-0" />
+                                        <Check className="h-5 w-5 text-indigo-500 mr-3 flex-shrink-0" />
                                         <span>Advanced Tone Fixing</span>
                                     </li>
                                     <li className={cn(
                                         "flex items-center",
                                         isDark ? "text-slate-300" : "text-slate-800"
                                     )}>
-                                        <Check className="h-5 w-5 text-orange-500 mr-3 flex-shrink-0" />
+                                        <Check className="h-5 w-5 text-indigo-500 mr-3 flex-shrink-0" />
                                         <span>Full Citation Generator (APA7, MLA9)</span>
                                     </li>
                                     <li className={cn(
                                         "flex items-center",
                                         isDark ? "text-slate-300" : "text-slate-800"
                                     )}>
-                                        <Check className="h-5 w-5 text-orange-500 mr-3 flex-shrink-0" />
+                                        <Check className="h-5 w-5 text-indigo-500 mr-3 flex-shrink-0" />
                                         <span>Plagiarism Risk Checks</span>
                                     </li>
                                     <li className={cn(
                                         "flex items-center",
                                         isDark ? "text-slate-300" : "text-slate-800"
                                     )}>
-                                        <Check className="h-5 w-5 text-orange-500 mr-3 flex-shrink-0" />
+                                        <Check className="h-5 w-5 text-indigo-500 mr-3 flex-shrink-0" />
                                         <span>Priority Support</span>
                                     </li>
                                 </ul>
                             </CardContent>
                             <CardFooter className="pt-4 pb-8">
                                 <Link to="/signup" className="w-full">
-                                    <Button className="w-full shadow-lg shadow-orange-500/25 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white" size="lg">
+                                    <Button className="w-full shadow-lg shadow-indigo-500/25 bg-indigo-600 hover:bg-indigo-700 text-white" size="lg">
                                         Upgrade to Pro
                                     </Button>
                                 </Link>
@@ -207,7 +207,7 @@ export default function Pricing() {
 
                     <div className="mt-24 max-w-3xl mx-auto">
                         <h2 className={cn(
-                            "text-2xl font-bold text-center mb-10",
+                            "text-2xl font-semibold text-center mb-10",
                             isDark ? "text-white" : "text-slate-900"
                         )}>
                             Frequently Asked Questions
@@ -221,8 +221,8 @@ export default function Pricing() {
                             ].map((faq, i) => (
                                 <div key={i} className={cn(
                                     "p-6 rounded-xl border shadow-sm",
-                                    isDark 
-                                        ? "bg-white/5 border-white/10" 
+                                    isDark
+                                        ? "bg-white/5 border-white/10"
                                         : "bg-white border-slate-100"
                                 )}>
                                     <h3 className={cn(

@@ -17,7 +17,7 @@ export class SupabaseService {
         const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 
         if (!supabaseUrl || !supabaseKey) {
-            throw new Error('Supabase credentials missing: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_ANON_KEY) are required');
+            throw new Error('CRITICAL CONFIG ERROR: Supabase credentials missing. SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required in the server .env for admin operations.');
         }
 
         this.supabase = createClient(supabaseUrl, supabaseKey);

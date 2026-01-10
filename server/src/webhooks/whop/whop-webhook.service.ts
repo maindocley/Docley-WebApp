@@ -37,51 +37,7 @@ export class WhopWebhookService {
         }
     }
 
-    async handlePaymentSucceeded(payload: any) {
-        const userId = payload.data?.metadata?.user_id;
-        const whopPaymentId = payload.data?.id;
-        const amount = payload.data?.amount;
-        const currency = payload.data?.currency;
-
-        if (!userId) {
-            this.logger.error('No user_id found in payment.succeeded metadata');
-            return;
-        }
-
-        this.logger.log(`Payment succeeded for user_id: ${userId}, payment_id: ${whopPaymentId}, amount: ${amount} ${currency}`);
-
-        // Update user to premium
-        const { error: userError } = await this.client
-            .from('users')
-            .update({
-                is_premium: true,
-                updated_at: new Date().toISOString()
-            })
-            .eq('id', userId);
-
-        if (userError) {
-            this.logger.error(`Failed to update user premium status: ${userError.message}`);
-            throw new InternalServerErrorException('Database update failed');
-        }
-
-        // Log transaction for audit
-        const { error: logError } = await this.client
-            .from('payment_transactions')
-            .insert({
-                user_id: userId,
-                whop_payment_id: whopPaymentId,
-                amount,
-                currency,
-                status: 'succeeded',
-                raw_payload: payload,
-                created_at: new Date().toISOString()
-            });
-
-        if (logError) {
-            this.logger.error(`Failed to log payment transaction: ${logError.message}`);
-            // Do not throw; user was already upgraded
-        }
-    }
+    // handlePaymentSucceeded removed - payment system deprecated
 
     async handleMembershipDeactivated(payload: any) {
         const email = payload.data?.email || payload.data?.user?.email;

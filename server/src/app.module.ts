@@ -4,7 +4,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SupabaseModule } from './supabase/supabase.module';
 import { UsersModule } from './users/users.module';
-import { PaymentsModule } from './payments/payments.module';
 import { AiModule } from './ai/ai.module';
 import { DocumentsModule } from './documents/documents.module';
 import { FeedbackModule } from './feedback/feedback.module';
@@ -14,12 +13,12 @@ import { WebhooksModule } from './webhooks/webhooks.module';
 import { AdminModule } from './admin/admin.module';
 import { SubscriptionGuard } from './common/guards/subscription.guard';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
     SupabaseModule,
     UsersModule,
-    PaymentsModule,
     AiModule,
     DocumentsModule,
     FeedbackModule,
@@ -27,6 +26,7 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
     NotificationsModule,
     WebhooksModule,
     AdminModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
-import { API_BASE_URL } from '../api/client';
+import apiClient from '../api/client';
 
 const AuthContext = createContext({});
 
@@ -67,23 +67,9 @@ export function AuthProvider({ children }) {
                 }
             }
 
-            // 2. Fetch from Backend API
-            const session = await supabase.auth.getSession();
-            const token = session.data.session?.access_token;
-
-            if (!token) throw new Error('No authentication token found');
-
-            const response = await fetch(`${API_BASE_URL}/users/profile`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`Profile fetch failed: ${response.statusText}`);
-            }
-
-            const data = await response.json();
+            // 2. Fetch from Backend API via Central Client
+            const response = await apiClient.get('/users/profile');
+            const data = response.data;
 
             if (data) {
                 setProfile(data);

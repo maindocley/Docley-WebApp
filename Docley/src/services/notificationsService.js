@@ -1,17 +1,14 @@
-import { API_BASE_URL, getAuthHeaders } from '../api/client';
+import apiClient from '../api/client';
 
-const API_URL = `${API_BASE_URL}/notifications`;
+/**
+ * Notifications Service
+ * Handles fetching and managing user notifications via NestJS Backend
+ */
 
 export async function getNotifications() {
     try {
-        const headers = await getAuthHeaders();
-        const response = await fetch(API_URL, { headers });
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch notifications');
-        }
-
-        return await response.json();
+        const response = await apiClient.get('/notifications');
+        return response.data;
     } catch (error) {
         console.error('Error fetching notifications:', error);
         return [];
@@ -19,72 +16,24 @@ export async function getNotifications() {
 }
 
 export async function markAsRead(id) {
-    try {
-        const headers = await getAuthHeaders();
-        const response = await fetch(`${API_URL}/${id}/read`, {
-            method: 'PATCH',
-            headers,
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to mark notification as read');
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error('Error marking notification as read:', error);
-        throw error;
-    }
+    const response = await apiClient.patch(`/notifications/${id}/read`);
+    return response.data;
 }
 
 export async function markAllAsRead() {
-    try {
-        const headers = await getAuthHeaders();
-        const response = await fetch(`${API_URL}/read-all`, {
-            method: 'PATCH',
-            headers,
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to mark all as read');
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error('Error marking all notifications as read:', error);
-        throw error;
-    }
+    const response = await apiClient.patch('/notifications/read-all');
+    return response.data;
 }
-export async function deleteNotification(id) {
-    try {
-        const headers = await getAuthHeaders();
-        const response = await fetch(`${API_URL}/${id}`, {
-            method: 'DELETE',
-            headers,
-        });
 
-        if (!response.ok) {
-            throw new Error('Failed to delete notification');
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error('Error deleting notification:', error);
-        throw error;
-    }
-}
+export const deleteNotification = async (id) => {
+    const response = await apiClient.delete(`/notifications/${id}`);
+    return response.data;
+};
 
 export async function getUnreadCount() {
     try {
-        const headers = await getAuthHeaders();
-        const response = await fetch(`${API_URL}/unread-count`, { headers });
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch unread count');
-        }
-
-        const data = await response.json();
-        return data.count;
+        const response = await apiClient.get('/notifications/unread-count');
+        return response.data.count;
     } catch (error) {
         console.error('Error fetching unread count:', error);
         return 0;

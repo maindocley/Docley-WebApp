@@ -11,8 +11,9 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { cn } from '../../lib/utils';
-import { API_BASE_URL } from '../../api/client';
+import apiClient from '../../api/client';
 import BillingUpgradeModal from '../../components/modals/BillingUpgradeModal';
+
 
 export default function DashboardSettings() {
     const { addToast } = useToast();
@@ -21,6 +22,7 @@ export default function DashboardSettings() {
     const [activeTab, setActiveTab] = useState('general');
     const [isSaving, setIsSaving] = useState(false);
     const [showBillingModal, setShowBillingModal] = useState(false);
+
 
     // Form Data
     const [formData, setFormData] = useState({
@@ -55,20 +57,7 @@ export default function DashboardSettings() {
     const handleSave = async () => {
         setIsSaving(true);
         try {
-            const { data: { session } } = await supabase.auth.getSession();
-            const response = await fetch(`${API_BASE_URL}/users/profile`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session?.access_token}`
-                },
-                body: JSON.stringify({ full_name: formData.fullName })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to save settings');
-            }
+            const response = await apiClient.patch('/users/profile', { full_name: formData.fullName });
 
             // Sync with Supabase Auth metadata for consistency
             await supabase.auth.updateUser({
@@ -97,20 +86,7 @@ export default function DashboardSettings() {
 
         setIsUpdatingPassword(true);
         try {
-            const { data: { session } } = await supabase.auth.getSession();
-            const response = await fetch(`${API_BASE_URL}/users/password`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session?.access_token}`
-                },
-                body: JSON.stringify({ password: passwordData.newPassword })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to update password');
-            }
+            const response = await apiClient.patch('/users/password', { password: passwordData.newPassword });
 
             addToast('Password updated successfully', 'success');
             setPasswordData({ newPassword: '', confirmPassword: '' });
@@ -124,8 +100,9 @@ export default function DashboardSettings() {
     const tabs = [
         { id: 'general', label: 'General', icon: User, desc: 'Profile & preferences' },
         { id: 'appearance', label: 'Appearance', icon: Monitor, desc: 'Theme & display' },
+        { id: 'billing', label: 'Billing', icon: CreditCard, desc: 'Plan & subscription' },
         { id: 'notifications', label: 'Notifications', icon: Bell, desc: 'Email alerts' },
-        { id: 'billing', label: 'Billing', icon: CreditCard, desc: 'Plan & payment' },
+
         { id: 'security', label: 'Security', icon: Shield, desc: 'Password & 2FA' },
     ];
 
@@ -351,6 +328,8 @@ export default function DashboardSettings() {
                     </div>
                 );
 
+
+
             case 'billing':
                 return (
                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
@@ -393,7 +372,7 @@ export default function DashboardSettings() {
                                             <Button
                                                 variant="outline"
                                                 className="flex-1 border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
-                                                onClick={() => addToast('Billing portal not available', 'info')}
+                                                onClick={() => addToast('Use the upgrade button to manage billing', 'info')}
                                             >
                                                 Billing History
                                             </Button>
@@ -595,6 +574,7 @@ export default function DashboardSettings() {
                     {renderContent()}
                 </div>
             </div>
+
 
             {/* Billing Modal */}
             <BillingUpgradeModal isOpen={showBillingModal} onClose={() => setShowBillingModal(false)} />

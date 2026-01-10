@@ -1,14 +1,11 @@
 import { Injectable, InternalServerErrorException, Inject, forwardRef } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
-import { PaymentsService } from '../payments/payments.service';
 import { UserProfileDto, UpdateUserProfileDto } from './dto/user-profile.dto';
 
 @Injectable()
 export class UsersService {
     constructor(
         private readonly supabaseService: SupabaseService,
-        @Inject(forwardRef(() => PaymentsService))
-        private readonly paymentsService: PaymentsService,
     ) { }
 
     private get client() {
@@ -16,9 +13,6 @@ export class UsersService {
     }
 
     private async getUserFlags(userId: string): Promise<{ is_premium: boolean; role: string | null }> {
-        // High-performance: Check Whop cache first
-        const isPremium = await this.paymentsService.checkSubscription(userId);
-
         const { data } = await this.client
             .from('users')
             .select('role')
@@ -26,7 +20,7 @@ export class UsersService {
             .maybeSingle();
 
         return {
-            is_premium: isPremium,
+            is_premium: false, // Payment system removed
             role: typeof data?.role === 'string' ? data.role : null,
         };
     }

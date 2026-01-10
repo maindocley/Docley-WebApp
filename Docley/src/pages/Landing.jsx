@@ -43,8 +43,8 @@ function TypingText({ isDark }) {
         <span className="inline-block">
             <span className={cn(
                 "bg-gradient-to-r bg-clip-text text-transparent",
-                isDark 
-                    ? "from-orange-400 to-blue-400" 
+                isDark
+                    ? "from-orange-400 to-blue-400"
                     : "from-orange-500 to-blue-500"
             )}>
                 {currentText}
@@ -66,8 +66,8 @@ function FAQItem({ item, isOpen, onToggle, isDark }) {
             onClick={onToggle}
             className={cn(
                 "w-full text-left rounded-xl border backdrop-blur-xl px-5 py-4 transition-all duration-300",
-                isDark 
-                    ? "border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20" 
+                isDark
+                    ? "border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20"
                     : "border-blue-200 bg-white hover:bg-blue-50 hover:border-blue-300 shadow-sm",
                 isOpen && (isDark ? "shadow-lg bg-white/10" : "shadow-md bg-blue-50")
             )}
@@ -80,7 +80,7 @@ function FAQItem({ item, isOpen, onToggle, isDark }) {
                 )}>{item.q}</span>
                 <ChevronDown className={cn(
                     "h-4 w-4 transition-transform duration-300",
-                    isDark 
+                    isDark
                         ? isOpen ? "rotate-180 text-orange-400" : "text-slate-400"
                         : isOpen ? "rotate-180 text-orange-500" : "text-slate-500"
                 )} />
@@ -101,14 +101,14 @@ function BrowserFrame({ url, children, isDark }) {
     return (
         <div className={cn(
             "overflow-hidden rounded-[32px] border backdrop-blur-xl shadow-2xl",
-            isDark 
-                ? "border-white/20 bg-white/5 shadow-black/20" 
+            isDark
+                ? "border-white/20 bg-white/5 shadow-black/20"
                 : "border-blue-200 bg-white shadow-blue-500/10"
         )}>
             <div className={cn(
                 "flex items-center gap-2 border-b backdrop-blur-sm px-5 py-3",
-                isDark 
-                    ? "border-white/10 bg-white/5" 
+                isDark
+                    ? "border-white/10 bg-white/5"
                     : "border-blue-100 bg-white"
             )}>
                 <div className="flex gap-2">
@@ -118,8 +118,8 @@ function BrowserFrame({ url, children, isDark }) {
                 </div>
                 <div className={cn(
                     "mx-auto hidden h-8 w-[46%] items-center justify-center rounded-lg border backdrop-blur-sm text-xs font-medium shadow-sm md:flex",
-                    isDark 
-                        ? "border-white/10 bg-white/5 text-white/70" 
+                    isDark
+                        ? "border-white/10 bg-white/5 text-white/70"
                         : "border-blue-200 bg-white text-slate-500"
                 )}>
                     {url}
@@ -134,8 +134,8 @@ function ProductUIMock({ isDark }) {
     return (
         <div className={cn(
             "relative aspect-[16/9] transition-colors duration-300",
-            isDark 
-                ? "bg-gradient-to-br from-slate-900 to-slate-950" 
+            isDark
+                ? "bg-gradient-to-br from-slate-900 to-slate-950"
                 : "bg-gradient-to-br from-slate-50 to-white"
         )}>
             <div className="absolute inset-0 p-5 md:p-7">
@@ -144,8 +144,8 @@ function ProductUIMock({ isDark }) {
                     <div className="col-span-4 hidden md:block">
                         <div className={cn(
                             "h-full rounded-2xl border backdrop-blur-xl p-4 shadow-lg transition-colors duration-300",
-                            isDark 
-                                ? "border-white/10 bg-white/5" 
+                            isDark
+                                ? "border-white/10 bg-white/5"
                                 : "border-blue-200 bg-white"
                         )}>
                             <div className="flex items-center gap-3">
@@ -182,8 +182,8 @@ function ProductUIMock({ isDark }) {
                             </div>
                             <div className={cn(
                                 "mt-6 rounded-2xl border backdrop-blur-sm p-3",
-                                isDark 
-                                    ? "border-white/10 bg-white/5" 
+                                isDark
+                                    ? "border-white/10 bg-white/5"
                                     : "border-blue-200 bg-blue-50/50"
                             )}>
                                 <div className={cn(
@@ -208,14 +208,14 @@ function ProductUIMock({ isDark }) {
                     <div className="col-span-12 md:col-span-8">
                         <div className={cn(
                             "h-full overflow-hidden rounded-2xl border backdrop-blur-xl shadow-lg transition-colors duration-300",
-                            isDark 
-                                ? "border-white/10 bg-white/5" 
+                            isDark
+                                ? "border-white/10 bg-white/5"
                                 : "border-blue-200 bg-white"
                         )}>
                             <div className={cn(
                                 "flex items-center justify-between border-b backdrop-blur-sm px-4 py-3",
-                                isDark 
-                                    ? "border-white/10 bg-white/5" 
+                                isDark
+                                    ? "border-white/10 bg-white/5"
                                     : "border-blue-100 bg-white"
                             )}>
                                 <div className="min-w-0">
@@ -231,8 +231,8 @@ function ProductUIMock({ isDark }) {
                                 <div className="flex items-center gap-2">
                                     <div className={cn(
                                         "rounded-lg border backdrop-blur-sm px-3 py-1.5 text-[11px] font-semibold",
-                                        isDark 
-                                            ? "border-white/10 bg-white/5 text-slate-300" 
+                                        isDark
+                                            ? "border-white/10 bg-white/5 text-slate-300"
                                             : "border-blue-200 bg-white text-slate-600"
                                     )}>
                                         Export
@@ -247,8 +247,8 @@ function ProductUIMock({ isDark }) {
                                 <div className="col-span-12 lg:col-span-8 p-4">
                                     <div className={cn(
                                         "rounded-xl border backdrop-blur-sm p-4",
-                                        isDark 
-                                            ? "border-white/10 bg-white/5" 
+                                        isDark
+                                            ? "border-white/10 bg-white/5"
                                             : "border-blue-200 bg-blue-50/50"
                                     )}>
                                         <div className={cn(
@@ -275,8 +275,8 @@ function ProductUIMock({ isDark }) {
                                         </div>
                                         <div className={cn(
                                             "mt-4 inline-flex items-center gap-2 rounded-full border backdrop-blur-sm px-3 py-1 text-[11px] font-semibold",
-                                            isDark 
-                                                ? "border-orange-500/30 bg-orange-500/10 text-orange-300" 
+                                            isDark
+                                                ? "border-orange-500/30 bg-orange-500/10 text-orange-300"
                                                 : "border-orange-200 bg-orange-50 text-orange-700"
                                         )}>
                                             Highlight: informal phrase
@@ -290,8 +290,8 @@ function ProductUIMock({ isDark }) {
                                 )}>
                                     <div className={cn(
                                         "rounded-xl border backdrop-blur-sm p-4",
-                                        isDark 
-                                            ? "border-white/10 bg-white/5" 
+                                        isDark
+                                            ? "border-white/10 bg-white/5"
                                             : "border-blue-200 bg-white"
                                     )}>
                                         <div className="flex items-center justify-between">
@@ -330,8 +330,8 @@ function ProductUIMock({ isDark }) {
                                     </div>
                                     <div className={cn(
                                         "mt-3 rounded-xl border backdrop-blur-sm p-4 text-[11px]",
-                                        isDark 
-                                            ? "border-white/10 bg-white/5 text-slate-300" 
+                                        isDark
+                                            ? "border-white/10 bg-white/5 text-slate-300"
                                             : "border-blue-200 bg-blue-50/50 text-slate-600"
                                     )}>
                                         <span className={cn(
@@ -353,19 +353,19 @@ function LifestyleHeroMock({ isDark }) {
     return (
         <div className={cn(
             "relative aspect-[16/9] overflow-hidden transition-colors duration-300",
-            isDark 
-                ? "bg-gradient-to-br from-orange-500 via-orange-600 to-blue-600" 
+            isDark
+                ? "bg-gradient-to-br from-orange-500 via-orange-600 to-blue-600"
                 : "bg-gradient-to-br from-orange-400 via-blue-400 to-blue-500"
         )}>
             {/* Animated gradient overlays */}
             <div className="absolute inset-0 opacity-40 [background-image:radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.3),transparent_50%),radial-gradient(circle_at_80%_70%,rgba(59,130,246,0.3),transparent_50%)] animate-pulse" />
             <div className={cn(
                 "absolute inset-0 bg-gradient-to-t",
-                isDark 
-                    ? "from-slate-900/60 via-slate-900/20 to-transparent" 
+                isDark
+                    ? "from-slate-900/60 via-slate-900/20 to-transparent"
                     : "from-white/40 via-white/10 to-transparent"
             )} />
-            
+
             {/* Floating particles */}
             <div className="absolute inset-0">
                 {[...Array(6)].map((_, i) => (
@@ -397,8 +397,8 @@ function LifestyleHeroMock({ isDark }) {
                                     />
                                     <div className={cn(
                                         "absolute inset-0 bg-gradient-to-t",
-                                        isDark 
-                                            ? "from-slate-900/50 via-slate-900/15 to-transparent" 
+                                        isDark
+                                            ? "from-slate-900/50 via-slate-900/15 to-transparent"
                                             : "from-white/30 via-white/10 to-transparent"
                                     )} />
                                 </div>
@@ -498,8 +498,8 @@ export default function Landing() {
     return (
         <div className={cn(
             "min-h-screen font-sans transition-colors duration-300",
-            isDark 
-                ? "bg-slate-950 selection:bg-orange-500/30 selection:text-white" 
+            isDark
+                ? "bg-slate-950 selection:bg-orange-500/30 selection:text-white"
                 : "bg-white selection:bg-blue-200 selection:text-blue-900"
         )}>
             <Navbar />
@@ -507,8 +507,8 @@ export default function Landing() {
             {/* HERO */}
             <section className={cn(
                 "relative overflow-hidden min-h-screen flex items-center transition-colors duration-300",
-                isDark 
-                    ? "bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" 
+                isDark
+                    ? "bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950"
                     : "bg-gradient-to-b from-white via-blue-50/30 to-white"
             )}>
                 {/* Animated gradient background */}
@@ -526,11 +526,11 @@ export default function Landing() {
                         "absolute bottom-0 left-1/2 w-[700px] h-[700px] rounded-full blur-3xl animate-blob animation-delay-4000",
                         isDark ? "bg-orange-400/15" : "bg-orange-300/8"
                     )} />
-                    
+
                     {/* Grid pattern overlay */}
                     <div className={cn(
                         "absolute inset-0 opacity-[0.15] [background-size:60px_60px]",
-                        isDark 
+                        isDark
                             ? "[background-image:linear-gradient(to_right,rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.1)_1px,transparent_1px)]"
                             : "[background-image:linear-gradient(to_right,rgba(59,130,246,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(59,130,246,0.1)_1px,transparent_1px)]"
                     )} />
@@ -540,8 +540,8 @@ export default function Landing() {
                     <div className={cn("mx-auto max-w-4xl text-center transition-all duration-1000", isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10")}>
                         <div className={cn(
                             "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold backdrop-blur-md mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700",
-                            isDark 
-                                ? "border-white/10 bg-white/5 text-white/90" 
+                            isDark
+                                ? "border-white/10 bg-white/5 text-white/90"
                                 : "border-blue-200 bg-white/80 text-blue-700 shadow-sm"
                         )}>
                             <span className="inline-flex h-2 w-2 rounded-full bg-orange-500 animate-pulse" />
@@ -549,7 +549,7 @@ export default function Landing() {
                         </div>
 
                         <h1 className={cn(
-                            "mt-6 text-5xl font-bold tracking-tight md:text-7xl lg:text-8xl leading-tight animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-100",
+                            "mt-6 text-5xl font-semibold tracking-tight md:text-7xl lg:text-8xl leading-tight animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-100",
                             isDark ? "text-white" : "text-slate-900"
                         )}>
                             Upgrade your <TypingText isDark={isDark} /> to
@@ -567,15 +567,15 @@ export default function Landing() {
 
                         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-300">
                             <Link to="/signup" className="w-full sm:w-auto group">
-                                <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-2xl shadow-orange-500/30 border-0 transition-all duration-300 hover:scale-105">
+                                <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-semibold bg-indigo-600 hover:bg-indigo-700 text-white border-0 shadow-xl shadow-indigo-500/20 transition-all duration-300 hover:scale-105">
                                     Get Started Free <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                                 </Button>
                             </Link>
                             <Link to="/dashboard" className="w-full sm:w-auto">
                                 <Button variant="outline" size="lg" className={cn(
                                     "w-full sm:w-auto h-14 px-8 text-base font-semibold backdrop-blur-md transition-all duration-300 hover:scale-105",
-                                    isDark 
-                                        ? "bg-white/5 border-white/20 text-white hover:bg-white/10" 
+                                    isDark
+                                        ? "bg-white/5 border-white/20 text-white hover:bg-white/10"
                                         : "bg-white border-blue-200 text-blue-700 hover:bg-blue-50 shadow-sm"
                                 )}>
                                     View Dashboard
@@ -598,8 +598,8 @@ export default function Landing() {
                         <div className="relative mx-auto max-w-6xl">
                             <div className={cn(
                                 "absolute inset-0 -z-10 rounded-[32px] blur-3xl opacity-50 animate-pulse",
-                                isDark 
-                                    ? "bg-gradient-to-r from-orange-500/30 via-blue-500/30 to-orange-500/30" 
+                                isDark
+                                    ? "bg-gradient-to-r from-orange-500/30 via-blue-500/30 to-orange-500/30"
                                     : "bg-gradient-to-r from-orange-400/20 via-blue-400/20 to-orange-400/20"
                             )} />
                             <BrowserFrame url="docley.app/assist" isDark={isDark}>
@@ -613,14 +613,14 @@ export default function Landing() {
             {/* LOGO STRIP */}
             <section className={cn(
                 "relative py-12 md:py-16 overflow-hidden transition-colors duration-300",
-                isDark 
-                    ? "bg-gradient-to-b from-slate-950 to-slate-900" 
+                isDark
+                    ? "bg-gradient-to-b from-slate-950 to-slate-900"
                     : "bg-gradient-to-b from-white to-blue-50/30"
             )}>
                 <div className={cn(
                     "absolute inset-0",
-                    isDark 
-                        ? "bg-[radial-gradient(circle_at_50%_50%,rgba(249,115,22,0.1),transparent_70%)]" 
+                    isDark
+                        ? "bg-[radial-gradient(circle_at_50%_50%,rgba(249,115,22,0.1),transparent_70%)]"
                         : "bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.05),transparent_70%)]"
                 )} />
                 <div className="container relative mx-auto px-4 md:px-6 z-10">
@@ -645,8 +645,8 @@ export default function Landing() {
                                     key={name}
                                     className={cn(
                                         "flex items-center justify-center rounded-full border backdrop-blur-sm px-5 py-2.5 text-xs font-semibold shadow-lg transition-all duration-300 hover:scale-105 animate-in fade-in slide-in-from-bottom-4",
-                                        isDark 
-                                            ? "border-white/10 bg-white/5 text-white/90 hover:bg-white/10 hover:border-white/20" 
+                                        isDark
+                                            ? "border-white/10 bg-white/5 text-white/90 hover:bg-white/10 hover:border-white/20"
                                             : "border-blue-200 bg-white text-blue-700 hover:bg-blue-50 hover:border-blue-300 shadow-blue-500/10"
                                     )}
                                     style={{ animationDelay: `${idx * 50}ms` }}
@@ -662,8 +662,8 @@ export default function Landing() {
             {/* FEATURES (4-up tiles like your reference) */}
             <section id="features" className={cn(
                 "relative py-20 md:py-32 overflow-hidden transition-colors duration-300",
-                isDark 
-                    ? "bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900" 
+                isDark
+                    ? "bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900"
                     : "bg-gradient-to-b from-white via-blue-50/20 to-white"
             )}>
                 {/* Background effects */}
@@ -677,11 +677,11 @@ export default function Landing() {
                         isDark ? "bg-orange-500/10" : "bg-orange-400/5"
                     )} />
                 </div>
-                
+
                 <div className="container relative mx-auto px-4 md:px-6 z-10">
                     <div className="mx-auto max-w-3xl text-center mb-16">
                         <h2 className={cn(
-                            "text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl animate-in fade-in slide-in-from-bottom-4 duration-700",
+                            "text-4xl font-semibold tracking-tight md:text-5xl lg:text-6xl animate-in fade-in slide-in-from-bottom-4 duration-700",
                             isDark ? "text-white" : "text-slate-900"
                         )}>
                             Built for academic submissions
@@ -700,8 +700,8 @@ export default function Landing() {
                         <div className="lg:col-span-7 lg:row-span-2 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
                             <div className={cn(
                                 "relative h-full overflow-hidden rounded-3xl border backdrop-blur-xl p-6 shadow-2xl md:p-8 transition-all duration-500",
-                                isDark 
-                                    ? "border-white/10 bg-gradient-to-br from-white/5 to-white/0 hover:border-white/20" 
+                                isDark
+                                    ? "border-white/10 bg-gradient-to-br from-white/5 to-white/0 hover:border-white/20"
                                     : "border-blue-200 bg-white hover:border-blue-300 shadow-blue-500/10"
                             )}>
                                 <div className={cn(
@@ -717,8 +717,8 @@ export default function Landing() {
                                     <div>
                                         <div className={cn(
                                             "inline-flex items-center gap-2 rounded-full border backdrop-blur-sm px-3 py-1.5 text-[11px] font-semibold",
-                                            isDark 
-                                                ? "border-white/20 bg-white/10 text-white/90" 
+                                            isDark
+                                                ? "border-white/20 bg-white/10 text-white/90"
                                                 : "border-blue-200 bg-blue-50 text-blue-700"
                                         )}>
                                             <span className="inline-flex h-2 w-2 rounded-full bg-orange-500 animate-pulse" />
@@ -741,8 +741,8 @@ export default function Landing() {
                                             {["Tone", "Structure", "Clarity", "Citations"].map((chip) => (
                                                 <span key={chip} className={cn(
                                                     "rounded-full border backdrop-blur-sm px-3 py-1.5 transition-colors",
-                                                    isDark 
-                                                        ? "border-white/20 bg-white/10 text-white/90 hover:bg-white/15" 
+                                                    isDark
+                                                        ? "border-white/20 bg-white/10 text-white/90 hover:bg-white/15"
                                                         : "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
                                                 )}>
                                                     {chip}
@@ -762,8 +762,8 @@ export default function Landing() {
                                     {/* mini diagnostic UI */}
                                     <div className={cn(
                                         "rounded-2xl border backdrop-blur-xl p-5 transition-all duration-300",
-                                        isDark 
-                                            ? "border-white/10 bg-white/5 hover:bg-white/10" 
+                                        isDark
+                                            ? "border-white/10 bg-white/5 hover:bg-white/10"
                                             : "border-blue-200 bg-blue-50/50 hover:bg-blue-100/50"
                                     )}>
                                         <div className="flex items-center justify-between">
@@ -806,8 +806,8 @@ export default function Landing() {
 
                                         <div className={cn(
                                             "mt-4 rounded-xl backdrop-blur-sm p-3 text-xs border",
-                                            isDark 
-                                                ? "bg-white/5 text-slate-300 border-white/10" 
+                                            isDark
+                                                ? "bg-white/5 text-slate-300 border-white/10"
                                                 : "bg-white text-slate-600 border-blue-200"
                                         )}>
                                             <span className={cn(
@@ -820,8 +820,8 @@ export default function Landing() {
                                     {/* mini before/after */}
                                     <div className={cn(
                                         "rounded-2xl border backdrop-blur-xl p-5 transition-all duration-300",
-                                        isDark 
-                                            ? "border-white/10 bg-white/5 hover:bg-white/10" 
+                                        isDark
+                                            ? "border-white/10 bg-white/5 hover:bg-white/10"
                                             : "border-blue-200 bg-blue-50/50 hover:bg-blue-100/50"
                                     )}>
                                         <div className="flex items-center justify-between">
@@ -838,16 +838,16 @@ export default function Landing() {
                                         <div className="mt-4 space-y-3">
                                             <div className={cn(
                                                 "rounded-xl border backdrop-blur-sm p-3 text-xs",
-                                                isDark 
-                                                    ? "border-red-500/30 bg-red-500/10 text-red-200" 
+                                                isDark
+                                                    ? "border-red-500/30 bg-red-500/10 text-red-200"
                                                     : "border-red-200 bg-red-50 text-red-700"
                                             )}>
                                                 "This shows the economy is bad and people can't buy stuff..."
                                             </div>
                                             <div className={cn(
                                                 "rounded-xl border backdrop-blur-sm p-3 text-xs",
-                                                isDark 
-                                                    ? "border-blue-500/30 bg-blue-500/10 text-blue-200" 
+                                                isDark
+                                                    ? "border-blue-500/30 bg-blue-500/10 text-blue-200"
                                                     : "border-blue-200 bg-blue-50 text-blue-700"
                                             )}>
                                                 "These findings indicate inflationary pressure has reduced consumer purchasing power..."
@@ -871,8 +871,8 @@ export default function Landing() {
                             <div key={item.title} className={`lg:col-span-5 animate-in fade-in slide-in-from-bottom-8 duration-1000`} style={{ animationDelay: `${300 + idx * 100}ms` }}>
                                 <div className={cn(
                                     "relative h-full overflow-hidden rounded-3xl border backdrop-blur-xl p-6 shadow-2xl md:p-7 transition-all duration-500",
-                                    isDark 
-                                        ? "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10" 
+                                    isDark
+                                        ? "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10"
                                         : "border-blue-200 bg-white hover:border-blue-300 hover:shadow-blue-500/20 shadow-blue-500/10"
                                 )}>
                                     <div className={cn(
@@ -901,8 +901,8 @@ export default function Landing() {
                                         {item.chips.map((chip) => (
                                             <span key={chip} className={cn(
                                                 "rounded-full border backdrop-blur-sm px-3 py-1.5 transition-colors",
-                                                isDark 
-                                                    ? "border-white/20 bg-white/10 text-white/90 hover:bg-white/15" 
+                                                isDark
+                                                    ? "border-white/20 bg-white/10 text-white/90 hover:bg-white/15"
                                                     : "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
                                             )}>
                                                 {chip}
@@ -912,15 +912,15 @@ export default function Landing() {
 
                                     <div className={cn(
                                         "mt-6 rounded-2xl border backdrop-blur-sm p-4",
-                                        isDark 
-                                            ? "border-white/10 bg-white/5" 
+                                        isDark
+                                            ? "border-white/10 bg-white/5"
                                             : "border-blue-200 bg-blue-50/50"
                                     )}>
                                         {item.title === "Rewrite with academic tone" ? (
                                             <div className={cn(
                                                 "rounded-xl border backdrop-blur-sm p-3 text-xs",
-                                                isDark 
-                                                    ? "border-white/10 bg-white/5" 
+                                                isDark
+                                                    ? "border-white/10 bg-white/5"
                                                     : "border-blue-200 bg-white"
                                             )}>
                                                 <div className={cn(
@@ -930,16 +930,16 @@ export default function Landing() {
                                                 <div className="mt-2 space-y-2">
                                                     <div className={cn(
                                                         "rounded-lg border backdrop-blur-sm p-2",
-                                                        isDark 
-                                                            ? "border-red-500/30 bg-red-500/10 text-red-200" 
+                                                        isDark
+                                                            ? "border-red-500/30 bg-red-500/10 text-red-200"
                                                             : "border-red-200 bg-red-50 text-red-700"
                                                     )}>
                                                         "I think this is a big problem for society."
                                                     </div>
                                                     <div className={cn(
                                                         "rounded-lg border backdrop-blur-sm p-2",
-                                                        isDark 
-                                                            ? "border-blue-500/30 bg-blue-500/10 text-blue-200" 
+                                                        isDark
+                                                            ? "border-blue-500/30 bg-blue-500/10 text-blue-200"
                                                             : "border-blue-200 bg-blue-50 text-blue-700"
                                                     )}>
                                                         "These findings indicate significant societal implications."
@@ -949,8 +949,8 @@ export default function Landing() {
                                         ) : (
                                             <div className={cn(
                                                 "rounded-xl border backdrop-blur-sm p-3 text-xs",
-                                                isDark 
-                                                    ? "border-white/10 bg-white/5" 
+                                                isDark
+                                                    ? "border-white/10 bg-white/5"
                                                     : "border-blue-200 bg-white"
                                             )}>
                                                 <div className={cn(
@@ -977,8 +977,8 @@ export default function Landing() {
                             <div key={b.title} className={`lg:col-span-4 animate-in fade-in slide-in-from-bottom-8 duration-1000`} style={{ animationDelay: `${500 + idx * 100}ms` }}>
                                 <div className={cn(
                                     "h-full overflow-hidden rounded-3xl border backdrop-blur-xl shadow-2xl transition-all duration-500",
-                                    isDark 
-                                        ? "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10" 
+                                    isDark
+                                        ? "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10"
                                         : "border-blue-200 bg-white hover:border-blue-300 hover:shadow-blue-500/20 shadow-blue-500/10"
                                 )}>
                                     <div className="p-6">
@@ -1000,8 +1000,8 @@ export default function Landing() {
                                         {b.title === "Structure & flow" && (
                                             <div className={cn(
                                                 "mt-5 rounded-2xl border backdrop-blur-sm p-4",
-                                                isDark 
-                                                    ? "border-white/10 bg-white/5" 
+                                                isDark
+                                                    ? "border-white/10 bg-white/5"
                                                     : "border-blue-200 bg-blue-50/50"
                                             )}>
                                                 <div className={cn(
@@ -1012,8 +1012,8 @@ export default function Landing() {
                                                     {["Thesis statement", "Argument 1 → evidence", "Argument 2 → evidence"].map((row) => (
                                                         <div key={row} className={cn(
                                                             "flex items-center justify-between rounded-xl border backdrop-blur-sm px-3 py-2 text-xs transition-colors",
-                                                            isDark 
-                                                                ? "border-white/10 bg-white/5 text-slate-300 hover:bg-white/10" 
+                                                            isDark
+                                                                ? "border-white/10 bg-white/5 text-slate-300 hover:bg-white/10"
                                                                 : "border-blue-200 bg-white text-slate-700 hover:bg-blue-50"
                                                         )}>
                                                             <span>{row}</span>
@@ -1026,8 +1026,8 @@ export default function Landing() {
                                         {b.title === "Citation awareness" && (
                                             <div className={cn(
                                                 "mt-5 rounded-2xl border backdrop-blur-sm p-4",
-                                                isDark 
-                                                    ? "border-white/10 bg-white/5" 
+                                                isDark
+                                                    ? "border-white/10 bg-white/5"
                                                     : "border-blue-200 bg-blue-50/50"
                                             )}>
                                                 <div className="flex items-center justify-between">
@@ -1037,24 +1037,24 @@ export default function Landing() {
                                                     )}>Citation checks</span>
                                                     <span className={cn(
                                                         "rounded-full border backdrop-blur-sm px-2 py-0.5 text-[10px] font-semibold",
-                                                        isDark 
-                                                            ? "border-orange-500/30 bg-orange-500/10 text-orange-300" 
+                                                        isDark
+                                                            ? "border-orange-500/30 bg-orange-500/10 text-orange-300"
                                                             : "border-orange-200 bg-orange-50 text-orange-700"
                                                     )}>2 missing</span>
                                                 </div>
                                                 <div className="mt-3 space-y-2">
                                                     <div className={cn(
                                                         "rounded-xl border backdrop-blur-sm px-3 py-2 text-xs",
-                                                        isDark 
-                                                            ? "border-white/10 bg-white/5 text-slate-300" 
+                                                        isDark
+                                                            ? "border-white/10 bg-white/5 text-slate-300"
                                                             : "border-blue-200 bg-white text-slate-600"
                                                     )}>
                                                         "Factual claim" <span className="font-semibold text-orange-600">needs citation</span>
                                                     </div>
                                                     <div className={cn(
                                                         "rounded-xl border backdrop-blur-sm px-3 py-2 text-xs",
-                                                        isDark 
-                                                            ? "border-white/10 bg-white/5 text-slate-300" 
+                                                        isDark
+                                                            ? "border-white/10 bg-white/5 text-slate-300"
                                                             : "border-blue-200 bg-white text-slate-600"
                                                     )}>
                                                         Reference list <span className="font-semibold text-blue-600">style: APA</span>
@@ -1065,8 +1065,8 @@ export default function Landing() {
                                         {b.title === "Export-ready output" && (
                                             <div className={cn(
                                                 "mt-5 rounded-2xl border backdrop-blur-sm p-4",
-                                                isDark 
-                                                    ? "border-white/10 bg-white/5" 
+                                                isDark
+                                                    ? "border-white/10 bg-white/5"
                                                     : "border-blue-200 bg-blue-50/50"
                                             )}>
                                                 <div className={cn(
@@ -1077,8 +1077,8 @@ export default function Landing() {
                                                     {["PDF Document", "Word (.docx)", "Plain Text"].map((row) => (
                                                         <div key={row} className={cn(
                                                             "rounded-xl border backdrop-blur-sm px-3 py-2 text-xs transition-colors",
-                                                            isDark 
-                                                                ? "border-white/10 bg-white/5 text-slate-300 hover:bg-white/10" 
+                                                            isDark
+                                                                ? "border-white/10 bg-white/5 text-slate-300 hover:bg-white/10"
                                                                 : "border-blue-200 bg-white text-slate-700 hover:bg-blue-50"
                                                         )}>
                                                             {row}
@@ -1098,8 +1098,8 @@ export default function Landing() {
             {/* STEPS */}
             <section className={cn(
                 "relative py-20 md:py-32 overflow-hidden transition-colors duration-300",
-                isDark 
-                    ? "bg-gradient-to-b from-slate-900 to-slate-950" 
+                isDark
+                    ? "bg-gradient-to-b from-slate-900 to-slate-950"
                     : "bg-gradient-to-b from-white via-blue-50/30 to-white"
             )}>
                 <div className="absolute inset-0">
@@ -1108,7 +1108,7 @@ export default function Landing() {
                         isDark ? "bg-orange-500/5" : "bg-orange-400/3"
                     )} />
                 </div>
-                
+
                 <div className="container relative mx-auto px-4 md:px-6 z-10">
                     <div className="mx-auto max-w-3xl text-center mb-16">
                         <h2 className={cn(
@@ -1127,8 +1127,8 @@ export default function Landing() {
                         {steps.map((s, idx) => (
                             <div key={s.title} className={cn(
                                 "rounded-3xl border backdrop-blur-xl shadow-2xl transition-all duration-500 animate-in fade-in slide-in-from-bottom-8",
-                                isDark 
-                                    ? "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10" 
+                                isDark
+                                    ? "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10"
                                     : "border-blue-200 bg-white hover:border-blue-300 hover:shadow-blue-500/20 shadow-blue-500/10"
                             )} style={{ animationDelay: `${200 + idx * 100}ms` }}>
                                 <div className="p-6">
@@ -1150,15 +1150,15 @@ export default function Landing() {
                                     {idx === 0 && (
                                         <div className={cn(
                                             "mt-5 rounded-2xl border backdrop-blur-sm p-4",
-                                            isDark 
-                                                ? "border-white/10 bg-white/5" 
+                                            isDark
+                                                ? "border-white/10 bg-white/5"
                                                 : "border-blue-200 bg-blue-50/50"
                                         )}>
                                             <div className="space-y-2">
                                                 <div className={cn(
                                                     "h-8 rounded-lg border backdrop-blur-sm px-3 flex items-center text-xs",
-                                                    isDark 
-                                                        ? "border-white/10 bg-white/5 text-slate-400" 
+                                                    isDark
+                                                        ? "border-white/10 bg-white/5 text-slate-400"
                                                         : "border-blue-200 bg-white text-slate-500"
                                                 )}>
                                                     Document title…
@@ -1166,16 +1166,16 @@ export default function Landing() {
                                                 <div className="grid grid-cols-2 gap-2">
                                                     <div className={cn(
                                                         "h-8 rounded-lg border backdrop-blur-sm px-3 flex items-center text-xs",
-                                                        isDark 
-                                                            ? "border-white/10 bg-white/5 text-slate-400" 
+                                                        isDark
+                                                            ? "border-white/10 bg-white/5 text-slate-400"
                                                             : "border-blue-200 bg-white text-slate-500"
                                                     )}>
                                                         Type: Essay
                                                     </div>
                                                     <div className={cn(
                                                         "h-8 rounded-lg border backdrop-blur-sm px-3 flex items-center text-xs",
-                                                        isDark 
-                                                            ? "border-white/10 bg-white/5 text-slate-400" 
+                                                        isDark
+                                                            ? "border-white/10 bg-white/5 text-slate-400"
                                                             : "border-blue-200 bg-white text-slate-500"
                                                     )}>
                                                         Level: UG
@@ -1183,8 +1183,8 @@ export default function Landing() {
                                                 </div>
                                                 <div className={cn(
                                                     "h-8 rounded-lg border backdrop-blur-sm px-3 flex items-center text-xs",
-                                                    isDark 
-                                                        ? "border-white/10 bg-white/5 text-slate-400" 
+                                                    isDark
+                                                        ? "border-white/10 bg-white/5 text-slate-400"
                                                         : "border-blue-200 bg-white text-slate-500"
                                                 )}>
                                                     Style: APA 7th
@@ -1196,14 +1196,14 @@ export default function Landing() {
                                     {idx === 1 && (
                                         <div className={cn(
                                             "mt-5 rounded-2xl border backdrop-blur-sm p-4",
-                                            isDark 
-                                                ? "border-white/10 bg-white/5" 
+                                            isDark
+                                                ? "border-white/10 bg-white/5"
                                                 : "border-blue-200 bg-blue-50/50"
                                         )}>
                                             <div className={cn(
                                                 "rounded-xl border backdrop-blur-sm p-3",
-                                                isDark 
-                                                    ? "border-white/10 bg-white/5" 
+                                                isDark
+                                                    ? "border-white/10 bg-white/5"
                                                     : "border-blue-200 bg-white"
                                             )}>
                                                 <div className={cn(
@@ -1226,8 +1226,8 @@ export default function Landing() {
                                                 </div>
                                                 <div className={cn(
                                                     "mt-3 inline-flex items-center gap-2 rounded-full border backdrop-blur-sm px-3 py-1 text-[11px] font-semibold",
-                                                    isDark 
-                                                        ? "border-orange-500/30 bg-orange-500/10 text-orange-300" 
+                                                    isDark
+                                                        ? "border-orange-500/30 bg-orange-500/10 text-orange-300"
                                                         : "border-orange-200 bg-orange-50 text-orange-700"
                                                 )}>
                                                     Highlight: informal phrase
@@ -1239,14 +1239,14 @@ export default function Landing() {
                                     {idx === 2 && (
                                         <div className={cn(
                                             "mt-5 rounded-2xl border backdrop-blur-sm p-4",
-                                            isDark 
-                                                ? "border-white/10 bg-white/5" 
+                                            isDark
+                                                ? "border-white/10 bg-white/5"
                                                 : "border-blue-200 bg-blue-50/50"
                                         )}>
                                             <div className={cn(
                                                 "rounded-xl border backdrop-blur-sm p-3",
-                                                isDark 
-                                                    ? "border-white/10 bg-white/5" 
+                                                isDark
+                                                    ? "border-white/10 bg-white/5"
                                                     : "border-blue-200 bg-white"
                                             )}>
                                                 <div className="flex items-center justify-between">
@@ -1263,8 +1263,8 @@ export default function Landing() {
                                                     {["PDF Document", "Word (.docx)", "Plain Text"].map((row) => (
                                                         <div key={row} className={cn(
                                                             "rounded-lg border backdrop-blur-sm px-3 py-2 text-xs transition-colors",
-                                                            isDark 
-                                                                ? "border-white/10 bg-white/5 text-slate-300 hover:bg-white/10" 
+                                                            isDark
+                                                                ? "border-white/10 bg-white/5 text-slate-300 hover:bg-white/10"
                                                                 : "border-blue-200 bg-white text-slate-700 hover:bg-blue-50"
                                                         )}>{row}</div>
                                                     ))}
@@ -1282,8 +1282,8 @@ export default function Landing() {
             {/* INTEGRITY / COMPARISON (clean table style) */}
             <section className={cn(
                 "relative py-20 md:py-32 overflow-hidden transition-colors duration-300",
-                isDark 
-                    ? "bg-gradient-to-b from-slate-950 to-slate-900" 
+                isDark
+                    ? "bg-gradient-to-b from-slate-950 to-slate-900"
                     : "bg-gradient-to-b from-white via-blue-50/20 to-white"
             )}>
                 <div className="absolute inset-0">
@@ -1292,14 +1292,14 @@ export default function Landing() {
                         isDark ? "bg-blue-500/5" : "bg-blue-400/3"
                     )} />
                 </div>
-                
+
                 <div className="container relative mx-auto px-4 md:px-6 z-10">
                     <div className="grid items-start gap-10 lg:grid-cols-12">
                         <div className="lg:col-span-5 animate-in fade-in slide-in-from-left-8 duration-1000">
                             <div className={cn(
                                 "inline-flex items-center gap-2 rounded-full border backdrop-blur-sm px-3 py-1.5 text-xs font-semibold",
-                                isDark 
-                                    ? "border-white/10 bg-white/5 text-white/90" 
+                                isDark
+                                    ? "border-white/10 bg-white/5 text-white/90"
                                     : "border-blue-200 bg-blue-50 text-blue-700"
                             )}>
                                 <ShieldCheck className="h-4 w-4 text-orange-500" />
@@ -1339,8 +1339,8 @@ export default function Landing() {
                         <div className="lg:col-span-7 animate-in fade-in slide-in-from-right-8 duration-1000 delay-200">
                             <div className={cn(
                                 "overflow-hidden rounded-3xl border backdrop-blur-xl shadow-2xl",
-                                isDark 
-                                    ? "border-white/10 bg-white/5" 
+                                isDark
+                                    ? "border-white/10 bg-white/5"
                                     : "border-blue-200 bg-white shadow-blue-500/10"
                             )}>
                                 <div className={cn(
@@ -1349,16 +1349,16 @@ export default function Landing() {
                                 )}>
                                     <div className={cn(
                                         "px-6 py-4 text-sm font-semibold",
-                                        isDark 
-                                            ? "text-white/70 bg-white/5" 
+                                        isDark
+                                            ? "text-white/70 bg-white/5"
                                             : "text-slate-600 bg-blue-50/50"
                                     )}>
                                         Generic AI writers
                                     </div>
                                     <div className={cn(
                                         "px-6 py-4 text-sm font-semibold bg-gradient-to-r",
-                                        isDark 
-                                            ? "text-white from-orange-500/20 to-blue-500/20" 
+                                        isDark
+                                            ? "text-white from-orange-500/20 to-blue-500/20"
                                             : "text-blue-700 from-orange-50 to-blue-50"
                                     )}>
                                         Docley
@@ -1392,8 +1392,8 @@ export default function Landing() {
                                             </div>
                                             <div className={cn(
                                                 "px-6 py-4 text-sm flex items-center justify-between gap-3",
-                                                isDark 
-                                                    ? "text-slate-300 bg-white/5" 
+                                                isDark
+                                                    ? "text-slate-300 bg-white/5"
                                                     : "text-slate-600 bg-white"
                                             )}>
                                                 <span className="min-w-0">{row.label}</span>
@@ -1412,14 +1412,14 @@ export default function Landing() {
 
                                 <div className={cn(
                                     "grid grid-cols-1 gap-3 border-t p-5 md:grid-cols-2",
-                                    isDark 
-                                        ? "border-white/10 bg-white/5" 
+                                    isDark
+                                        ? "border-white/10 bg-white/5"
                                         : "border-blue-100 bg-blue-50/30"
                                 )}>
                                     <div className={cn(
                                         "rounded-2xl border backdrop-blur-sm p-4",
-                                        isDark 
-                                            ? "border-white/10 bg-white/5" 
+                                        isDark
+                                            ? "border-white/10 bg-white/5"
                                             : "border-blue-200 bg-white"
                                     )}>
                                         <div className={cn(
@@ -1436,8 +1436,8 @@ export default function Landing() {
                                     </div>
                                     <div className={cn(
                                         "rounded-2xl border backdrop-blur-sm p-4",
-                                        isDark 
-                                            ? "border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-blue-500/10" 
+                                        isDark
+                                            ? "border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-blue-500/10"
                                             : "border-orange-200 bg-gradient-to-br from-orange-50 to-blue-50"
                                     )}>
                                         <div className={cn(
@@ -1462,8 +1462,8 @@ export default function Landing() {
             {/* METRICS */}
             <section className={cn(
                 "relative py-20 md:py-32 overflow-hidden transition-colors duration-300",
-                isDark 
-                    ? "bg-gradient-to-b from-slate-900 to-slate-950" 
+                isDark
+                    ? "bg-gradient-to-b from-slate-900 to-slate-950"
                     : "bg-gradient-to-b from-white via-blue-50/20 to-white"
             )}>
                 <div className="absolute inset-0">
@@ -1472,7 +1472,7 @@ export default function Landing() {
                         isDark ? "bg-orange-500/5" : "bg-orange-400/3"
                     )} />
                 </div>
-                
+
                 <div className="container relative mx-auto px-4 md:px-6 z-10">
                     <div className="mx-auto max-w-3xl text-center mb-16">
                         <h2 className={cn(
@@ -1490,8 +1490,8 @@ export default function Landing() {
                     <div className="mx-auto mt-10 max-w-5xl md:mt-14">
                         <div className={cn(
                             "rounded-3xl border backdrop-blur-xl shadow-2xl animate-in fade-in zoom-in-95 duration-1000 delay-200",
-                            isDark 
-                                ? "border-white/10 bg-white/5" 
+                            isDark
+                                ? "border-white/10 bg-white/5"
                                 : "border-blue-200 bg-white shadow-blue-500/10"
                         )}>
                             <div className={cn(
@@ -1536,8 +1536,8 @@ export default function Landing() {
             {/* PRODUCT PREVIEW (moved down as requested) */}
             <section className={cn(
                 "relative py-20 md:py-32 overflow-hidden transition-colors duration-300",
-                isDark 
-                    ? "bg-gradient-to-b from-slate-950 to-slate-900" 
+                isDark
+                    ? "bg-gradient-to-b from-slate-950 to-slate-900"
                     : "bg-gradient-to-b from-white via-blue-50/20 to-white"
             )}>
                 <div className="absolute inset-0">
@@ -1550,7 +1550,7 @@ export default function Landing() {
                         isDark ? "bg-orange-500/10" : "bg-orange-400/5"
                     )} />
                 </div>
-                
+
                 <div className="container relative mx-auto px-4 md:px-6 z-10">
                     <div className="mx-auto max-w-3xl text-center mb-16">
                         <h2 className={cn(
@@ -1569,8 +1569,8 @@ export default function Landing() {
                         <div className="relative mx-auto max-w-6xl">
                             <div className={cn(
                                 "absolute inset-0 -z-10 rounded-[32px] blur-3xl opacity-50 animate-pulse",
-                                isDark 
-                                    ? "bg-gradient-to-r from-orange-500/30 via-blue-500/30 to-orange-500/30" 
+                                isDark
+                                    ? "bg-gradient-to-r from-orange-500/30 via-blue-500/30 to-orange-500/30"
                                     : "bg-gradient-to-r from-orange-400/20 via-blue-400/20 to-orange-400/20"
                             )} />
                             <BrowserFrame url="docley.app/dashboard/editor" isDark={isDark}>
@@ -1584,8 +1584,8 @@ export default function Landing() {
             {/* FAQ */}
             <section className={cn(
                 "relative py-20 md:py-32 overflow-hidden transition-colors duration-300",
-                isDark 
-                    ? "bg-gradient-to-b from-slate-900 to-slate-950" 
+                isDark
+                    ? "bg-gradient-to-b from-slate-900 to-slate-950"
                     : "bg-gradient-to-b from-white via-blue-50/20 to-white"
             )}>
                 <div className="absolute inset-0">
@@ -1594,7 +1594,7 @@ export default function Landing() {
                         isDark ? "bg-orange-500/5" : "bg-orange-400/3"
                     )} />
                 </div>
-                
+
                 <div className="container relative mx-auto px-4 md:px-6 z-10">
                     <div className="mx-auto max-w-3xl text-center mb-16">
                         <h2 className={cn(
@@ -1627,8 +1627,8 @@ export default function Landing() {
             {/* FINAL CTA */}
             <section className={cn(
                 "relative overflow-hidden py-20 md:py-32 transition-colors duration-300",
-                isDark 
-                    ? "bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" 
+                isDark
+                    ? "bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950"
                     : "bg-gradient-to-b from-white via-blue-50/30 to-white"
             )}>
                 <div className="pointer-events-none absolute inset-0">
@@ -1649,8 +1649,8 @@ export default function Landing() {
                 <div className="container relative mx-auto px-4 md:px-6 z-10">
                     <div className={cn(
                         "mx-auto max-w-4xl rounded-3xl border backdrop-blur-2xl p-8 text-center shadow-2xl md:p-12 animate-in fade-in zoom-in-95 duration-1000",
-                        isDark 
-                            ? "border-white/10 bg-white/5" 
+                        isDark
+                            ? "border-white/10 bg-white/5"
                             : "border-blue-200 bg-white shadow-blue-500/10"
                     )}>
                         <h3 className={cn(
@@ -1674,8 +1674,8 @@ export default function Landing() {
                             <Link to="/pricing" className="w-full sm:w-auto">
                                 <Button variant="outline" size="lg" className={cn(
                                     "w-full sm:w-auto h-14 px-8 text-base font-semibold backdrop-blur-md transition-all duration-300 hover:scale-105",
-                                    isDark 
-                                        ? "bg-white/5 border-white/20 text-white hover:bg-white/10" 
+                                    isDark
+                                        ? "bg-white/5 border-white/20 text-white hover:bg-white/10"
                                         : "bg-white border-blue-200 text-blue-700 hover:bg-blue-50 shadow-sm"
                                 )}>
                                     View Pricing

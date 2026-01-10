@@ -1,30 +1,26 @@
-import { API_BASE_URL, getAuthHeaders } from '../api/client';
-
-const API_URL = `${API_BASE_URL}/users`;
+import apiClient from '../api/client';
 
 export async function getUserUsage() {
-    const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}/usage`, { headers });
-
-    if (!response.ok) {
-        throw new Error('Failed to fetch user usage');
+    try {
+        const response = await apiClient.get('/users/usage');
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching user usage:', error);
+        return { used: 0, limit: 0, reset_date: null };
     }
-
-    return await response.json();
 }
 
 /**
  * Manages user profile fetching and syncing
  */
 export async function fetchUserProfile() {
-    const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}/profile`, { headers });
-
-    if (!response.ok) {
-        throw new Error('Failed to fetch user profile');
+    try {
+        const response = await apiClient.get('/users/profile');
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        throw error; // Re-throw for AuthContext to handle login redirects
     }
-
-    return await response.json();
 }
 
 /**
@@ -32,17 +28,8 @@ export async function fetchUserProfile() {
  */
 export async function syncUserProfile() {
     try {
-        const headers = await getAuthHeaders();
-        const response = await fetch(`${API_URL}/sync`, {
-            method: 'POST',
-            headers
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to sync user profile');
-        }
-
-        return await response.json();
+        const response = await apiClient.post('/users/sync');
+        return response.data;
     } catch (error) {
         console.error('Error syncing user profile:', error);
         return null;

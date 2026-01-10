@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { SupabaseService } from '../../supabase/supabase.service';
-import { PaymentsService } from '../../payments/payments.service';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { IS_PREMIUM_KEY } from '../decorators/require-premium.decorator';
 
@@ -19,7 +18,6 @@ export class SubscriptionGuard implements CanActivate {
     constructor(
         private reflector: Reflector,
         private supabaseService: SupabaseService,
-        private paymentsService: PaymentsService,
     ) { }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -45,7 +43,7 @@ export class SubscriptionGuard implements CanActivate {
             throw new UnauthorizedException('Missing token');
         }
 
-        // 1. Verify Supabase JWT
+        // Verify Supabase JWT
         const { data: { user }, error } = await this.supabaseService.getClient().auth.getUser(token);
 
         if (error || !user) {
@@ -56,22 +54,15 @@ export class SubscriptionGuard implements CanActivate {
         // Attach user to request
         request.user = user;
 
-        // 2. Check if route requires Premium
+        // Payment system removed - premium checks no longer enforced
+        // All authenticated users now have the same access level
         const requirePremium = this.reflector.getAllAndOverride<boolean>(IS_PREMIUM_KEY, [
             context.getHandler(),
             context.getClass(),
         ]);
 
-        if (!requirePremium) {
-            return true;
-        }
-
-        // 3. Verify Whop Subscription (High-Performance Caching inside WhopService)
-        const isPremium = await this.paymentsService.checkSubscription(user.id);
-
-        if (!isPremium) {
-            this.logger.warn(`User ${user.id} denied access to premium route`);
-            throw new ForbiddenException('Premium subscription required');
+        if (requirePremium) {
+            this.logger.warn(`@RequirePremium() decorator is deprecated - payment system removed`);
         }
 
         return true;

@@ -12,6 +12,7 @@ import {
     Check
 } from 'lucide-react';
 import { Button } from '../ui/Button';
+import apiClient from '../../api/client';
 
 export const CitationModal = ({ isOpen, onClose, onInsert, currentStyle = 'APA 7th Edition' }) => {
     const [source, setSource] = useState('');
@@ -33,24 +34,13 @@ export const CitationModal = ({ isOpen, onClose, onInsert, currentStyle = 'APA 7
         setResult(null);
 
         try {
-            // Call AI service (this assumes a shared aiService utility exists or we use window.fetch)
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/ai/transform`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem('sb-access-token'))}` // Simplified auth grab
-                },
-                body: JSON.stringify({
-                    text: source,
-                    instruction: currentStyle,
-                    mode: 'citation'
-                })
+            const response = await apiClient.post('/ai/transform', {
+                text: source,
+                instruction: currentStyle,
+                mode: 'citation'
             });
 
-            if (!response.ok) throw new Error('Failed to generate citation');
-
-            const data = await response.json();
-            setResult(data);
+            setResult(response.data);
         } catch (err) {
             console.error('Citation error:', err);
             setError('Failed to generate citation. Please try again.');
