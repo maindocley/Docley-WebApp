@@ -143,6 +143,36 @@ function ServerUnreachableOverlay() {
   );
 }
 
+// Redirect Loop Protection
+function RedirectLoopProtector({ children }) {
+  useEffect(() => {
+    const MAX_REDIRECTS = 5;
+    const TIME_WINDOW = 2000; // 2 seconds
+
+    const lastLoad = localStorage.getItem('last_load_time');
+    const redirects = parseInt(localStorage.getItem('redirect_count') || '0');
+    const now = Date.now();
+
+    if (lastLoad && now - parseInt(lastLoad) < TIME_WINDOW) {
+      const newCount = redirects + 1;
+      localStorage.setItem('redirect_count', newCount.toString());
+
+      if (newCount > MAX_REDIRECTS) {
+        console.error('Redirect loop detected. Clearing storage.');
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = '/login'; // Start fresh
+      }
+    } else {
+      localStorage.setItem('redirect_count', '0');
+    }
+
+    localStorage.setItem('last_load_time', now.toString());
+  }, []);
+
+  return children;
+}
+
 function App() {
   return (
     <ThemeProvider>
@@ -151,106 +181,108 @@ function App() {
           <FloatingDocuments />
           <PWAInstallPrompt delaySeconds={30} />
           <MaintenanceGuard>
-            <Router>
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<Landing />} />
-                <Route path="/pricing" element={<Pricing />} />
-                <Route path="/blog" element={<BlogList />} />
-                <Route path="/blog/:id" element={<BlogPost />} />
+            <RedirectLoopProtector>
+              <Router>
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/" element={<Landing />} />
+                  <Route path="/pricing" element={<Pricing />} />
+                  <Route path="/blog" element={<BlogList />} />
+                  <Route path="/blog/:id" element={<BlogPost />} />
 
-                {/* Maintenance Page Route (for testing/direct access) */}
-                <Route path="/maintenance" element={<MaintenancePage />} />
+                  {/* Maintenance Page Route (for testing/direct access) */}
+                  <Route path="/maintenance" element={<MaintenancePage />} />
 
-                {/* Auth Routes */}
-                <Route path="/login" element={
-                  <PublicRoute>
-                    <Login />
-                  </PublicRoute>
-                } />
-                <Route path="/signup" element={
-                  <PublicRoute>
-                    <Signup />
-                  </PublicRoute>
-                } />
-                <Route path="/forgot-password" element={
-                  <PublicRoute>
-                    <ForgotPassword />
-                  </PublicRoute>
-                } />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/auth/callback" element={<AuthCallback />} />
+                  {/* Auth Routes */}
+                  <Route path="/login" element={
+                    <PublicRoute>
+                      <Login />
+                    </PublicRoute>
+                  } />
+                  <Route path="/signup" element={
+                    <PublicRoute>
+                      <Signup />
+                    </PublicRoute>
+                  } />
+                  <Route path="/forgot-password" element={
+                    <PublicRoute>
+                      <ForgotPassword />
+                    </PublicRoute>
+                  } />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
 
-                {/* Protected Editor Route - Standalone without sidebar */}
-                <Route path="/dashboard/editor/:id" element={
-                  <ProtectedRoute>
-                    <EditorPage />
-                  </ProtectedRoute>
-                } />
+                  {/* Protected Editor Route - Standalone without sidebar */}
+                  <Route path="/dashboard/editor/:id" element={
+                    <ProtectedRoute>
+                      <EditorPage />
+                    </ProtectedRoute>
+                  } />
 
-                {/* Protected Dashboard Routes */}
-                <Route path="/dashboard" element={
-                  <ProtectedRoute>
-                    <DashboardLayout />
-                  </ProtectedRoute>
-                }>
-                  <Route index element={<DashboardHome />} />
-                  <Route path="documents" element={<DashboardDocuments />} />
-                  <Route path="timetable" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <TimetableGenerator />
-                    </Suspense>
-                  } />
-                  <Route path="settings" element={<DashboardSettings />} />
-                  <Route path="settings/billing" element={<Billing />} />
-                </Route>
+                  {/* Protected Dashboard Routes */}
+                  <Route path="/dashboard" element={
+                    <ProtectedRoute>
+                      <DashboardLayout />
+                    </ProtectedRoute>
+                  }>
+                    <Route index element={<DashboardHome />} />
+                    <Route path="documents" element={<DashboardDocuments />} />
+                    <Route path="timetable" element={
+                      <Suspense fallback={<LoadingFallback />}>
+                        <TimetableGenerator />
+                      </Suspense>
+                    } />
+                    <Route path="settings" element={<DashboardSettings />} />
+                    <Route path="settings/billing" element={<Billing />} />
+                  </Route>
 
-                {/* Admin Routes - Lazy loaded, restricted to admin email only */}
-                <Route path="/admin" element={
-                  <AdminOnlyRoute>
-                    <Suspense fallback={<LoadingFallback />}>
-                      <AdminLayout />
-                    </Suspense>
-                  </AdminOnlyRoute>
-                }>
-                  <Route index element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <AdminDashboard />
-                    </Suspense>
-                  } />
-                  <Route path="users" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <UsersManager />
-                    </Suspense>
-                  } />
-                  <Route path="blog" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <BlogManager />
-                    </Suspense>
-                  } />
-                  <Route path="blog/new" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <BlogPostEditor />
-                    </Suspense>
-                  } />
-                  <Route path="blog/edit/:id" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <BlogPostEditor />
-                    </Suspense>
-                  } />
-                  <Route path="feedback" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <FeedbackManager />
-                    </Suspense>
-                  } />
-                  <Route path="settings" element={
-                    <Suspense fallback={<LoadingFallback />}>
-                      <AdminSettings />
-                    </Suspense>
-                  } />
-                </Route>
-              </Routes>
-            </Router>
+                  {/* Admin Routes - Lazy loaded, restricted to admin email only */}
+                  <Route path="/admin" element={
+                    <AdminOnlyRoute>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <AdminLayout />
+                      </Suspense>
+                    </AdminOnlyRoute>
+                  }>
+                    <Route index element={
+                      <Suspense fallback={<LoadingFallback />}>
+                        <AdminDashboard />
+                      </Suspense>
+                    } />
+                    <Route path="users" element={
+                      <Suspense fallback={<LoadingFallback />}>
+                        <UsersManager />
+                      </Suspense>
+                    } />
+                    <Route path="blog" element={
+                      <Suspense fallback={<LoadingFallback />}>
+                        <BlogManager />
+                      </Suspense>
+                    } />
+                    <Route path="blog/new" element={
+                      <Suspense fallback={<LoadingFallback />}>
+                        <BlogPostEditor />
+                      </Suspense>
+                    } />
+                    <Route path="blog/edit/:id" element={
+                      <Suspense fallback={<LoadingFallback />}>
+                        <BlogPostEditor />
+                      </Suspense>
+                    } />
+                    <Route path="feedback" element={
+                      <Suspense fallback={<LoadingFallback />}>
+                        <FeedbackManager />
+                      </Suspense>
+                    } />
+                    <Route path="settings" element={
+                      <Suspense fallback={<LoadingFallback />}>
+                        <AdminSettings />
+                      </Suspense>
+                    } />
+                  </Route>
+                </Routes>
+              </Router>
+            </RedirectLoopProtector>
           </MaintenanceGuard>
         </ToastProvider>
       </AuthProvider>

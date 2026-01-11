@@ -53,10 +53,7 @@ apiClient.interceptors.response.use(
         if (status === 401) {
             console.warn('[API Client] 401 Unauthorized - Clearing zombie session');
             await supabase.auth.signOut();
-            // Force reload to sync auth state across app
-            if (typeof window !== 'undefined') {
-                window.location.reload();
-            }
+            // No reload - let AuthContext handle the state change via onAuthStateChange
         }
 
         if (status >= 500) {

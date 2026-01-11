@@ -7,7 +7,7 @@ import {
     Logger,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { SupabaseService } from '../../supabase/supabase.service';
+import { SupabaseService } from '../../core/supabase/supabase.service';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { IS_PREMIUM_KEY } from '../decorators/require-premium.decorator';
 
