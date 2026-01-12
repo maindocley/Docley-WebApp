@@ -14,7 +14,7 @@ interface AuthenticatedRequest extends Request {
 @Controller('api/payments')
 @UseGuards(SubscriptionGuard)
 export class PaymentsController {
-  constructor(private readonly paymentsService: PaymentsService) {}
+  constructor(private readonly paymentsService: PaymentsService) { }
 
   @Post('create-session')
   async createCheckoutSession(
@@ -22,13 +22,12 @@ export class PaymentsController {
     @Body() body: { redirectUrl?: string },
   ) {
     const userId = req.user?.sub || req.user?.id;
+    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
-    // User requested http://localhost:5173/dashboard?payment=success as success_url
-    // We can default to that or use what the frontend sends if flexible
-    const successUrl =
-      body.redirectUrl ||
-      `${process.env.FRONTEND_URL || 'http://localhost:5173'}/dashboard?session=success`;
+    // Dynamic success and cancel URLs
+    const successUrl = body.redirectUrl || `${baseUrl}/dashboard?session=success`;
+    const cancelUrl = `${baseUrl}/dashboard?session=canceled`;
 
-    return this.paymentsService.createCheckoutSession(userId, successUrl);
+    return this.paymentsService.createCheckoutSession(userId, successUrl, cancelUrl);
   }
 }

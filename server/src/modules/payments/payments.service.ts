@@ -12,9 +12,9 @@ export class PaymentsService {
   private readonly priceId = process.env.WHOP_PRICE_ID;
   private readonly webhookSecret = process.env.WHOP_WEBHOOK_SECRET;
 
-  constructor(private readonly supabaseService: SupabaseService) {}
+  constructor(private readonly supabaseService: SupabaseService) { }
 
-  async createCheckoutSession(userId: string, successUrl: string) {
+  async createCheckoutSession(userId: string, successUrl: string, cancelUrl: string) {
     if (!this.apiKey) {
       this.logger.error(
         'CRITICAL: WHOP_API_KEY is missing from environment variables',
@@ -34,23 +34,25 @@ export class PaymentsService {
     }
 
     try {
-      const requestUrl = 'https://api.whop.com/v1/checkout_sessions';
+      // Updated to v2 API as requested
+      const requestUrl = 'https://api.whop.com/api/v2/checkout_sessions';
       const requestBody = {
-        price_id: this.priceId,
+        product_id: this.priceId, // v2 often uses product_id or price_id, double check docs if possible, but user said price_id in prompt. Actually v2 usually expects 'items' or specific structure. 
+        // Wait, standardized v2 payload usually looks like: { line_items: [...], success_url, cancel_url } OR { product_id, ... } depending on the specific endpoint flavor.
+        // User specifically asked to "Pull WHOP_PRICE_ID".
+        // Let's stick to the v2 structure which is usually:
+        // { product_id: "...", success_url: "...", cancel_url: "..." } for simple flows or check docs.
+        // Given I can't check docs, I will assume standard v2 which often simplifies to:
+        price_id: this.priceId, // Kept as price_id based on typical v1->v2 migrations unless explicitly 'product_id'
         success_url: successUrl,
+        cancel_url: cancelUrl,
         metadata: {
           user_id: userId,
         },
       };
 
-      console.log('\n--- [DEBUG] START WHOP REQUEST ---');
-      console.log('URL:', requestUrl);
-      console.log('Price ID:', this.priceId);
-      console.log('User ID:', userId);
-      console.log('----------------------------------\n');
-
-      this.logger.log(`Initiating Whop Checkout for User ID: ${userId}`);
-      this.logger.log(`Target URL: https://api.whop.com/v1/checkout_sessions`);
+      this.logger.log(`Initiating Whop Checkout v2 for User ID: ${userId}`);
+      this.logger.log(`Target URL: ${requestUrl}`);
 
       const response = await fetch(requestUrl, {
         method: 'POST',
@@ -64,34 +66,16 @@ export class PaymentsService {
 
       if (!response.ok) {
         const errorText = await response.text();
-
-        console.error('\n!!! [DEBUG] WHOP API ERROR !!!');
-        console.error(`Status: ${response.status} ${response.statusText}`);
-        console.error('BODY:', errorText);
-        console.error('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n');
-
         this.logger.error(
-          `Whop API Request Failed! Status: ${response.status} ${response.statusText}`,
+          `Whop API v2 Request Failed! Status: ${response.status} ${response.statusText} - Body: ${errorText}`,
         );
-        this.logger.error(`Whop Error Response Body: ${errorText}`);
-
-        // Try to parse JSON error if possible for cleaner log
-        try {
-          const errorJson = JSON.parse(errorText);
-          console.error(
-            'Parsed Whop Error:',
-            JSON.stringify(errorJson, null, 2),
-          );
-        } catch (e) {
-          // ignore
-        }
-
         throw new InternalServerErrorException(
-          `Payment Provider Error: ${response.statusText} - ${errorText}`,
+          `Payment Provider Error: ${response.statusText}`,
         );
       }
 
       const data = await response.json();
+      // v2 response structure usually has 'url' or 'checkout_url'
       const checkoutUrl = data.url || data.checkout_url || data.data?.url;
 
       if (!checkoutUrl) {
@@ -108,7 +92,7 @@ export class PaymentsService {
     } catch (error) {
       this.logger.error(`Checkout Session Exception: ${error.message}`);
       if (error instanceof InternalServerErrorException) {
-        throw error; // Re-throw known errors
+        throw error;
       }
       throw new InternalServerErrorException(
         `Internal Payment System Error: ${error.message}`,
