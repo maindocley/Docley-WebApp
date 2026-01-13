@@ -3,9 +3,9 @@ import { supabase } from '../lib/supabase';
 
 // 1. Base URL Resolution & Safety Check
 const getBaseURL = () => {
-    const url = import.meta.env.VITE_API_URL;
+    const url = import.meta.env.VITE_API_BASE_URL;
     if (!url) {
-        console.error('FATAL: VITE_API_URL is missing from .env');
+        console.error('FATAL: VITE_API_BASE_URL is missing from .env');
         return import.meta.env.DEV ? 'http://localhost:3000' : '';
     }
     return url;
@@ -53,10 +53,7 @@ apiClient.interceptors.response.use(
         if (status === 401) {
             console.warn('[API Client] 401 Unauthorized - Clearing zombie session');
             await supabase.auth.signOut();
-            // Force reload to sync auth state across app
-            if (typeof window !== 'undefined') {
-                window.location.reload();
-            }
+            // No reload - let AuthContext handle the state change via onAuthStateChange
         }
 
         if (status >= 500) {

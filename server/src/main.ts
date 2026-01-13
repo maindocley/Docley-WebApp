@@ -22,8 +22,8 @@ async function bootstrap() {
           defaultSrc: ["'self'"],
           styleSrc: ["'self'", "'unsafe-inline'"], // allow inline styles (React/Tailwind runtime)
           scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Vite dev + some libs
-          imgSrc: ["'self'", "data:", "blob:"],
-          fontSrc: ["'self'", "data:"],
+          imgSrc: ["'self'", 'data:', 'blob:'],
+          fontSrc: ["'self'", 'data:'],
           connectSrc: [
             "'self'",
             'http://localhost:3000',
@@ -36,7 +36,10 @@ async function bootstrap() {
             'ws:',
             'wss:',
           ],
-          frameSrc: ["'self'", process.env.SUPABASE_URL || 'https://*.supabase.co'],
+          frameSrc: [
+            "'self'",
+            process.env.SUPABASE_URL || 'https://*.supabase.co',
+          ],
           objectSrc: ["'none'"],
           baseUri: ["'self'"],
         },
@@ -50,13 +53,17 @@ async function bootstrap() {
 
   // Enable CORS for local-first development and production fallback
   const allowedOrigins = [
-    'http://localhost:5173',  // Local Vite
-    'http://localhost:5174',  // Add this line - your actual frontend port
-    'http://localhost:3000',  // Local NestJS (for internal testing)
+    'http://localhost:5173', // Local Vite
+    'http://localhost:5174', // Add this line - your actual frontend port
+    'http://localhost:3000', // Local NestJS (for internal testing)
     'http://127.0.0.1:5173',
-    'http://127.0.0.1:5174',  // Add this too
-    'https://docley.vercel.app' // Production Frontend
+    'http://127.0.0.1:5174', // Add this too
+    'https://docley.vercel.app', // Production Frontend
   ];
+
+  if (process.env.FRONTEND_URL) {
+    allowedOrigins.push(process.env.FRONTEND_URL);
+  }
 
   // Also include any origins from environment variables
   if (process.env.CORS_ORIGINS) {
@@ -68,15 +75,25 @@ async function bootstrap() {
       // Allow requests with no origin (like mobile apps or curl)
       if (!origin) return callback(null, true);
 
-      if (allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.vercel.app')) {
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.endsWith('.vercel.app') // Allow all Vercel preview deployments
+      ) {
         callback(null, true);
       } else {
+        console.warn(`Blocked CORS request from origin: ${origin}`);
         callback(null, false);
       }
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Client-Info', 'Apikey'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'X-Client-Info',
+      'Apikey',
+    ],
   });
 
   // Global validation pipe - auto-reject malformed JSON/data
