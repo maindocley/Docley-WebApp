@@ -45,7 +45,7 @@ export function NotificationBell() {
                 getNotifications(),
                 getUnreadCount(),
             ]);
-            
+
             // Check if new notifications arrived
             if (count > previousUnreadCount && previousUnreadCount >= 0) {
                 const newCount = count - previousUnreadCount;
@@ -56,29 +56,29 @@ export function NotificationBell() {
                         'info'
                     );
                 }
-                
+
                 // Play subtle notification sound (if browser allows)
                 try {
                     // Create a simple beep sound using Web Audio API
                     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                     const oscillator = audioContext.createOscillator();
                     const gainNode = audioContext.createGain();
-                    
+
                     oscillator.connect(gainNode);
                     gainNode.connect(audioContext.destination);
-                    
+
                     oscillator.frequency.value = 800;
                     oscillator.type = 'sine';
                     gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
                     gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-                    
+
                     oscillator.start(audioContext.currentTime);
                     oscillator.stop(audioContext.currentTime + 0.2);
                 } catch (e) {
                     // Ignore audio errors (browser may not support)
                 }
             }
-            
+
             setNotifications(notifs);
             setPreviousUnreadCount(count);
             setUnreadCount(count);
@@ -186,10 +186,10 @@ export function NotificationBell() {
                 )} />
                 {unreadCount > 0 && (
                     <span className={cn(
-                        "absolute -top-1 -right-1 h-5 w-5 rounded-full flex items-center justify-center text-xs font-bold",
-                        "bg-gradient-to-r from-orange-500 to-red-500 text-white border-2 shadow-lg shadow-orange-500/50",
+                        "absolute -top-1 -right-1 h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold",
+                        "bg-gradient-to-r from-orange-500 via-red-500 to-rose-600 text-white border-2 shadow-[0_0_15px_rgba(249,115,22,0.5)]",
                         isDark ? "border-slate-900" : "border-white",
-                        "animate-pulse"
+                        "animate-bounce"
                     )}>
                         {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
@@ -198,11 +198,11 @@ export function NotificationBell() {
 
             {isOpen && (
                 <div className={cn(
-                    "absolute right-0 top-full mt-2 w-96 max-h-[600px] rounded-xl shadow-2xl border z-50",
-                    "flex flex-col",
+                    "absolute right-0 top-full mt-3 w-[420px] max-h-[600px] rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border z-50 overflow-hidden",
+                    "flex flex-col animate-in fade-in slide-in-from-top-4 duration-300 ease-out",
                     isDark
-                        ? "bg-slate-900 border-white/10"
-                        : "bg-white border-slate-200"
+                        ? "bg-slate-900/95 border-white/10 backdrop-blur-2xl"
+                        : "bg-white/95 border-slate-200 backdrop-blur-2xl"
                 )}>
                     {/* Header */}
                     <div className={cn(
@@ -274,10 +274,10 @@ export function NotificationBell() {
                                         <div
                                             key={notification.id}
                                             className={cn(
-                                                "p-4 transition-colors cursor-pointer group",
+                                                "p-4 transition-all cursor-pointer group flex items-start gap-4 mx-2 my-1 rounded-xl",
                                                 !notification.read && isDark && "bg-orange-500/5",
-                                                !notification.read && !isDark && "bg-orange-50",
-                                                isDark ? "hover:bg-white/5" : "hover:bg-slate-50"
+                                                !notification.read && !isDark && "bg-orange-50/50",
+                                                isDark ? "hover:bg-white/5" : "hover:bg-slate-50 border border-transparent hover:border-slate-100"
                                             )}
                                             onClick={() => !notification.read && handleMarkAsRead(notification.id)}
                                         >

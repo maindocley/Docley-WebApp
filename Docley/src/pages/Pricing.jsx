@@ -40,8 +40,8 @@ export default function Pricing() {
                     <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                         {/* Free Plan */}
                         <Card className={cn(
-                            "border",
-                            isDark ? "bg-white/5 border-white/10" : "border-slate-200"
+                            "border transition-all duration-300",
+                            isDark ? "bg-white/5 border-white/10" : "bg-white border-slate-200/60 shadow-sm hover:shadow-md"
                         )}>
                             <CardHeader>
                                 <CardTitle className={isDark ? "text-white" : ""}>Starter</CardTitle>
@@ -122,10 +122,10 @@ export default function Pricing() {
 
                         {/* Pro Plan */}
                         <Card className={cn(
-                            "relative shadow-xl scale-105 z-10 border",
+                            "relative shadow-xl scale-105 z-10 border transition-all duration-300",
                             isDark
                                 ? "bg-white/5 border-orange-500/30 shadow-orange-500/10"
-                                : "border-orange-200 shadow-orange-500/10"
+                                : "bg-white border-orange-200 shadow-[0_20px_50px_rgba(249,115,22,0.1)]"
                         )}>
                             <div className="absolute top-0 right-0 transform translate-x-2 -translate-y-2">
                                 <span className="inline-flex items-center rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white shadow-lg">

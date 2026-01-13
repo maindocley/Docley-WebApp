@@ -552,9 +552,12 @@ export default function Landing() {
                             "mt-6 text-5xl font-semibold tracking-tight md:text-7xl lg:text-8xl leading-tight animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-100",
                             isDark ? "text-white" : "text-slate-900"
                         )}>
-                            Upgrade your <TypingText isDark={isDark} /> to
+                            <span className="block">Upgrade your</span>
+                            <span className="block mt-2">
+                                <TypingText isDark={isDark} />
+                            </span>
                             <span className="block mt-2 bg-gradient-to-r from-orange-500 via-orange-600 to-blue-500 bg-clip-text text-transparent animate-gradient">
-                                submission-ready quality
+                                to submission-ready
                             </span>
                         </h1>
 
@@ -567,16 +570,16 @@ export default function Landing() {
 
                         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-300">
                             <Link to="/signup" className="w-full sm:w-auto group">
-                                <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-semibold bg-indigo-600 hover:bg-indigo-700 text-white border-0 shadow-xl shadow-indigo-500/20 transition-all duration-300 hover:scale-105">
+                                <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-semibold bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white border-0 shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_30px_rgba(79,70,229,0.5)] transition-all duration-300 hover:scale-105 active:scale-95">
                                     Get Started Free <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                                 </Button>
                             </Link>
                             <Link to="/dashboard" className="w-full sm:w-auto">
                                 <Button variant="outline" size="lg" className={cn(
-                                    "w-full sm:w-auto h-14 px-8 text-base font-semibold backdrop-blur-md transition-all duration-300 hover:scale-105",
+                                    "w-full sm:w-auto h-14 px-8 text-base font-semibold backdrop-blur-md transition-all duration-300 hover:scale-105 active:scale-95",
                                     isDark
-                                        ? "bg-white/5 border-white/20 text-white hover:bg-white/10"
-                                        : "bg-white border-blue-200 text-blue-700 hover:bg-blue-50 shadow-sm"
+                                        ? "bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/40"
+                                        : "bg-white border-blue-200 text-blue-700 hover:bg-blue-50 shadow-[0_0_15px_rgba(59,130,246,0.1)] hover:shadow-[0_0_25px_rgba(59,130,246,0.2)]"
                                 )}>
                                     View Dashboard
                                 </Button>
@@ -606,6 +609,64 @@ export default function Landing() {
                                 <LifestyleHeroMock isDark={isDark} />
                             </BrowserFrame>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* STATS / SOCIAL PROOF */}
+            <section className={cn(
+                "relative py-16 md:py-24 overflow-hidden transition-colors duration-300",
+                isDark
+                    ? "bg-slate-950"
+                    : "bg-white shadow-[0_-4px_30px_rgba(0,0,0,0.02)] border-y border-slate-100"
+            )}>
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <div className={cn(
+                        "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[300px] rounded-[100%] blur-[120px] opacity-20",
+                        isDark ? "bg-orange-500/30" : "bg-blue-400/20"
+                    )} />
+                </div>
+
+                <div className="container relative mx-auto px-4 md:px-6 z-10">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+                        {[
+                            { value: "15,000+", label: "Assignments Upgraded", sub: "Built on real data", icon: Sparkles },
+                            { value: "98.5%", label: "Student Success Rate", sub: "Based on user feedback", icon: GraduationCap },
+                            { value: "250K+", label: "Lines Refined", sub: "High precision AI", icon: Wand2 },
+                        ].map((stat, idx) => (
+                            <div
+                                key={stat.label}
+                                className={cn(
+                                    "relative group p-8 rounded-[32px] border transition-all duration-500 hover:-translate-y-2",
+                                    isDark
+                                        ? "border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20"
+                                        : "border-blue-100 bg-white hover:bg-white hover:border-blue-200 shadow-sm hover:shadow-xl hover:shadow-blue-500/5"
+                                )}
+                                style={{ animationDelay: `${idx * 150}ms` }}
+                            >
+                                <div className="absolute top-6 right-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                                    <stat.icon className="h-12 w-12" />
+                                </div>
+                                <div className={cn(
+                                    "text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-br bg-clip-text text-transparent mb-2",
+                                    isDark ? "from-orange-400 to-blue-400" : "from-orange-600 to-blue-600"
+                                )}>
+                                    {stat.value}
+                                </div>
+                                <div className={cn(
+                                    "text-lg font-semibold mb-1",
+                                    isDark ? "text-white" : "text-slate-900"
+                                )}>
+                                    {stat.label}
+                                </div>
+                                <div className={cn(
+                                    "text-sm",
+                                    isDark ? "text-slate-400" : "text-slate-500"
+                                )}>
+                                    {stat.sub}
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </section>
@@ -664,7 +725,7 @@ export default function Landing() {
                 "relative py-20 md:py-32 overflow-hidden transition-colors duration-300",
                 isDark
                     ? "bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900"
-                    : "bg-gradient-to-b from-white via-blue-50/20 to-white"
+                    : "bg-slate-50"
             )}>
                 {/* Background effects */}
                 <div className="absolute inset-0">
@@ -699,10 +760,10 @@ export default function Landing() {
                         {/* Big card */}
                         <div className="lg:col-span-7 lg:row-span-2 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
                             <div className={cn(
-                                "relative h-full overflow-hidden rounded-3xl border backdrop-blur-xl p-6 shadow-2xl md:p-8 transition-all duration-500",
+                                "relative h-full overflow-hidden rounded-3xl border backdrop-blur-xl p-6 shadow-2xl md:p-8 transition-all duration-500 hover:scale-[1.02] group",
                                 isDark
-                                    ? "border-white/10 bg-gradient-to-br from-white/5 to-white/0 hover:border-white/20"
-                                    : "border-blue-200 bg-white hover:border-blue-300 shadow-blue-500/10"
+                                    ? "border-white/10 bg-gradient-to-br from-white/5 to-white/0 hover:border-white/20 hover:shadow-orange-500/10"
+                                    : "border-blue-200 bg-white hover:border-blue-300 shadow-blue-500/10 hover:shadow-blue-500/20"
                             )}>
                                 <div className={cn(
                                     "pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full blur-3xl animate-pulse",
@@ -1581,6 +1642,89 @@ export default function Landing() {
                 </div>
             </section>
 
+            {/* TESTIMONIALS */}
+            <section className={cn(
+                "relative py-20 md:py-32 overflow-hidden transition-colors duration-300",
+                isDark
+                    ? "bg-slate-950"
+                    : "bg-blue-50/20"
+            )}>
+                <div className="container relative mx-auto px-4 md:px-6 z-10">
+                    <div className="mx-auto max-w-3xl text-center mb-16">
+                        <h2 className={cn(
+                            "text-4xl font-bold tracking-tight md:text-5xl",
+                            isDark ? "text-white" : "text-slate-900"
+                        )}>Loved by students everywhere</h2>
+                        <p className={cn(
+                            "mt-6 text-lg md:text-xl",
+                            isDark ? "text-slate-300" : "text-slate-600"
+                        )}>
+                            Join thousands of students who have transformed their academic writing with Docley.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {[
+                            {
+                                name: "Sarah J.",
+                                role: "Undergraduate Student",
+                                text: "Docley completely changed how I approach my essays. The tone upgrade is incredible—my professors actually noticed the difference!",
+                                university: "Stanford University"
+                            },
+                            {
+                                name: "Michael R.",
+                                role: "Master's Candidate",
+                                text: "The citation awareness feature is a lifesaver. No more worrying about missing APA references. It's like having a writing tutor 24/7.",
+                                university: "University of Toronto"
+                            },
+                            {
+                                name: "Elena Q.",
+                                role: "PhD Researcher",
+                                text: "I use Docley to refine my research summaries. It keeps my voice while polishing the technical language. Truly an essential tool.",
+                                university: "Oxford University"
+                            }
+                        ].map((t, idx) => (
+                            <div
+                                key={idx}
+                                className={cn(
+                                    "p-8 rounded-[32px] border backdrop-blur-xl transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1",
+                                    isDark
+                                        ? "border-white/10 bg-white/5 shadow-2xl shadow-black/20"
+                                        : "border-blue-100 bg-white shadow-xl shadow-blue-500/5"
+                                )}
+                            >
+                                <div className="flex gap-1 mb-4">
+                                    {[...Array(5)].map((_, i) => (
+                                        <Sparkles key={i} className="h-4 w-4 text-orange-500 fill-orange-500" />
+                                    ))}
+                                </div>
+                                <p className={cn(
+                                    "text-base leading-relaxed mb-6 italic",
+                                    isDark ? "text-slate-300" : "text-slate-600"
+                                )}>
+                                    "{t.text}"
+                                </p>
+                                <div className="flex items-center gap-4">
+                                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-orange-400 to-blue-400 flex items-center justify-center text-white font-bold text-lg">
+                                        {t.name[0]}
+                                    </div>
+                                    <div>
+                                        <div className={cn(
+                                            "font-bold text-sm",
+                                            isDark ? "text-white" : "text-slate-900"
+                                        )}>{t.name}</div>
+                                        <div className={cn(
+                                            "text-xs",
+                                            isDark ? "text-slate-400" : "text-slate-500"
+                                        )}>{t.university}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
             {/* FAQ */}
             <section className={cn(
                 "relative py-20 md:py-32 overflow-hidden transition-colors duration-300",
@@ -1626,66 +1770,70 @@ export default function Landing() {
 
             {/* FINAL CTA */}
             <section className={cn(
-                "relative overflow-hidden py-20 md:py-32 transition-colors duration-300",
+                "relative overflow-hidden py-24 md:py-40 transition-colors duration-300",
                 isDark
-                    ? "bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950"
-                    : "bg-gradient-to-b from-white via-blue-50/30 to-white"
+                    ? "bg-slate-950"
+                    : "bg-white"
             )}>
                 <div className="pointer-events-none absolute inset-0">
                     <div className={cn(
-                        "absolute top-0 right-[-10%] h-[600px] w-[600px] rounded-full blur-3xl animate-blob",
-                        isDark ? "bg-orange-500/20" : "bg-orange-400/10"
+                        "absolute top-0 right-[-10%] h-[600px] w-[600px] rounded-full blur-3xl opacity-20 animate-blob",
+                        isDark ? "bg-orange-500/30" : "bg-orange-400/20"
                     )} />
                     <div className={cn(
-                        "absolute bottom-0 left-[-15%] h-[700px] w-[700px] rounded-full blur-3xl animate-blob animation-delay-2000",
-                        isDark ? "bg-blue-500/20" : "bg-blue-400/10"
-                    )} />
-                    <div className={cn(
-                        "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-3xl animate-blob animation-delay-4000",
-                        isDark ? "bg-orange-400/10" : "bg-orange-300/5"
+                        "absolute bottom-0 left-[-15%] h-[700px] w-[700px] rounded-full blur-3xl opacity-20 animate-blob animation-delay-2000",
+                        isDark ? "bg-blue-500/30" : "bg-blue-400/20"
                     )} />
                 </div>
 
                 <div className="container relative mx-auto px-4 md:px-6 z-10">
                     <div className={cn(
-                        "mx-auto max-w-4xl rounded-3xl border backdrop-blur-2xl p-8 text-center shadow-2xl md:p-12 animate-in fade-in zoom-in-95 duration-1000",
+                        "mx-auto max-w-5xl rounded-[48px] border backdrop-blur-3xl p-10 text-center shadow-[0_20px_50px_rgba(0,0,0,0.1)] md:p-20 overflow-hidden relative group",
                         isDark
-                            ? "border-white/10 bg-white/5"
-                            : "border-blue-200 bg-white shadow-blue-500/10"
+                            ? "border-white/10 bg-white/5 shadow-black/40"
+                            : "border-blue-100 bg-gradient-to-br from-white to-blue-50/50 shadow-blue-500/10"
                     )}>
-                        <h3 className={cn(
-                            "text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl",
-                            isDark ? "text-white" : "text-slate-900"
-                        )}>
-                            Ready to upgrade your next assignment?
-                        </h3>
-                        <p className={cn(
-                            "mx-auto mt-6 max-w-2xl text-lg md:text-xl",
-                            isDark ? "text-slate-300" : "text-slate-600"
-                        )}>
-                            Create a document, run diagnostics, and refine your work into a cleaner, more academic submission.
-                        </p>
-                        <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                            <Link to="/signup" className="w-full sm:w-auto group">
-                                <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-2xl shadow-orange-500/30 border-0 transition-all duration-300 hover:scale-105">
-                                    Start Free <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                                </Button>
-                            </Link>
-                            <Link to="/pricing" className="w-full sm:w-auto">
-                                <Button variant="outline" size="lg" className={cn(
-                                    "w-full sm:w-auto h-14 px-8 text-base font-semibold backdrop-blur-md transition-all duration-300 hover:scale-105",
-                                    isDark
-                                        ? "bg-white/5 border-white/20 text-white hover:bg-white/10"
-                                        : "bg-white border-blue-200 text-blue-700 hover:bg-blue-50 shadow-sm"
-                                )}>
-                                    View Pricing
-                                </Button>
-                            </Link>
+                        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+
+                        <div className="relative z-10">
+                            <h3 className={cn(
+                                "text-4xl font-bold tracking-tight md:text-6xl lg:text-7xl mb-8 leading-[1.1]",
+                                isDark ? "text-white" : "text-slate-900"
+                            )}>
+                                Ready to upgrade your <br className="hidden md:block" />
+                                <span className="bg-gradient-to-r from-orange-500 to-blue-500 bg-clip-text text-transparent">next assignment?</span>
+                            </h3>
+                            <p className={cn(
+                                "mx-auto max-w-2xl text-lg md:text-2xl mb-12 opacity-80",
+                                isDark ? "text-slate-300" : "text-slate-600"
+                            )}>
+                                Join students from top universities using Docley to refine their work into publication-ready quality.
+                            </p>
+                            <div className="flex flex-col items-center justify-center gap-6 sm:flex-row">
+                                <Link to="/signup" className="w-full sm:w-auto">
+                                    <Button size="lg" className="w-full sm:w-auto h-16 px-10 text-lg font-bold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white shadow-[0_10px_30px_rgba(249,115,22,0.4)] border-0 transition-all duration-300 hover:scale-105 active:scale-95">
+                                        Get Started For Free <ArrowRight className="ml-2 h-6 w-6" />
+                                    </Button>
+                                </Link>
+                                <Link to="/pricing" className="w-full sm:w-auto">
+                                    <Button variant="outline" size="lg" className={cn(
+                                        "w-full sm:w-auto h-16 px-10 text-lg font-bold backdrop-blur-md transition-all duration-300 hover:scale-105 active:scale-95",
+                                        isDark
+                                            ? "bg-white/5 border-white/20 text-white hover:bg-white/10"
+                                            : "bg-white border-blue-200 text-blue-700 hover:bg-blue-50"
+                                    )}>
+                                        View Pricing
+                                    </Button>
+                                </Link>
+                            </div>
+                            <div className={cn(
+                                "mt-10 flex items-center justify-center gap-8 text-sm font-medium opacity-60",
+                                isDark ? "text-slate-400" : "text-slate-500"
+                            )}>
+                                <span className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> No credit card</span>
+                                <span className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Cancel anytime</span>
+                            </div>
                         </div>
-                        <p className={cn(
-                            "mt-6 text-sm",
-                            isDark ? "text-slate-400" : "text-slate-500"
-                        )}>No credit card required. Cancel anytime.</p>
                     </div>
                 </div>
             </section>

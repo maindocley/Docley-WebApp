@@ -108,15 +108,16 @@ export function DashboardLayout() {
         setShowOnboarding(false);
     };
 
-    // Sidebar is collapsed by default, expands on hover
-    const isCollapsed = !isHovered;
+    // Sidebar is collapsed by default on desktop, expands on hover
+    // It should NEVER be collapsed on mobile drawer
+    const isCollapsed = !isHovered && !isMobileMenuOpen;
 
     return (
         <div className={cn(
             "min-h-screen flex transition-colors duration-300",
             isDark
-                ? "bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900"
-                : "bg-gradient-to-br from-slate-50 via-white to-slate-50"
+                ? "bg-slate-950"
+                : "bg-slate-50"
         )}>
             {/* Onboarding Flow */}
             {showOnboarding && <OnboardingFlow onComplete={handleOnboardingComplete} />}
@@ -138,32 +139,22 @@ export function DashboardLayout() {
                 />
             )}
 
-            {/* Mobile Menu Button */}
-            <div className="lg:hidden fixed top-4 left-4 z-50">
-                <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    className="bg-white shadow-lg border-slate-200"
-                >
-                    {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                </Button>
-            </div>
+            {/* Mobile Menu Button - Removed redundant fixed button. We use the one in the sticky header instead */}
 
             {/* Sidebar - Fixed position, auto-collapse with hover expand */}
             <aside
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
                 className={cn(
-                    'fixed inset-y-0 left-0 z-30 flex flex-col shadow-lg transition-all duration-300 ease-in-out backdrop-blur-xl',
+                    'fixed inset-y-0 left-0 z-50 flex flex-col shadow-lg transition-all duration-300 ease-in-out backdrop-blur-xl',
                     // Mobile: hidden by default, shown when menu is open
                     isMobileMenuOpen ? 'translate-x-0 w-72' : '-translate-x-full',
                     // Desktop: always visible, collapsed by default, expands on hover
                     'lg:translate-x-0',
                     isCollapsed ? 'lg:w-[70px]' : 'lg:w-[260px]',
                     isDark
-                        ? 'bg-white/5 border-r border-white/10'
-                        : 'bg-white/80 border-r border-slate-200'
+                        ? 'bg-slate-900 border-r border-white/10'
+                        : 'bg-white border-r border-slate-200 shadow-[4px_0_24px_rgba(0,0,0,0.02)]'
                 )}
             >
                 {/* Logo */}
@@ -288,8 +279,8 @@ export function DashboardLayout() {
             <main className="flex-1 min-w-0 overflow-y-auto custom-scrollbar lg:ml-[70px]">
                 {/* Professional Header */}
                 <header className={cn(
-                    "sticky top-0 z-20 flex items-center gap-4 px-4 lg:px-6 xl:px-8 py-3 md:py-4 backdrop-blur-xl border-b",
-                    isDark ? "bg-slate-900/70 border-white/5" : "bg-white/80 border-slate-200"
+                    "sticky top-0 z-20 flex items-center gap-4 px-4 lg:px-6 xl:px-8 py-3 md:py-4 backdrop-blur-xl border-b transition-all duration-300",
+                    isDark ? "bg-slate-950/80 border-white/5" : "bg-white/70 border-slate-200/60 shadow-sm"
                 )}>
                     {/* Mobile Menu Button */}
                     <button
@@ -358,8 +349,8 @@ export function DashboardLayout() {
                         </div>
                     </div>
 
-                    {/* Right Side Actions */}
-                    <div className="flex items-center gap-3">
+                    {/* Right Side Actions - Desktop Hidden below MD */}
+                    <div className="hidden md:flex items-center gap-3">
                         <ThemeToggle />
                         {/* User Profile Dropdown */}
                         <div className="relative">

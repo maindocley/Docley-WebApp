@@ -73,7 +73,7 @@ export default function Signup() {
         return (
             <div className={cn(
                 "min-h-screen flex items-center justify-center p-4 transition-colors duration-300",
-                isDark ? "bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900" : "bg-slate-50"
+                isDark ? "bg-slate-950" : "bg-slate-50"
             )}>
                 <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
                     {isDark ? (
@@ -91,10 +91,10 @@ export default function Signup() {
 
                 <div className="w-full max-w-md relative z-10">
                     <Card className={cn(
-                        "shadow-xl backdrop-blur-sm border",
+                        "shadow-2xl backdrop-blur-sm border transition-all duration-300",
                         isDark
-                            ? "bg-white/5 border-white/10 shadow-black/20"
-                            : "border-slate-200 bg-white/80 shadow-indigo-500/5"
+                            ? "bg-slate-900/50 border-white/10 shadow-black/20"
+                            : "border-slate-200/60 bg-white shadow-[0_20px_60px_rgba(0,0,0,0.05)]"
                     )}>
                         <CardContent className="pt-8 pb-8 text-center">
                             <div className={cn(
@@ -151,7 +151,7 @@ export default function Signup() {
     return (
         <div className={cn(
             "min-h-screen flex items-center justify-center p-4 transition-colors duration-300",
-            isDark ? "bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900" : "bg-slate-50"
+            isDark ? "bg-slate-950" : "bg-slate-50"
         )}>
             {/* Background decoration */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
@@ -190,10 +190,10 @@ export default function Signup() {
                 </div>
 
                 <Card className={cn(
-                    "shadow-xl backdrop-blur-sm border",
+                    "shadow-2xl backdrop-blur-sm border transition-all duration-300",
                     isDark
-                        ? "bg-white/5 border-white/10 shadow-black/20"
-                        : "border-slate-200 bg-white/80 shadow-indigo-500/5"
+                        ? "bg-slate-900/50 border-white/10 shadow-black/20"
+                        : "border-slate-200/60 bg-white shadow-[0_20px_60px_rgba(0,0,0,0.05)]"
                 )}>
                     <CardContent className="pt-6">
                         {error && (

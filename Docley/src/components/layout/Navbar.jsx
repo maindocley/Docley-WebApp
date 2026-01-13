@@ -23,10 +23,10 @@ export function Navbar() {
 
     return (
         <nav className={cn(
-            "sticky top-0 z-50 w-full border-b backdrop-blur-xl transition-colors duration-300",
+            "sticky top-0 z-50 w-full border-b backdrop-blur-xl transition-all duration-300",
             isDark
                 ? "border-white/10 bg-slate-950/80"
-                : "border-blue-100/50 bg-white/80 shadow-sm"
+                : "border-slate-200/50 bg-white/70 shadow-[0_2px_15px_rgba(0,0,0,0.02)]"
         )}>
             <div className="container mx-auto px-4 md:px-6">
                 <div className="flex h-16 items-center justify-between">

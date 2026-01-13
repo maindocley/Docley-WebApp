@@ -176,7 +176,7 @@ export default function DashboardHome() {
                     "lg:col-span-2 rounded-2xl border p-8 backdrop-blur-xl relative overflow-hidden group transition-all duration-300",
                     isDark
                         ? "bg-white/5 border-white/10"
-                        : "bg-white border-slate-200 shadow-sm hover:shadow-md"
+                        : "bg-white border-slate-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(0,0,0,0.06)]"
                 )}>
                     {/* Decorative Background Elements */}
                     <div className="absolute -top-24 -right-24 w-48 h-48 bg-orange-500/10 blur-3xl rounded-full group-hover:bg-orange-500/20 transition-colors duration-700" />
@@ -256,7 +256,7 @@ export default function DashboardHome() {
                 "rounded-xl border p-4 md:p-5 backdrop-blur-xl",
                 isDark
                     ? "bg-white/5 border-white/10"
-                    : "bg-gradient-to-r from-indigo-50/50 to-orange-50/30 border-indigo-100/50"
+                    : "bg-white border-slate-200/60 shadow-sm"
             )}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     {/* ... (no changes) ... */}
@@ -295,7 +295,7 @@ export default function DashboardHome() {
                     "lg:col-span-1 hover:shadow-lg transition-all duration-300",
                     isDark
                         ? "bg-white/5 border-white/10"
-                        : "border-slate-200 bg-gradient-to-br from-white via-purple-50/30 to-white"
+                        : "border-slate-200/60 bg-white shadow-sm hover:shadow-md"
                 )}>
                     <CardContent className="p-6">
                         <div className="flex items-center gap-2 mb-4">
@@ -421,7 +421,7 @@ export default function DashboardHome() {
                     "lg:col-span-2 hover:shadow-lg transition-all duration-300",
                     isDark
                         ? "bg-white/5 border-white/10"
-                        : "border-slate-200 bg-gradient-to-br from-white via-blue-50/30 to-white"
+                        : "border-slate-200/60 bg-white shadow-sm hover:shadow-md"
                 )}>
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between mb-4">

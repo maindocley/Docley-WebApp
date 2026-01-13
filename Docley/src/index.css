@@ -6,6 +6,22 @@
 
 @variant dark (&:where(.dark, .dark *));
 
+/* Base light mode refinements */
+:root:not(.dark) {
+  background-color: #f8fafc;
+  /* slate-50 */
+  color: #0f172a;
+  /* slate-900 */
+}
+
+/* Base dark mode ensure slate-950 */
+.dark {
+  background-color: #020617;
+  /* slate-950 */
+  color: #f8fafc;
+  /* slate-50 */
+}
+
 
 /* --- Small global utilities used across pages --- */
 
@@ -120,4 +136,12 @@
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(148, 163, 184, 0.55) transparent;
+}
+@keyframes shrink {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+.animate-shrink {
+  animation: shrink 4s linear forwards;
 }

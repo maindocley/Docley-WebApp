@@ -22,24 +22,46 @@ const ToastItem = ({ id, type, message, onDismiss }) => {
     };
 
     const colors = {
-        success: "bg-green-50 border-green-200 text-green-800",
-        error: "bg-red-50 border-red-200 text-red-800",
-        info: "bg-blue-50 border-blue-200 text-blue-800",
-        warning: "bg-orange-50 border-orange-200 text-orange-800" // Utilizing Orange for warnings
+        success: "border-green-500/20 bg-green-500/10 text-green-500",
+        error: "border-red-500/20 bg-red-500/10 text-red-500",
+        info: "border-blue-500/20 bg-blue-500/10 text-blue-500",
+        warning: "border-orange-500/20 bg-orange-500/10 text-orange-500"
     };
 
     const Icon = icons[type] || icons.info;
 
     return (
         <div className={cn(
-            "flex items-center gap-3 w-full max-w-sm px-4 py-3 mb-3 rounded-lg border shadow-lg transform transition-all duration-300 ease-in-out animate-in slide-in-from-right",
+            "group flex items-center gap-3 w-full max-w-sm px-4 py-3 mb-3 rounded-xl border backdrop-blur-xl shadow-2xl relative overflow-hidden",
+            "animate-in slide-in-from-right-full fade-in duration-500 ease-out",
             colors[type] || colors.info
         )}>
-            <Icon className="h-5 w-5 flex-shrink-0" />
-            <p className="flex-1 text-sm font-medium">{message}</p>
-            <button onClick={() => onDismiss(id)} className="text-current opacity-60 hover:opacity-100">
+            {/* Background Glow */}
+            <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent pointer-events-none" />
+
+            <div className={cn(
+                "flex h-8 w-8 items-center justify-center rounded-lg border flex-shrink-0 transition-transform group-hover:scale-110",
+                colors[type] || colors.info
+            )}>
+                <Icon className="h-5 w-5" />
+            </div>
+
+            <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold leading-tight capitalize mb-0.5">{type}</p>
+                <p className="text-xs font-medium opacity-90 truncate">{message}</p>
+            </div>
+
+            <button
+                onClick={() => onDismiss(id)}
+                className="p-1 rounded-md hover:bg-white/10 transition-colors text-current opacity-40 hover:opacity-100"
+            >
                 <X className="h-4 w-4" />
             </button>
+
+            {/* Progress Bar */}
+            <div className="absolute bottom-0 left-0 h-[2px] bg-current opacity-20 w-full">
+                <div className="h-full bg-current animate-shrink" style={{ animation: 'shrink 4s linear forwards' }} />
+            </div>
         </div>
     );
 };
