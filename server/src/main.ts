@@ -58,7 +58,8 @@ async function bootstrap() {
     'http://localhost:3000', // Local NestJS (for internal testing)
     'http://127.0.0.1:5173',
     'http://127.0.0.1:5174', // Add this too
-    'https://docley.vercel.app', // Production Frontend
+    'https://docley.vercel.app', // Original Production Frontend
+    'https://docley-xi.vercel.app', // New Production Frontend
   ];
 
   if (process.env.FRONTEND_URL) {
