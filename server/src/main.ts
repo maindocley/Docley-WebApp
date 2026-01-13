@@ -111,5 +111,22 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
   await app.listen(port, '0.0.0.0');
   console.log(`🚀 Server is listening on port ${port}`);
+
+  // Keep-Alive Heartbeat: Ping self every 14 minutes to prevent Render free tier from sleeping
+  const HEARTBEAT_INTERVAL = 14 * 60 * 1000; // 14 minutes in ms
+  const RENDER_URL = process.env.RENDER_EXTERNAL_URL || 'https://docley.onrender.com';
+
+  setInterval(async () => {
+    try {
+      const response = await fetch(`${RENDER_URL}/health`);
+      if (response.ok) {
+        console.log(`💓 Heartbeat successful at ${new Date().toISOString()}`);
+      } else {
+        console.log(`💔 Heartbeat failed: ${response.status}`);
+      }
+    } catch (error) {
+      console.log(`💔 Heartbeat failed: ${error.message}`);
+    }
+  }, HEARTBEAT_INTERVAL);
 }
 bootstrap();

@@ -12,6 +12,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { SubscriptionGuard } from './common/guards/subscription.guard';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { PaymentsModule } from './modules/payments/payments.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
     WebhooksModule,
     AdminModule,
     PaymentsModule,
+    HealthModule,
   ],
   controllers: [],
   providers: [
@@ -46,4 +48,4 @@ import { PaymentsModule } from './modules/payments/payments.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
