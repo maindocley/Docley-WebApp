@@ -15,95 +15,42 @@ export default function AuthCallback() {
     useEffect(() => {
         const handleCallback = async () => {
             try {
-                // Get the hash params (Supabase uses hash for auth callbacks)
-                const hashParams = new URLSearchParams(window.location.hash.substring(1));
-                const accessToken = hashParams.get('access_token');
-                const refreshToken = hashParams.get('refresh_token');
-                const type = hashParams.get('type');
+                // Supabase JS SDK handles the hash/query params automatically 
+                // when detectSessionInUrl is true (which it is in our lib/supabase.js)
+                const { data: { session }, error } = await supabase.auth.getSession();
 
-                // Check if this is an email verification
-                if (type === 'signup' || type === 'email_change') {
-                    // Email verification
-                    if (accessToken && refreshToken) {
-                        const { error } = await supabase.auth.setSession({
-                            access_token: accessToken,
-                            refresh_token: refreshToken,
-                        });
+                if (error) throw error;
 
-                        if (error) throw error;
-
-                        // Sync user profile (creates usage record)
-                        try {
-                            const { syncUserProfile } = await import('../../services/usersService');
-                            await syncUserProfile();
-                        } catch (e) {
-                            console.error('Sync failed', e);
-                        }
-
-                        setStatus('success');
-                        setMessage('Email verified successfully!');
-
-                        // Redirect to dashboard after 2 seconds
-                        setTimeout(() => {
-                            navigate('/dashboard');
-                        }, 2000);
-                    } else {
-                        // Try to get the session from URL (newer Supabase versions)
-                        const { data: { session }, error } = await supabase.auth.getSession();
-
-                        if (error) throw error;
-
-                        if (session) {
-                            // Sync user profile (creates usage record)
-                            try {
-                                const { syncUserProfile } = await import('../../services/usersService');
-                                await syncUserProfile();
-                            } catch (e) {
-                                console.error('Sync failed', e);
-                            }
-
-                            setStatus('success');
-                            setMessage('Email verified successfully!');
-                            setTimeout(() => {
-                                navigate('/dashboard');
-                            }, 2000);
-                        } else {
-                            throw new Error('No session found');
-                        }
+                if (session) {
+                    // Sync user profile with backend to ensure usage records etc. exist
+                    try {
+                        const { syncUserProfile } = await import('../../services/usersService');
+                        await syncUserProfile();
+                    } catch (e) {
+                        console.error('[AuthCallback] Profile sync failed:', e);
+                        // We don't block the user if sync fails, but we log it
                     }
-                } else if (type === 'recovery') {
-                    // Password recovery - redirect to reset password page
-                    // The session is already set by Supabase
-                    navigate('/reset-password');
+
+                    setStatus('success');
+                    setMessage('Successfully authenticated!');
+
+                    // Small delay for UX then redirect
+                    setTimeout(() => {
+                        navigate('/dashboard');
+                    }, 1000);
                 } else {
-                    // OAuth callback or other - check for session
-                    const { data: { session }, error } = await supabase.auth.getSession();
-
-                    if (error) throw error;
-
-                    if (session) {
-                        // Sync user profile with backend
-                        try {
-                            // Dynamically import to avoid circular dependencies if any (safe practice)
-                            const { syncUserProfile } = await import('../../services/usersService');
-                            await syncUserProfile();
-                        } catch (e) {
-                            console.error('Sync failed', e);
-                        }
-
-                        setStatus('success');
-                        setMessage('Successfully signed in!');
-                        setTimeout(() => {
-                            navigate('/dashboard');
-                        }, 1500);
-                    } else {
-                        throw new Error('Authentication failed');
+                    // If no session is found immediately, it might be an error in the URL
+                    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+                    const errorDescription = hashParams.get('error_description');
+                    if (errorDescription) {
+                        throw new Error(errorDescription);
                     }
+                    throw new Error('No active session found. Please try logging in again.');
                 }
             } catch (err) {
                 console.error('Auth callback error:', err);
                 setStatus('error');
-                setMessage(err.message || 'Something went wrong. Please try again.');
+                setMessage(err.message || 'Authentication failed. Please try again.');
             }
         };
 
