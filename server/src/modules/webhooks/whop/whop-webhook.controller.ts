@@ -1,93 +1,69 @@
 import {
   Controller,
   Post,
-  Body,
   Headers,
-  RawBodyRequest,
   Req,
   BadRequestException,
   UnauthorizedException,
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import * as express from 'express';
-import * as crypto from 'crypto';
 import { WhopWebhookService } from './whop-webhook.service';
+import { WhopSignatureService } from './whop-signature.service';
+import { Public } from '../../../common/decorators/public.decorator';
 
-@Controller('api/webhooks/whop')
+@Controller('webhooks')
 export class WhopWebhookController {
   private readonly logger = new Logger(WhopWebhookController.name);
 
-  constructor(private readonly whopWebhookService: WhopWebhookService) { }
+  constructor(
+    private readonly whopWebhookService: WhopWebhookService,
+    private readonly signatureService: WhopSignatureService,
+  ) { }
 
-  @Post()
+  @Public()
+  @Post('whop')
   async handleWebhook(
     @Req() req: any,
     @Headers('whop-signature') signature: string,
     @Headers('whop-id') id: string,
     @Headers('whop-timestamp') timestamp: string,
   ) {
-    const secret = process.env.WHOP_WEBHOOK_SECRET;
-
-    if (!secret) {
-      this.logger.error(
-        'WHOP_WEBHOOK_SECRET is not defined in environment variables',
-      );
-      throw new InternalServerErrorException('Configuration error');
-    }
-
-    if (!signature || !id || !timestamp) {
-      throw new BadRequestException('Missing Whop headers');
-    }
-
-    // Verify Signature
     const rawBody = req.rawBody?.toString();
     if (!rawBody) {
+      this.logger.error('Received webhook with empty raw body');
       throw new BadRequestException('Empty body');
     }
 
-    const signedContent = `${id}.${timestamp}.${rawBody}`;
-    const secretKey = secret.startsWith('wh_secret_')
-      ? secret.slice(10)
-      : secret;
+    // Strict Authorization Check
+    const isValid = this.signatureService.verifySignature(
+      signature,
+      id,
+      timestamp,
+      rawBody,
+    );
 
-    // Whop signatures (SVIX) are HMAC SHA256 base64
-    // The header contains "v1,SIGNATURE"
-    const expectedSignatures = signature.split(' ').map((s) => s.split(',')[1]);
-
-    const hmac = crypto.createHmac('sha256', secretKey);
-    hmac.update(signedContent);
-    const mySignature = hmac.digest('base64');
-
-    if (!expectedSignatures.includes(mySignature)) {
-      this.logger.warn('Invalid Whop signature');
+    if (!isValid) {
+      this.logger.warn(`Unauthorized Whop Webhook attempt. ID: ${id}`);
       throw new UnauthorizedException('Invalid signature');
     }
 
-    // Handle Events
-    const payload = JSON.parse(rawBody);
-    const eventType = payload.action || payload.type;
+    try {
+      const payload = JSON.parse(rawBody);
+      const eventType = payload.action || payload.type;
 
-    // User requested this specific log line
-    console.log('Whop Webhook Received: ', payload.action);
-    this.logger.log(`Received Whop event: ${eventType}`);
+      this.logger.log(`Whop Webhook Verified: ${eventType} | ID: ${id}`);
 
-    switch (eventType) {
-      // Payment succeeded handler removed
-      case 'membership.went_active':
-      case 'membership.activated':
-      case 'membership_activated':
-        await this.whopWebhookService.handleMembershipActivated(payload);
-        break;
-      case 'membership.went_inactive':
-      case 'membership.cancelled':
-      case 'membership_deactivated':
-        await this.whopWebhookService.handleMembershipDeactivated(payload);
-        break;
-      default:
-        this.logger.log(`Unhandled event type: ${eventType}`);
+      // Delegate to service for business logic
+      await this.whopWebhookService.handleWebhookEvent(eventType, id, payload);
+
+      return { received: true };
+    } catch (error) {
+      this.logger.error(`Failed to process Whop webhook: ${error.message}`);
+      // Return 200 even on some processing failures if we already verified the signature
+      // but if it's a critical error we might want Whop to retry.
+      // NestJS will handle the exception and return a non-200 by default.
+      throw new InternalServerErrorException('Webhook processing failed');
     }
-
-    return { received: true };
   }
 }

@@ -58,17 +58,25 @@ export class SubscriptionGuard implements CanActivate {
     // Attach user to request
     request.user = user;
 
-    // Payment system removed - premium checks no longer enforced
-    // All authenticated users now have the same access level
+    // 2. Check if route requires Premium
     const requirePremium = this.reflector.getAllAndOverride<boolean>(
       IS_PREMIUM_KEY,
       [context.getHandler(), context.getClass()],
     );
 
     if (requirePremium) {
-      this.logger.warn(
-        `@RequirePremium() decorator is deprecated - payment system removed`,
-      );
+      // Query backend database for subscription status
+      const { data: usage, error: usageError } = await this.supabaseService
+        .getClient()
+        .from('usage')
+        .select('subscription_tier')
+        .eq('user_id', user.id)
+        .single();
+
+      if (usageError || !usage || usage.subscription_tier !== 'pro') {
+        this.logger.warn(`User ${user.id} tried to access premium route without active subscription`);
+        throw new ForbiddenException('Premium subscription required');
+      }
     }
 
     return true;
