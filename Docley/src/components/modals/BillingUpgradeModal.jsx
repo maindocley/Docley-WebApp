@@ -68,26 +68,44 @@ export default function BillingUpgradeModal({ isOpen, onClose }) {
                                     </button>
                                 </div>
 
-                                <div className="mt-2">
-                                    <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-6 mb-6">
-                                        <h4 className="text-2xl font-semibold text-indigo-900 dark:text-indigo-100 mb-2">
-                                            $1<span className="text-sm font-normal text-indigo-700 dark:text-indigo-300">/mo</span>
-                                        </h4>
-                                        <p className="text-sm text-indigo-600 dark:text-indigo-300">
-                                            Unlock the full power of Docley
-                                        </p>
+                                <div className="mt-2 relative">
+                                    {/* Most Popular Badge */}
+                                    <div className="absolute -top-12 right-0">
+                                        <span className="inline-flex items-center rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white shadow-lg">
+                                            Most Popular
+                                        </span>
                                     </div>
 
-                                    <ul className="space-y-3 mb-8">
+                                    <div className="flex flex-col mb-8">
+                                        <div className="flex items-center justify-between">
+                                            <h4 className="text-xl font-bold text-slate-900 dark:text-white">
+                                                Pro Student
+                                            </h4>
+                                        </div>
+                                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                            For serious academic success
+                                        </p>
+                                        <div className="mt-4 flex items-baseline">
+                                            <span className="text-4xl font-bold text-slate-900 dark:text-white">
+                                                $12
+                                            </span>
+                                            <span className="ml-1 text-slate-500 dark:text-slate-400">
+                                                /month
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <ul className="space-y-4 mb-8">
                                         {[
-                                            'Unlimited AI Document Analysis',
-                                            'Advanced PDF & DOCX Exports',
-                                            'Priority Support',
-                                            'Early Access to New Features'
+                                            { text: 'Unlimited Transformations', important: true },
+                                            { text: 'Advanced Tone Fixing', important: true },
+                                            { text: 'Full Citation Generator (APA7, MLA9)', important: false },
+                                            { text: 'Plagiarism Risk Checks', important: false },
+                                            { text: 'Priority Support', important: false }
                                         ].map((feature, i) => (
-                                            <li key={i} className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
-                                                <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                                                {feature}
+                                            <li key={i} className={`flex items-center gap-3 text-sm ${feature.important ? 'font-medium text-slate-800 dark:text-slate-200' : 'text-slate-600 dark:text-slate-300'}`}>
+                                                <Check className="h-5 w-5 text-indigo-500 flex-shrink-0" />
+                                                {feature.text}
                                             </li>
                                         ))}
                                     </ul>
@@ -95,12 +113,12 @@ export default function BillingUpgradeModal({ isOpen, onClose }) {
                                     <Button
                                         onClick={handleUpgrade}
                                         isLoading={loading}
-                                        className="w-full h-12 text-base"
+                                        className="w-full h-12 text-base shadow-lg shadow-indigo-500/25 bg-indigo-600 hover:bg-indigo-700 text-white"
                                     >
-                                        Join Now
+                                        Upgrade to Pro
                                     </Button>
-                                    <p className="mt-4 text-xs text-center text-slate-400">
-                                        Secure payment powered by Whop. Cancel anytime.
+                                    <p className="mt-4 text-[10px] text-center text-slate-400 uppercase tracking-wider font-medium">
+                                        Secure payment powered by Whop • Cancel anytime
                                     </p>
                                 </div>
                             </Dialog.Panel>
