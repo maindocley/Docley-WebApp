@@ -72,17 +72,17 @@ export class PaymentsService {
 
       this.logger.log(`Whop Response received: ${JSON.stringify(data)}`);
 
-      // Whop v2 returns 'redirect_url'
-      const redirectUrl = data.redirect_url;
+      // Whop v2 prioritizes 'purchase_url', fallback to 'redirect_url'
+      const checkoutUrl = data.purchase_url || data.redirect_url;
+      const urlSource = data.purchase_url ? 'purchase_url' : (data.redirect_url ? 'redirect_url' : 'NONE');
 
-      if (!redirectUrl) {
-        this.logger.error('Whop response missing redirect_url. Full Data:', JSON.stringify(data));
-        // Use 502 Bad Gateway as requested for invalid upstream response
-        throw new InternalServerErrorException('Payment Provider Error: Missing Redirect URL (502 Bad Gateway)');
+      if (!checkoutUrl) {
+        this.logger.error('Whop response missing both purchase_url and redirect_url. Full Data:', JSON.stringify(data));
+        throw new InternalServerErrorException('Payment Provider Error: Missing Checkout URL (502 Bad Gateway)');
       }
 
-      this.logger.log(`Checkout Session Created: ${redirectUrl}`);
-      return { redirectUrl };
+      this.logger.log(`Checkout URL selected from ${urlSource}: ${checkoutUrl}`);
+      return { redirectUrl: checkoutUrl };
     } catch (error) {
       this.logger.error(`Checkout Session Exception: ${error.message}`);
       if (error instanceof InternalServerErrorException) throw error;
