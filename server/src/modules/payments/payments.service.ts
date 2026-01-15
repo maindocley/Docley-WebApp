@@ -15,6 +15,9 @@ export class PaymentsService {
   constructor(private readonly supabaseService: SupabaseService) { }
 
   async createCheckoutSession(userId: string, successUrl: string, cancelUrl: string) {
+    // Sanity log for Render/Environment debugging
+    console.log('WHOP KEY LOADED:', !!process.env.WHOP_API_KEY);
+
     if (!this.apiKey) {
       this.logger.error(
         'CRITICAL: WHOP_API_KEY is missing from environment variables',
@@ -51,7 +54,7 @@ export class PaymentsService {
       const response = await fetch(requestUrl, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${this.apiKey}`,
+          Authorization: `Bearer ${process.env.WHOP_API_KEY}`,
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
