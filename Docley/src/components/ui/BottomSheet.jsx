@@ -1,29 +1,14 @@
 import { X, Sparkles, ArrowRight } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { useNavigate } from 'react-router-dom';
 
-export const BottomSheet = ({ isOpen, notification, onClose }) => {
-    const navigate = useNavigate();
-
+export const BottomSheet = ({ isOpen, notification, onClose, onAction }) => {
     if (!isOpen || !notification) return null;
 
     const handleAction = () => {
         const { action } = notification;
-        if (!action) return;
+        if (!action || !onAction) return;
 
-        switch (action.type) {
-            case 'upgrade':
-                navigate('/pricing');
-                break;
-            case 'navigate':
-                navigate(action.payload?.path || '/');
-                break;
-            case 'retry':
-                window.location.reload();
-                break;
-            default:
-                break;
-        }
+        onAction(action);
         onClose();
     };
 

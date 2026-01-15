@@ -173,16 +173,47 @@ function RedirectLoopProtector({ children }) {
   return children;
 }
 
+// 6. Notification Navigation Handler (inside Router context)
+function NotificationNavigationHandler() {
+  const navigate = useNavigate();
+  const { pendingAction, resolveAction } = useNotification();
+
+  useEffect(() => {
+    if (pendingAction) {
+      console.log('🚀 Handling Notification Action:', pendingAction.type);
+
+      switch (pendingAction.type) {
+        case 'upgrade':
+          navigate('/pricing');
+          break;
+        case 'navigate':
+          navigate(pendingAction.payload?.path || '/');
+          break;
+        case 'retry':
+          window.location.reload();
+          break;
+        default:
+          break;
+      }
+
+      resolveAction();
+    }
+  }, [pendingAction, navigate, resolveAction]);
+
+  return null;
+}
+
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <NotificationProvider>
-          <FloatingDocuments />
-          <PWAInstallPrompt delaySeconds={30} />
-          <MaintenanceGuard>
-            <RedirectLoopProtector>
-              <Router>
+        <Router>
+          <NotificationProvider>
+            <NotificationNavigationHandler />
+            <FloatingDocuments />
+            <PWAInstallPrompt delaySeconds={30} />
+            <MaintenanceGuard>
+              <RedirectLoopProtector>
                 <Routes>
                   {/* Public Routes */}
                   <Route path="/" element={<Landing />} />
@@ -281,10 +312,10 @@ function App() {
                     } />
                   </Route>
                 </Routes>
-              </Router>
-            </RedirectLoopProtector>
-          </MaintenanceGuard>
-        </NotificationProvider>
+              </RedirectLoopProtector>
+            </MaintenanceGuard>
+          </NotificationProvider>
+        </Router>
       </AuthProvider>
     </ThemeProvider>
   );

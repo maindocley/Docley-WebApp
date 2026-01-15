@@ -70,6 +70,7 @@ const ToastItem = ({ id, priority, message, onDismiss, ttl }) => {
 export const NotificationProvider = ({ children }) => {
     const [toasts, setToasts] = useState([]);
     const [activeCritical, setActiveCritical] = useState(null);
+    const [pendingAction, setPendingAction] = useState(null);
 
     const showNotification = useCallback((notification) => {
         if (!notification) return;
@@ -103,8 +104,23 @@ export const NotificationProvider = ({ children }) => {
         setActiveCritical(null);
     }, []);
 
+    const triggerAction = useCallback((action) => {
+        if (!action) return;
+        setPendingAction(action);
+    }, []);
+
+    const resolveAction = useCallback(() => {
+        setPendingAction(null);
+    }, []);
+
     return (
-        <NotificationContext.Provider value={{ showNotification, toast: showNotification }}>
+        <NotificationContext.Provider value={{
+            showNotification,
+            toast: showNotification,
+            pendingAction,
+            triggerAction,
+            resolveAction
+        }}>
             {children}
 
             {/* Toasts (Normal & Minimal) */}
@@ -124,6 +140,7 @@ export const NotificationProvider = ({ children }) => {
                 isOpen={!!activeCritical}
                 notification={activeCritical}
                 onClose={dismissCritical}
+                onAction={triggerAction}
             />
         </NotificationContext.Provider>
     );
