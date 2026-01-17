@@ -2,37 +2,74 @@ import { jsPDF } from 'jspdf';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, ImageRun, Media, Header } from 'docx';
 
 /**
- * Sanitize text for PDF (strip markdown and HTML)
+ * Semantic Block Model for PDF Rendering
+ * This replaces the basic text stripping with a model that understands document structure.
  */
-function sanitizeTextForPDF(html) {
-    if (!html) return '';
+function parseContentToBlocks(html) {
+    if (!html) return [];
 
-    // Create a temporary div to parse HTML
     const temp = document.createElement('div');
     temp.innerHTML = html;
 
-    // Process block elements to preserve line breaks
-    let text = '';
-    const blocks = temp.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li');
+    const blocks = [];
 
-    if (blocks.length > 0) {
-        blocks.forEach(block => {
-            text += block.innerText.trim() + '\n\n';
+    function processInline(node) {
+        const runs = [];
+        node.childNodes.forEach(child => {
+            if (child.nodeType === Node.TEXT_NODE) {
+                if (child.textContent) {
+                    runs.push({ text: child.textContent, bold: false });
+                }
+            } else if (child.nodeType === Node.ELEMENT_NODE) {
+                const tag = child.tagName.toLowerCase();
+                const isBold = tag === 'strong' || tag === 'b';
+
+                // If nested, we flatten for now or recurse
+                if (child.childNodes.length > 0) {
+                    const nestedRuns = processInline(child);
+                    nestedRuns.forEach(nr => {
+                        runs.push({ ...nr, bold: isBold || nr.bold });
+                    });
+                } else if (child.innerText) {
+                    runs.push({ text: child.innerText, bold: isBold });
+                }
+            }
         });
-    } else {
-        // Fallback to plain text if no block structures found
-        text = temp.innerText;
+        return runs;
     }
 
-    return text
-        .replace(/\*\*/g, '') // remove bold markdown
-        .replace(/\*/g, '')  // remove italic markdown
-        .replace(/#/g, '')   // remove heading markers
-        .trim();
+    const childNodes = Array.from(temp.childNodes);
+    childNodes.forEach(node => {
+        if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+        const tag = node.tagName.toLowerCase();
+
+        if (/^h[1-6]$/.test(tag)) {
+            blocks.push({
+                type: 'heading',
+                level: parseInt(tag.substring(1)),
+                text: node.innerText.trim()
+            });
+        } else if (tag === 'p') {
+            const runs = processInline(node);
+            if (runs.length > 0) {
+                blocks.push({ type: 'paragraph', runs });
+            }
+        } else if (tag === 'ul' || tag === 'ol') {
+            const items = Array.from(node.querySelectorAll('li')).map(li => {
+                return { runs: processInline(li) };
+            });
+            if (items.length > 0) {
+                blocks.push({ type: 'list', items, ordered: tag === 'ol' });
+            }
+        }
+    });
+
+    return blocks;
 }
 
 /**
- * Export the editor content to a PDF file using manual jsPDF rendering.
+ * Export the editor content to a PDF file using structured block rendering.
  */
 export const exportToPDF = async (element, fileName = 'document.pdf', options = {}) => {
     const { margins, headerText } = options;
@@ -41,88 +78,141 @@ export const exportToPDF = async (element, fileName = 'document.pdf', options = 
         throw new Error('Editor content not found');
     }
 
-    // 1. Resolve content - ensure we are capturing the latest state
-    // We use innerHTML to capture the structure and then sanitize
-    const contentHTML = element.innerHTML;
-    const plainText = sanitizeTextForPDF(contentHTML);
+    const blocks = parseContentToBlocks(element.innerHTML);
+    console.log('[PDF Export] Blocks parsed:', blocks.length);
 
-    console.log('[PDF Export] Validating content length:', plainText.length);
-
-    // 2. Validate AI content length
-    if (!plainText || plainText.length < 5) {
+    if (blocks.length === 0) {
         throw new Error('Cannot export empty document. Please wait for AI to finish or add some text.');
     }
 
     try {
-        // 3. Initialize jsPDF
-        // Px unit is used for consistency with the editor's display
         const doc = new jsPDF({
             orientation: 'p',
-            unit: 'pt', // points are standard for PDFs
+            unit: 'pt',
             format: 'a4'
         });
 
-        // 4. Set Font and Style
-        doc.setFont('helvetica', 'normal');
-        const fontSize = 12;
-        doc.setFontSize(fontSize);
-
-        // 5. Page Layout Constants
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
-        const marginX = margins?.left ? (margins.left * 0.75) : 72; // constant for standard margin
+        const marginX = margins?.left ? (margins.left * 0.75) : 72;
         const marginY = margins?.top ? (margins.top * 0.75) : 72;
         const marginBottom = margins?.bottom ? (margins.bottom * 0.75) : 72;
         const maxLineWidth = pageWidth - (marginX * 2);
 
         let cursorY = marginY;
 
-        // 6. Add Header if exists
-        const addHeader = (pageNum) => {
+        const addHeader = () => {
             if (headerText) {
+                const prevFont = doc.getFont().fontName;
+                const prevSize = doc.getFontSize();
+                doc.setFont('helvetica', 'normal');
                 doc.setFontSize(9);
                 doc.setTextColor(150);
                 doc.text(headerText, pageWidth / 2, 40, { align: 'center' });
-                doc.setFontSize(fontSize);
+                doc.setFont(prevFont, 'normal');
+                doc.setFontSize(prevSize);
                 doc.setTextColor(30);
             }
         };
 
-        // Initialize first page
-        addHeader(1);
+        const checkPageBreak = (needed) => {
+            if (cursorY + needed > pageHeight - marginBottom) {
+                doc.addPage();
+                cursorY = marginY;
+                addHeader();
+                return true;
+            }
+            return false;
+        };
 
-        // 7. Split content into manageable chunks (paragraphs)
-        const paragraphs = plainText.split('\n\n');
+        addHeader();
 
-        // 8. Render Paragraphs with auto-pagination
-        paragraphs.forEach((para) => {
-            if (!para.trim()) return;
+        blocks.forEach(block => {
+            if (block.type === 'heading') {
+                const sizes = { 1: 22, 2: 18, 3: 16, 4: 14, 5: 13, 6: 12 };
+                const size = sizes[block.level] || 12;
 
-            // Wrap text within page width
-            const lines = doc.splitTextToSize(para, maxLineWidth);
-            const lineHeight = fontSize * 1.5;
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(size);
 
-            lines.forEach((line) => {
-                // Check if we need a new page
-                if (cursorY + lineHeight > pageHeight - marginBottom) {
-                    doc.addPage();
-                    cursorY = marginY;
-                    addHeader();
+                const lines = doc.splitTextToSize(block.text, maxLineWidth);
+                const blockHeight = lines.length * size * 1.2;
+
+                checkPageBreak(blockHeight + 20);
+                cursorY += 10; // Space before
+
+                lines.forEach(line => {
+                    doc.text(line, marginX, cursorY);
+                    cursorY += size * 1.2;
+                });
+
+                cursorY += 10; // Space after
+            } else if (block.type === 'paragraph' || block.type === 'list') {
+                const renderRuns = (runs, indent = 0) => {
+                    doc.setFontSize(12);
+                    let currentX = marginX + indent;
+                    const lineHeight = 12 * 1.5;
+
+                    // Group runs into lines manually to handle bold transitions
+                    let currentLine = [];
+                    let currentLineWidth = 0;
+
+                    const flushLine = () => {
+                        if (currentLine.length === 0) return;
+
+                        checkPageBreak(lineHeight);
+                        let drawX = marginX + indent;
+
+                        currentLine.forEach(run => {
+                            doc.setFont('helvetica', run.bold ? 'bold' : 'normal');
+                            doc.text(run.text, drawX, cursorY);
+                            drawX += doc.getTextWidth(run.text);
+                        });
+
+                        cursorY += lineHeight;
+                        currentLine = [];
+                        currentLineWidth = 0;
+                    };
+
+                    runs.forEach(run => {
+                        const words = run.text.split(/(\s+)/);
+                        words.forEach(word => {
+                            doc.setFont('helvetica', run.bold ? 'bold' : 'normal');
+                            const wordWidth = doc.getTextWidth(word);
+
+                            if (currentLineWidth + wordWidth > maxLineWidth - indent) {
+                                flushLine();
+                                // If the word itself is wider than line, we force it (unlikely with words)
+                            }
+
+                            currentLine.push({ text: word, bold: run.bold });
+                            currentLineWidth += wordWidth;
+                        });
+                    });
+                    flushLine();
+                };
+
+                if (block.type === 'paragraph') {
+                    renderRuns(block.runs);
+                    cursorY += 6; // Paragraph spacing
+                } else if (block.type === 'list') {
+                    block.items.forEach((item, index) => {
+                        const marker = block.ordered ? `${index + 1}. ` : '• ';
+                        const markerWidth = 15;
+
+                        checkPageBreak(18);
+                        doc.setFont('helvetica', 'normal');
+                        doc.text(marker, marginX + 5, cursorY);
+
+                        renderRuns(item.runs, markerWidth);
+                    });
+                    cursorY += 6;
                 }
-
-                doc.text(line, marginX, cursorY);
-                cursorY += lineHeight;
-            });
-
-            // Add space between paragraphs
-            cursorY += lineHeight * 0.5;
+            }
         });
 
-        // 9. Finalize and Download
-        console.log('[PDF Export] Finalizing document stream...');
         const finalFileName = fileName.endsWith('.pdf') ? fileName : `${fileName}.pdf`;
         doc.save(finalFileName);
-
         console.log('[PDF Export] Success');
     } catch (error) {
         console.error('[PDF Export] Critical rendering failure:', error);
